@@ -14,7 +14,7 @@ env:
 
 jobs:
   rust_test:
-    name: 'rust-tests:required'
+    name: 'rust-tests'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
