@@ -12,3 +12,54 @@ Cargo.lock
 
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
+
+# OS ignore rules
+.DS_Store
+.AppleDouble
+.LSOverride
+[Dd]esktop.ini
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+.Trash-*
+*~
+
+# Nodejs
+## Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+## Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+## Dependency directories
+node_modules/
+
+## Optional npm cache directory
+.npm
+.eslintcache
+
+## dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+## generate output
+out
+dist
