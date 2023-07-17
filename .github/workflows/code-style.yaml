@@ -1,0 +1,30 @@
+name: 'Code style'
+
+on: 
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  # When getting Rust dependencies, retry on network error:
+  CARGO_NET_RETRY: 10
+  # Use the local .curlrc
+  CURL_HOME: .
+
+jobs:
+  rust:
+    name: 'consistent-style'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-rust
+      - name: 'Format code'
+        run: cargo fmt --all -- --check
+        env:
+          RUST_BACKTRACE: 1
+      - name: 'Lint code'
+        run: cargo clippy --verbose --tests --benches --workspace -- -D clippy::all
+        env:
+          RUST_BACKTRACE: 1
