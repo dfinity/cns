@@ -1,8 +1,8 @@
-name: 'Setup Python'
-description: Setup Python
+name: Setup Python
+description: Adds python and pip as the package installer
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Install Python
       uses: actions/setup-python@v4
