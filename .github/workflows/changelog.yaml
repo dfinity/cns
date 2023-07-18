@@ -2,7 +2,8 @@ name: 'Update changelog'
 
 on: 
   merge_group:
-    types: [checks_requested]
+    branches:
+      - main
 
 jobs:
   update_changelogs:
@@ -25,6 +26,6 @@ jobs:
       # - name: 'Commit and push'
       #   uses: ./.github/actions/commit-handler
       #   with:
-      #     commit-message: 'chore: action updated changelogs'
+      #     commit-message: 'chore: actions updated changelogs'
       #     skip-if-empty: false
       #     push-changes: true
