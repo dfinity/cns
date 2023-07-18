@@ -6,11 +6,13 @@ on:
       - 'Check commits'
     types:
       - completed
-    # branches:
-    #   - 'main'
+    branches:
+      - '*' # todo: change this to main branch only
 
 jobs:
   update_changelogs:
+    # Only updates the changelogs if check commits were successfully completed
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: 'generate-changelogs'
     runs-on: ubuntu-latest
     steps:
