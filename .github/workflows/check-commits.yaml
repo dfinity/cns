@@ -2,6 +2,9 @@ name: 'Check commits'
 
 on: 
   pull_request:
+  merge_group:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -29,7 +32,7 @@ jobs:
               exit 1
           fi
   check_commits:
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    if: ${{ github.event_name != 'pull_request' }}
     name: 'conventional-commits'
     runs-on: ubuntu-latest
     steps:
