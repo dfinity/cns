@@ -7,11 +7,12 @@ on:
     types:
       - completed
     branches:
-      - '*' # todo: change this to main branch only
+      - '!main'
 
 jobs:
   update_changelogs:
     # Only updates the changelogs if check commits were successfully completed
+    # and the pull request was added to the merge group, && github.event_name == 'merge_group'
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: 'generate-changelogs'
     runs-on: ubuntu-latest
