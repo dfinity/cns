@@ -2,10 +2,8 @@ name: 'Update changelog'
 
 on: 
   workflow_run:
-    workflows: 
-      - 'Check commits'
-    types:
-      - completed
+    workflows: [Check commits]
+    types: [completed]
     branches:
       - '!main'
 
