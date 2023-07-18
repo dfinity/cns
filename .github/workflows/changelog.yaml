@@ -1,6 +1,7 @@
 name: 'Update changelog'
 
 on: 
+  pull_request:
   merge_group:
     types: [checks_requested]
     branches:
@@ -8,7 +9,8 @@ on:
 
 jobs:
   update_changelogs:
-    name: 'generate-changelogs'
+    if: ${{ github.event_name == 'merge_group' }}
+    name: 'generate-changelogs:required'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'

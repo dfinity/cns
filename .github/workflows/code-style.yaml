@@ -18,7 +18,7 @@ env:
 
 jobs:
   rust:
-    name: 'consistent-style'
+    name: 'consistent-style:required'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
