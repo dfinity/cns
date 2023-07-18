@@ -3,8 +3,6 @@ name: 'Update changelog'
 on: 
   merge_group:
     types: [checks_requested]
-    branches:
-      - main
 
 jobs:
   update_changelogs:
