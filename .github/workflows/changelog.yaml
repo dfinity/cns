@@ -1,17 +1,13 @@
 name: 'Update changelog'
 
 on: 
-  workflow_run:
-    workflows: [Check commits]
-    types: [completed]
+  merge_group:
+    types: [checks_requested]
     branches:
-      - '!main'
+      - main
 
 jobs:
   update_changelogs:
-    # Only updates the changelogs if check commits were successfully completed
-    # and the pull request was added to the merge group, && github.event_name == 'merge_group'
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: 'generate-changelogs'
     runs-on: ubuntu-latest
     steps:
@@ -24,9 +20,13 @@ jobs:
         run: pip install -U commitizen
       - name: 'Update Changelogs'
         run: cz changelog --incremental
-      - name: 'Commit and push'
-        uses: ./.github/actions/commit-handler
-        with: 
-          commit-message: 'chore: action updated changelogs'
-          skip-if-empty: false
-          push-changes: true
+      - name: 'Test merge group'
+        run: |
+          echo 'test merge group'
+          exit 1
+      # - name: 'Commit and push'
+      #   uses: ./.github/actions/commit-handler
+      #   with:
+      #     commit-message: 'chore: action updated changelogs'
+      #     skip-if-empty: false
+      #     push-changes: true
