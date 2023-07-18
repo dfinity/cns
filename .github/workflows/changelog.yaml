@@ -22,13 +22,9 @@ jobs:
         run: pip install -U commitizen
       - name: 'Update Changelogs'
         run: cz changelog --incremental
-      - name: 'Test merge group'
-        run: |
-          echo 'test merge group'
-          exit 1
-      # - name: 'Commit and push'
-      #   uses: ./.github/actions/commit-handler
-      #   with:
-      #     commit-message: 'chore: actions updated changelogs'
-      #     skip-if-empty: false
-      #     push-changes: true
+      - name: 'Commit and push'
+        uses: ./.github/actions/commit-handler
+        with:
+          commit-message: 'chore: auto update changelogs'
+          skip-if-empty: false
+          push-changes: true
