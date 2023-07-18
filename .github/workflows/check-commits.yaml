@@ -3,6 +3,7 @@ name: 'Check commits'
 on: 
   pull_request:
   merge_group:
+    types: [checks_requested]
     branches:
       - main
   push:
