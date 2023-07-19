@@ -25,6 +25,5 @@ jobs:
         with:
           branch-name: 'changelogs'
           commit-message: 'chore: auto update changelogs'
+          pull-request-body: 'Automated by github actions generating the changelogs.'
           gh-token: ${{ secrets.GITHUB_TOKEN }}
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
