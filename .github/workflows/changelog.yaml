@@ -23,6 +23,7 @@ jobs:
       - name: 'Create PR and merge'
         uses: ./.github/actions/pr-handler
         with:
+          branch-name: 'changelogs'
           commit-message: 'chore: auto update changelogs'
           gh-token: ${{ secrets.GITHUB_TOKEN }}
         # env:
