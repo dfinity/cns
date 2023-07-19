@@ -24,5 +24,6 @@ jobs:
         uses: ./.github/actions/pr-handler
         with:
           commit-message: 'chore: auto update changelogs'
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}

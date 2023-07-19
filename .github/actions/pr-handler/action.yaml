@@ -15,12 +15,10 @@ inputs:
     default: 'github-actions[bot]@@users.noreply.github.com'
   gh-token:
     description: 'Git user token to create the pull request'
-    required: false
-    default: ${{ secrets.GITHUB_TOKEN }}
+    required: true
   gh-approve-token:
     description: 'Git user token to approve the pull request'
     required: false
-    default: ${{ secrets.GITHUB_TOKEN }}
   auto-merge: 
     description: 'Automatically merge pull request'
     required: false
