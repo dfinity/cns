@@ -27,8 +27,8 @@ inputs:
   gh-approve-token:
     description: 'Git user token to approve the pull request'
     required: false
-  auto-merge: 
-    description: 'Automatically merge pull request'
+  auto-approve: 
+    description: 'Automatically approve pull request'
     required: false
     default: false
   base-branch:
@@ -70,26 +70,18 @@ runs:
           git commit --allow-empty -m "${{ inputs.commit-message }}"
         fi
     - name: 'Create pull request'
-      id: create-pr
+      id: create-pull-request
       if: ${{ steps.commit-changes.outputs.continue }}
       shell: bash
       run: |
         echo ${{ inputs.gh-token }} | gh auth login --with-token
         git push origin ${{ steps.branch-creation.outputs.pr-branch-name }}
-        gh pr create --base ${{ inputs.base-branch }} --title "${{ inputs.commit-message }}" --body "${{ inputs.pull-request-body }}" --fill --no-maintainer-edit
-
-    # - name: Create Pull Request
-    #   uses: peter-evans/create-pull-request@v5
-    #   with:
-    #     token: ${{ inputs.gh-token }}
-    #     author: ${{ inputs.git-email }}
-    #     commit-message: ${{ inputs.commit-message }}
-    #     title: ${{ inputs.commit-message }}
-    #     branch: 'automated-pr/changelog'
-    #     branch-suffix: short-commit-hash
-    #     body: |
-    #       Automated pull request to update the changelogs.
-    #     delete-branch: true
-    #     labels: |
-    #       automated pr
-    #     draft: false
+        pr_url=$(gh pr create --base ${{ inputs.base-branch }} --title "${{ inputs.commit-message }}" --body "${{ inputs.pull-request-body }}" --fill --no-maintainer-edit)
+        echo "url=$pr_url" >> $GITHUB_OUTPUT
+        gh pr merge $pr_url --auto --delete-branch --squash
+    - name: 'Auto merge pull request'
+      id: approve-pull-request
+      if: ${{ inputs.auto-approve = "true" }}
+      shell: bash
+      run: |
+        echo "todo: set auto approve logic"
