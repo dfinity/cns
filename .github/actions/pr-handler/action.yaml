@@ -91,7 +91,7 @@ runs:
         echo "url=$pr_url" >> $GITHUB_OUTPUT
     - name: 'Auto merge pull request'
       id: approve-pull-request
-      if: ${{ inputs.auto-merge }}
+      if: ${{ steps.commit-changes.outputs.continue && inputs.auto-merge }}
       shell: bash
       run: |
         echo ${{ inputs.gh-approve-token }} | gh auth login --with-token
