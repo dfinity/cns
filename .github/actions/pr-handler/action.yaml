@@ -98,5 +98,5 @@ runs:
         if [ -n "${{ inputs.auto-merge-label }}" ]; then
           gh pr edit ${{ steps.create-pull-request.outputs.url }} --add-label ${{ inputs.auto-merge-label }}
         fi
-        gh pr merge ${{ steps.create-pull-request.outputs.url }} --auto --delete-branch
         gh pr review ${{ steps.create-pull-request.outputs.url }} --approve --body 'Approved by github actions'
+        gh pr merge ${{ steps.create-pull-request.outputs.url }} --auto --delete-branch --squash
