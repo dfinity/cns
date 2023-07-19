@@ -46,7 +46,7 @@ runs:
       shell: bash
       run: |
         branch_suffix=$(openssl rand -hex 4)
-        pr_branch_name="auto-pr/${{inputs.branch-name}}$branch_suffix"
+        pr_branch_name="auto-pr/${{inputs.branch-name}}-$branch_suffix"
         echo "pr-branch-name=$pr_branch_name" >> $GITHUB_OUTPUT
         git checkout -b $pr_branch_name
     - name: 'Add and commit changes'
@@ -63,7 +63,7 @@ runs:
         fi
     - name: 'Create pull request'
       id: create-pr
-      if: ${{ steps.swagger-ui.outputs.continue }}
+      if: ${{ steps.commit-changes.outputs.continue }}
       shell: bash
       run: |
         git push origin ${{ steps.branch-creation.outputs.pr-branch-name }}
