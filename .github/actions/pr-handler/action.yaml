@@ -89,7 +89,7 @@ runs:
       run: |
         echo ${{ inputs.gh-approve-token }} | gh auth login --with-token
         if [ -n "${{ inputs.auto-pr-label }}" ]; then
-          gh pr edit ${{ steps.create-pull-request.outputs.url }} --add-label ${{ auto-pr-label }}
+          gh pr edit ${{ steps.create-pull-request.outputs.url }} --add-label ${{ inputs.auto-pr-label }}
         fi
         gh pr merge ${{ steps.create-pull-request.outputs.url }} --auto --delete-branch
         gh pr review ${{ steps.create-pull-request.outputs.url }} --approve --body 'Approved by github actions'
