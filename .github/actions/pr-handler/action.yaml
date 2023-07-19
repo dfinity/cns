@@ -81,7 +81,7 @@ runs:
         gh pr merge $pr_url --auto --delete-branch --squash
     - name: 'Auto merge pull request'
       id: approve-pull-request
-      if: ${{ inputs.auto-approve = "true" }}
+      if: ${{ inputs.auto-approve }}
       shell: bash
       run: |
         echo "todo: set auto approve logic"
