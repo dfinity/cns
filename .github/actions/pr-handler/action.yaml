@@ -47,6 +47,10 @@ inputs:
     description: 'The label to automatically attach when auto-merge is added'
     required: false
     default: 'auto-merge'
+  approve-message:
+    description: 'Message to show when the pull request is approved'
+    required: true
+    default: 'Automated bot approval 🚀'
 
 runs:
   using: 'composite'
@@ -98,5 +102,5 @@ runs:
         if [ -n "${{ inputs.auto-merge-label }}" ]; then
           gh pr edit ${{ steps.create-pull-request.outputs.url }} --add-label ${{ inputs.auto-merge-label }}
         fi
-        gh pr review ${{ steps.create-pull-request.outputs.url }} --approve --body 'Approved by github actions'
+        gh pr review ${{ steps.create-pull-request.outputs.url }} --approve --body "${{ inputs.approve-message }}"
         gh pr merge ${{ steps.create-pull-request.outputs.url }} --auto --delete-branch --squash
