@@ -78,8 +78,7 @@ runs:
         git push origin ${{ steps.branch-creation.outputs.pr-branch-name }}
         pr_url=$(gh pr create --base ${{ inputs.base-branch }} --title "${{ inputs.commit-message }}" --body "${{ inputs.pull-request-body }}" --fill --no-maintainer-edit)
         echo "url=$pr_url" >> $GITHUB_OUTPUT
-        gh pr merge $pr_url --auto --delete-branch --squash
-        gh pr ready $pr_url
+        gh pr merge $pr_url --auto --delete-branch
     - name: 'Auto merge pull request'
       id: approve-pull-request
       if: ${{ inputs.auto-approve }}
