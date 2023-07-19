@@ -27,8 +27,8 @@ inputs:
   gh-approve-token:
     description: 'Git user token to approve the pull request'
     required: false
-  auto-approve: 
-    description: 'Automatically approve pull request'
+  auto-merge:
+    description: 'Automatically approve and merge pull request'
     required: false
     default: false
   base-branch:
@@ -39,6 +39,10 @@ inputs:
     description: 'The body to add to the pull request'
     required: true
     default: 'Automated pull request'
+  auto-pr-label:
+    description: 'The label to automatically attach when auto-merge is added'
+    required: false
+    default: 'auto-pr'
 
 runs:
   using: 'composite'
@@ -78,11 +82,14 @@ runs:
         git push origin ${{ steps.branch-creation.outputs.pr-branch-name }}
         pr_url=$(gh pr create --base ${{ inputs.base-branch }} --title "${{ inputs.commit-message }}" --body "${{ inputs.pull-request-body }}" --fill --no-maintainer-edit)
         echo "url=$pr_url" >> $GITHUB_OUTPUT
-        gh pr merge $pr_url --auto --delete-branch
     - name: 'Auto merge pull request'
       id: approve-pull-request
-      if: ${{ inputs.auto-approve }}
+      if: ${{ inputs.auto-merge }}
       shell: bash
       run: |
         echo ${{ inputs.gh-approve-token }} | gh auth login --with-token
+        if [ -n "${{ inputs.auto-pr-label }}" ]; then
+          gh pr edit ${{ steps.create-pull-request.outputs.url }} --add-label ${{ auto-pr-label }}
+        fi
+        gh pr merge ${{ steps.create-pull-request.outputs.url }} --auto --delete-branch
         gh pr review ${{ steps.create-pull-request.outputs.url }} --approve --body 'Approved by github actions'

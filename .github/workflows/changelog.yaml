@@ -27,5 +27,5 @@ jobs:
           commit-message: 'chore: auto update changelogs'
           pull-request-body: 'Automated by github actions generating the changelogs.'
           gh-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-approve: true
+          auto-merge: true
           gh-approve-token: ${{ secrets.GH_ADMIN_TOKEN }}
