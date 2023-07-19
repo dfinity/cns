@@ -2,6 +2,8 @@ name: 'Update changelog'
 
 on: 
   push:
+    branches:
+      - main
 
 jobs:
   update_changelogs:
