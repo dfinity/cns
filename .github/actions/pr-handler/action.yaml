@@ -84,4 +84,5 @@ runs:
       if: ${{ inputs.auto-approve }}
       shell: bash
       run: |
-        echo "todo: set auto approve logic"
+        echo ${{ inputs.gh-approve-token }} | gh auth login --with-token
+        gh pr review ${{ steps.create-pull-request.outputs.url }} --approve --body 'Approved by github actions'
