@@ -67,7 +67,7 @@ runs:
       shell: bash
       run: |
         git push origin ${{ steps.branch-creation.outputs.pr-branch-name }}
-        gh auth login --with-token ${{ inputs.gh-token }}
+        gh auth login --with-token << ${{ inputs.gh-token }}
         gh pr create --base main --fill --label 'auto-pr' --no-maintainer-edit
         gh auth logout
 
