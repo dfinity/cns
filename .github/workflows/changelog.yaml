@@ -1,15 +1,15 @@
 name: 'Update changelog'
 
-on: 
+on:
   push:
-    branches:
-      - main
+    # branches:
+    #   - main
 
 jobs:
   update_changelogs:
     name: 'generate-changelogs'
     runs-on: ubuntu-latest
-    environment: production
+    # environment: production
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3
@@ -20,11 +20,9 @@ jobs:
         run: pip install -U commitizen
       - name: 'Update Changelogs'
         run: cz changelog --incremental
-      - name: 'Commit and push'
-        uses: ./.github/actions/commit-handler
+      - name: 'Create PR and merge'
+        uses: ./.github/actions/pr-handler
         with:
-          commit-message: 'chore: auto update changelogs [skip ci]'
-          skip-if-empty: true
-          push-changes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          commit-message: 'chore: auto update changelogs'
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}

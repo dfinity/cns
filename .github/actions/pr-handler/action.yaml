@@ -1,0 +1,60 @@
+name: 'Pull request handler'
+description: 'Action to create a pull request with the changes'
+
+inputs:
+  commit-message: 
+    description: 'The commit message'
+    required: true
+  git-user:
+    description: 'Git user to be used by commits'
+    required: false
+    default: 'github-actions[bot]'
+  git-email:
+    description: 'Git email to be used by commits'
+    required: false
+    default: 'github-actions[bot]@@users.noreply.github.com'
+  gh-token:
+    description: 'Git user token to create the pull request'
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
+  gh-approve-token:
+    description: 'Git user token to approve the pull request'
+    required: false
+    default: ${{ secrets.GITHUB_TOKEN }}
+  auto-merge: 
+    description: 'Automatically merge pull request'
+    required: false
+    default: false
+
+runs:
+  using: 'composite'
+  steps:
+    # - name: 'Update git configurations'
+    #   shell: bash
+    #   run: |
+    #     git config user.name "${{ inputs.git-user }}"
+    #     git config user.email "${{ inputs.git-email }}"
+    # - name: 'Add and commit changes'
+    #   shell: bash
+    #   run: |
+    #     git add .
+    #     if [ -n "$(git status --porcelain)" ]; then
+    #       git commit -m "${{ inputs.commit-message }}"
+    #     elif [ "${{ inputs.skip-if-empty }}" = "false" ]; then
+    #       git commit --allow-empty -m "${{ inputs.commit-message }}"
+    #     fi
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ inputs.gh-token }}
+        author: ${{ inputs.git-email }}
+        commit-message: ${{ inputs.commit-message }}
+        title: ${{ inputs.commit-message }}
+        branch: 'automated-pr/changelog'
+        branch-suffix: short-commit-hash
+        body: |
+          Automated pull request to update the changelogs.
+        delete-branch: true
+        labels: |
+          automated pr
+        draft: false
