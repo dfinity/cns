@@ -3,6 +3,9 @@ name: 'Check commits'
 on: 
   pull_request:
   merge_group:
+    types: [checks_requested]
+    branches:
+      - main
   push:
     branches:
       - main
@@ -10,7 +13,7 @@ on:
 jobs:
   check_pr_title:
     if: ${{ github.event_name == 'pull_request' }}
-    name: 'conventional-title'
+    name: 'conventional-title:required'
     runs-on: ubuntu-latest
     steps:
       # Conventional commit patterns:
@@ -31,7 +34,7 @@ jobs:
           fi
   check_commits:
     if: ${{ github.event_name != 'pull_request' }}
-    name: 'conventional-commits'
+    name: 'conventional-commits:required'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'

@@ -3,6 +3,9 @@ name: 'Code tests'
 on: 
   pull_request:
   merge_group:
+    types: [checks_requested]
+    branches:
+      - main
   push:
     branches:
       - main
@@ -15,7 +18,7 @@ env:
 
 jobs:
   rust_test:
-    name: 'rust-tests'
+    name: 'rust-tests:required'
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
