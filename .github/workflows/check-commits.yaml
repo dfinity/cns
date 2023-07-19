@@ -12,9 +12,6 @@ on:
     types: [checks_requested]
     branches:
       - main
-  push:
-    branches:
-      - main
 
 jobs:
   check_pr_title:

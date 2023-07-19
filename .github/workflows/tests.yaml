@@ -12,9 +12,6 @@ on:
     types: [checks_requested]
     branches:
       - main
-  push:
-    branches:
-      - main
 
 env:
   # When getting Rust dependencies, retry on network error:
