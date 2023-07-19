@@ -31,6 +31,10 @@ inputs:
     description: 'Automatically merge pull request'
     required: false
     default: false
+  base-branch:
+    description: 'The base branch to create the PR against'
+    required: true
+    default: 'main'
 
 runs:
   using: 'composite'
@@ -68,7 +72,7 @@ runs:
       run: |
         echo ${{ inputs.gh-token }} | gh auth login --with-token
         git push origin ${{ steps.branch-creation.outputs.pr-branch-name }}
-        gh pr create --base main --fill --label 'auto-pr' --no-maintainer-edit
+        gh pr create --base ${{ inputs.base-branch }} --fill --no-maintainer-edit
         gh auth logout
 
     # - name: Create Pull Request
