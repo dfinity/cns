@@ -86,7 +86,7 @@ runs:
         git push origin ${{ steps.branch-creation.outputs.pr-branch-name }}
         pr_url=$(gh pr create --base ${{ inputs.base-branch }} --title "${{ inputs.commit-message }}" --body "${{ inputs.pull-request-body }}" --fill --no-maintainer-edit)
         if [ -n "${{ inputs.auto-pr-label }}" ]; then
-          gh pr edit --add-label ${{ inputs.auto-pr-label }}
+          gh pr edit $pr_url --add-label ${{ inputs.auto-pr-label }}
         fi
         echo "url=$pr_url" >> $GITHUB_OUTPUT
     - name: 'Auto merge pull request'
@@ -96,7 +96,7 @@ runs:
       run: |
         echo ${{ inputs.gh-approve-token }} | gh auth login --with-token
         if [ -n "${{ inputs.auto-merge-label }}" ]; then
-          gh pr edit --add-label ${{ inputs.auto-merge-label }}
+          gh pr edit ${{ steps.create-pull-request.outputs.url }} --add-label ${{ inputs.auto-merge-label }}
         fi
-        gh pr merge --auto --delete-branch
-        gh pr review --approve --body 'Approved by github actions'
+        gh pr merge ${{ steps.create-pull-request.outputs.url }} --auto --delete-branch
+        gh pr review ${{ steps.create-pull-request.outputs.url }} --approve --body 'Approved by github actions'
