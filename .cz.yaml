@@ -9,4 +9,4 @@ commitizen:
   version_files:
     - packages/cns-naming-canister/Cargo.toml:version
     - packages/cns-root-canister/Cargo.toml:version
-    - packages/cns-top-level-domain-canister/Cargo.toml:version
+    - packages/cns-operator-canister/Cargo.toml:version
