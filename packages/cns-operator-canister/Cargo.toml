@@ -1,5 +1,5 @@
 [package]
-name = "cns-top-level-domain-canister"
+name = "cns-operator-canister"
 version = "0.1.0"
 edition = "2021"
 

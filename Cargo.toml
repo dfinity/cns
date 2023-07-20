@@ -2,7 +2,7 @@
 members = [
   "packages/cns-naming-canister",
   "packages/cns-root-canister",
-  "packages/cns-top-level-domain-canister",
+  "packages/cns-operator-canister",
 ]
 
 [profile.release]
