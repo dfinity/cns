@@ -1,6 +1,14 @@
-name: 'Update changelog'
+name: 'Automation'
 
 on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
   push:
     branches:
       - main
@@ -9,7 +17,7 @@ jobs:
   update_changelogs:
     name: 'generate-changelogs'
     runs-on: ubuntu-latest
-    environment: production
+    environment: automation
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3
@@ -27,5 +35,14 @@ jobs:
           commit-message: 'chore: auto update changelogs'
           pull-request-body: 'Automated by github actions generating the changelogs.'
           gh-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-merge: true
-          gh-approve-token: ${{ secrets.GH_ADMIN_TOKEN }}
+          # auto-merge: true
+          # gh-approve-token: ${{ secrets.GH_ADMIN_TOKEN }}
+          # development
+          # release
+  test_job:
+    name: 'test-job'
+    runs-on: ubuntu-latest
+    environment: automation
+    steps:
+      - name: 'Test same environmen'
+        run: echo 'works'
