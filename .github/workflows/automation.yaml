@@ -1,14 +1,6 @@
 name: 'Automation'
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - opened
-      - edited
-      - synchronize
-      - reopened
   push:
     branches:
       - main
@@ -35,14 +27,5 @@ jobs:
           commit-message: 'chore: auto update changelogs'
           pull-request-body: 'Automated by github actions generating the changelogs.'
           gh-token: ${{ secrets.GITHUB_TOKEN }}
-          # auto-merge: true
-          # gh-approve-token: ${{ secrets.GH_ADMIN_TOKEN }}
-          # development
-          # release
-  test_job:
-    name: 'test-job'
-    runs-on: ubuntu-latest
-    environment: automation
-    steps:
-      - name: 'Test same environmen'
-        run: echo 'works'
+          auto-merge: true
+          gh-approve-token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
