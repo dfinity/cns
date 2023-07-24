@@ -1,7 +1,7 @@
 // A certificate is represented as a blob.
 type Certificate = blob;
 // The canister state tree is represented as a blob.
-type CanisterStateTree = blob;
+type StateTree = blob;
 
 // DomainRecord represents a CNS record item.
 type DomainRecord = record {
@@ -127,22 +127,28 @@ type NamingCanisterInit = record {
   allow_offchain_signatures : opt bool;
 }
 
-// Information about the certification of a canister.
+// Certification information to validate a query.
 type Certification = record {
   // The ic certificate that contains the certified variable with the root hash of the canister state tree.
   ic_certificate : Certificate;
   // The state tree of the canister.
-  canister_state_tree : CanisterStateTree;
+  state_tree : StateTree;
 }
 
 // Information about the naming canister.
 type NamingCanisterInfo = record {
-  // The certification information available to validate the query.
-  certification : Certification;
-  // Wether or not the naming canister allows offchain signatures.
+  // Wether or not the naming canister allows offchain signatures of domain record types.
   allow_offchain_signatures : bool;
   // The number of domains registered.
   domains_registered : nat64;
+}
+
+// Result of the `get_info` operation.
+type NamingCanisterInfoResult = record {
+  // The certification information available to validate the query.
+  certification : Certification;
+  // Information about the naming canister.
+  info : NamingCanisterInfo;
 }
 
 service : (opt NamingCanisterInit) {
@@ -153,5 +159,5 @@ service : (opt NamingCanisterInit) {
   // Manage records of the specified domain based on the list of operations.
   manage_records(input : ManageRecordsInput) -> (ManageRecordsResult);
   // Get information about the naming canister.
-  get_info() -> (NamingCanisterInfo) query;
+  get_info() -> (NamingCanisterInfoResult) query;
 };
