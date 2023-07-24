@@ -1,3 +1,8 @@
+// A certificate is represented as a blob.
+type Certificate = blob;
+// The canister state tree is represented as a blob.
+type CanisterStateTree = blob;
+
 // DomainRecord represents a CNS record item.
 type DomainRecord = record {
   // The domain name, e.g. "mydomain.test.", the name is required for all operations and must
@@ -95,9 +100,11 @@ type ManageRecordsInput = record {
   domain : text;
   // The list of operations to perform on the domain records.
   operations : vec ManageRecordsOperation;
-  // Wether the changed records should be signed with the tECDSA api, 
-  // the operation will fail if this is set to false and no signature 
+  // Wether the changed records should be signed with the tECDSA api,
+  // the operation will fail if this is set to false and no signature
   // is provided within the operations.
+  //
+  // Also, offchain signatures are only available if the canister has set `allow_offchain_signatures` to true.
   sign_with_tecdsa : opt bool;
 };
 
@@ -114,9 +121,28 @@ type ManageRecordsResult = UpdateOperationResult;
 
 // The init payload for the naming canister, which can be supplied on install and upgrade.
 type NamingCanisterInit = record {
-  // Sets the default on wether the records should be signed with the tECDSA api.
-  // If not specified, the default value will be false.
-  sign_with_tecdsa : opt bool;
+  // Sets the default on wether the records can be signed with offchain signatures.
+  // If not specified, the default value will be true, if set to false any operations that
+  // send record types with RRSIG signatures will fail.
+  allow_offchain_signatures : opt bool;
+}
+
+// Information about the certification of a canister.
+type Certification = record {
+  // The ic certificate that contains the certified variable with the root hash of the canister state tree.
+  ic_certificate : Certificate;
+  // The state tree of the canister.
+  canister_state_tree : CanisterStateTree;
+}
+
+// Information about the naming canister.
+type NamingCanisterInfo = record {
+  // The certification information available to validate the query.
+  certification : Certification;
+  // Wether or not the naming canister allows offchain signatures.
+  allow_offchain_signatures : bool;
+  // The number of domains registered.
+  domains_registered : nat64;
 }
 
 service : (opt NamingCanisterInit) {
@@ -126,4 +152,6 @@ service : (opt NamingCanisterInit) {
   get_records(input : GetRecordsInput) -> (GetRecordsResult);
   // Manage records of the specified domain based on the list of operations.
   manage_records(input : ManageRecordsInput) -> (ManageRecordsResult);
+  // Get information about the naming canister.
+  get_info() -> (NamingCanisterInfo) query;
 };
