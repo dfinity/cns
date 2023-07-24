@@ -8,7 +8,7 @@ type DomainRecord = record {
   // The domain name, e.g. "mydomain.test.", the name is required for all operations and must
   // end with a dot (.). Names have well defined size limits and must have the parts between
   // the dots or commonly called as labels with equal or less then 63 bytes and the entire
-  // name must be under 255 bytes
+  // name must be under 255 bytes.
   name : text;
   // The record type refers to the classification or category of a specific record within the
   // system, e.g. "CID", "A", "CNAME", "TXT", "MX", "AAAA", "NC", "NS", "DNSKEY", "NSEC".
