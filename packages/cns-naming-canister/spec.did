@@ -119,14 +119,6 @@ type UpdateOperationResult = record {
 // Result of the `manage_records` operation.
 type ManageRecordsResult = UpdateOperationResult;
 
-// The init payload for the naming canister, which can be supplied on install and upgrade.
-type NamingCanisterInit = record {
-  // Sets the default on wether the records can be signed with offchain signatures.
-  // If not specified, the default value will be true, if set to false any operations that
-  // send record types with RRSIG signatures will fail.
-  allow_offchain_signatures : opt bool;
-}
-
 // Certification information to validate a query.
 type Certification = record {
   // The ic certificate that contains the certified variable with the root hash of the canister state tree.
@@ -144,11 +136,19 @@ type NamingCanisterInfo = record {
 }
 
 // Result of the `get_info` operation.
-type NamingCanisterInfoResult = record {
+type GetInfoResult = record {
   // The certification information available to validate the query.
   certification : Certification;
   // Information about the naming canister.
   info : NamingCanisterInfo;
+}
+
+// The init payload for the naming canister, which can be supplied on install and upgrade.
+type NamingCanisterInit = record {
+  // Sets the default on wether the records can be signed with offchain signatures.
+  // If not specified, the default value will be true, if set to false any operations that
+  // send record types with RRSIG signatures will fail.
+  allow_offchain_signatures : opt bool;
 }
 
 service : (opt NamingCanisterInit) {
@@ -159,5 +159,5 @@ service : (opt NamingCanisterInit) {
   // Manage records of the specified domain based on the list of operations.
   manage_records(input : ManageRecordsInput) -> (ManageRecordsResult);
   // Get information about the naming canister.
-  get_info() -> (NamingCanisterInfoResult) query;
+  get_info() -> (GetInfoResult) query;
 };
