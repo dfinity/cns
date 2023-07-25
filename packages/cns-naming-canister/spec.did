@@ -174,6 +174,28 @@ type GetInfoResult = record {
   info : NamingCanisterInfo;
 }
 
+// Input parameters for the `get_records` operation.
+type GetDomainsInput = record {
+  // Pagination options for the result set, if not specified, the default values will be used:
+  // - start: 0
+  // - limit: 100
+  options : opt PaginationOptions;
+};
+
+// Item of the `get_domains` result set.
+type GetDomainsItem = record {
+  // The domain name.
+  domain : text;
+}
+
+// Result of the `get_domains` operation.
+type GetDomainsResult = record {
+  // Pagination information about the result set.
+  info : PaginationInfo;
+  // The list of domains registered that the caller of the operation has access to.
+  items : vec GetDomainsItem;
+}
+
 // The init payload for the naming canister, which can be supplied on install and upgrade.
 type NamingCanisterInit = record {
   // Sets the default on wether the records can be signed with offchain signatures.
@@ -186,7 +208,9 @@ service : (opt NamingCanisterInit) {
   // Lookup a domain name and return the records that match the specified record type.
   lookup(domain : text, record_type : text) -> (DomainLookup) query;
   // Get records of the specified domain, the result set is paginated.
-  get_records(input : GetRecordsInput) -> (GetRecordsResult);
+  get_records(input : GetRecordsInput) -> (GetRecordsResult) query;
+  // Get the list of domains registered that the caller of the operation has access to.
+  get_domains(input : GetDomainsInput) -> (GetDomainsResult) query;
   // Manage records of the specified domain based on the list of operations.
   manage_records(input : ManageRecordsInput) -> (ManageRecordsResult);
   // Get information about the naming canister.
