@@ -174,7 +174,7 @@ type GetInfoResult = record {
   info : NamingCanisterInfo;
 }
 
-// Input parameters for the `get_records` operation.
+// Input parameters for the `get_domains` operation.
 type GetDomainsInput = record {
   // Pagination options for the result set, if not specified, the default values will be used:
   // - start: 0
@@ -199,8 +199,9 @@ type GetDomainsResult = record {
 // The init payload for the naming canister, which can be supplied on install and upgrade.
 type NamingCanisterInit = record {
   // Sets the default on wether the records can be signed with offchain signatures.
-  // If not specified, the default value will be true, if set to false any operations that
-  // send record types with RRSIG signatures will fail.
+  // If not specified, the default value will be false which will fail any operations that
+  // send record types with RRSIG signatures, only tECDSA will be allowed, set it to true
+  // to enable records to be signed off-chain.
   allow_offchain_signatures : opt bool;
 }
 
