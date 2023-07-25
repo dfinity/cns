@@ -3,7 +3,7 @@ type Certificate = blob;
 // The canister state tree is represented as a blob.
 type StateTree = blob;
 
-// DomainRecord represents a CNS record item.
+// DomainRecord represents a Chain Name System (CNS) record item.
 type DomainRecord = record {
   // The domain name, e.g. "mydomain.test.", the name is required for all operations and must
   // end with a dot (.). Names have well defined size limits and must have the parts between
@@ -12,6 +12,8 @@ type DomainRecord = record {
   name : text;
   // The record type refers to the classification or category of a specific record within the
   // system, e.g. "CID", "A", "CNAME", "TXT", "MX", "AAAA", "NC", "NS", "DNSKEY", "NSEC".
+  //
+  // Also, "ANY" is a reserved type that can only be used in lookups to retrieve all records of a domain.
   type : text;
   // The Time to Live (TTL) is a parameter in a record that specifies the amount of time for
   // which the record should be cached before being refreshed from the authoritative naming canister.
@@ -84,14 +86,43 @@ type ManageRecordOperationType = variant {
   remove;
 };
 
+// Input parameters for a domain record operation.
+type DomainRecordInput = record {
+  // The domain name, e.g. "mydomain.test.", the name is required for all operations and must end with a dot (.).
+  name : text;
+  // The record type refers to the classification or category of a specific record within the system.
+  type : text;
+  // The Time to Live (TTL) is a parameter in a record that specifies the amount of time for which the record
+  // should be cached. If not set the default value will be used.
+  ttl : nat32;
+  // The record data in a domain record refers to the specific information associated with that record type.
+  // If not set the default value will be used.
+  data : text;
+}
+
+// Input parameters for the `append` operation.
+type AppendRecordOperationInput = DomainRecordInput;
+
+// Input parameters for the `override` operation.
+type OverrideRecordOperationInput = DomainRecordInput;
+
+// Input parameters for the `remove` operation.
+type RemoveRecordOperationInput = record {
+  // The name of the record to remove, same restrictions as the name of a DomainRecord apply.
+  name : text;
+  // The type of the record to remove, same restrictions as the type of a DomainRecord apply.
+  // If no type is specified, all records with the specified name will be removed.
+  type : opt text;
+};
+
 // The operation to execute on the records, the operation type specifies how the operation will be performed.
-type ManageRecordsOperation = record {
-  // The type of record to update.
-  record_type : text;
-  // The list of records to edit, must match the record type specified in the operation.
-  records : vec DomainRecord;
-  // The type of operation to perform on the records.
-  operation : ManageRecordOperationType;
+type ManageRecordsOperation = variant {
+  // If a record with the same name and type already exists, the operation will append to the list.
+  append : vec AppendRecordOperationInput;
+  // This operation will override the existing records using the name and type as the key.
+  override : vec OverrideRecordOperationInput;
+  // This operation will remove the existing records using the name and type as the key.
+  remove : vec RemoveRecordOperationInput;
 };
 
 // Input parameters for the `manage_records` operation.
