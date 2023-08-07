@@ -16,8 +16,8 @@ pub struct DomainRecord {
     /// system, e.g. "CID", "A", "CNAME", "TXT", "MX", "AAAA", "NC", "NS", "DNSKEY", "NSEC".
     ///
     /// Also, "ANY" is a reserved type that can only be used in lookups to retrieve all records of a domain.
-    /// 
-    /// Record types can have maximum of 12 bytes, are encoded in ascii and are case insensitive, 
+    ///
+    /// Record types can have maximum of 12 bytes, are encoded in ascii and are case insensitive,
     /// but the canonical form is uppercase.
     pub record_type: String,
     /// The Time to Live (TTL) is a parameter in a record that specifies the amount of time for

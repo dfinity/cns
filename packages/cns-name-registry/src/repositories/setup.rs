@@ -19,7 +19,7 @@ thread_local! {
 
 /// A helper function that executes a closure with the memory manager.
 pub fn with_memory_manager<R>(f: impl FnOnce(&MemoryManager<DefaultMemoryImpl>) -> R) -> R {
-    MEMORY_MANAGER.with(|cell| f(&*cell.borrow()))
+    MEMORY_MANAGER.with(|cell| f(&cell.borrow()))
 }
 
 /// A repository is a generic interface for storing and retrieving data.

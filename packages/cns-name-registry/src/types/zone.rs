@@ -28,7 +28,7 @@ pub mod domain_zone_byte_size {
     pub const FIELD_RECORDS: u32 = (MAX_RECORD_SIZE + RECORDS_KEY) * MAX_RECORDS_PER_ZONE;
 
     /// The maximum byte size of a DomainZone.
-    pub const MAX_SIZE: u32 = FIELD_NAME + FIELD_RECORDS as u32;
+    pub const MAX_SIZE: u32 = FIELD_NAME + FIELD_RECORDS;
 }
 
 /// Adds serialization and deserialization support to DomainZone to stable memory.

@@ -49,6 +49,12 @@ impl DomainZoneRepository {
     }
 }
 
+impl Default for DomainZoneRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Common interfaces for the DomainZone repository, it enables storing, retrieving and removing domain zones.
 impl Repository<DomainName, DomainZone> for DomainZoneRepository {
     fn get(&self, key: DomainName) -> Option<DomainZone> {
