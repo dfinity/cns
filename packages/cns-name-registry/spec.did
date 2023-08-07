@@ -1,0 +1,219 @@
+// A certificate is represented as a blob.
+type Certificate = blob;
+// The canister state tree is represented as a blob.
+type StateTree = blob;
+
+// DomainRecord represents a Chain Name System (CNS) record item.
+type DomainRecord = record {
+  // The domain name, e.g. "mydomain.test.", the name is required for all operations and must
+  // end with a dot (.). Names have well defined size limits and must have the parts between
+  // the dots or commonly called as labels with equal or less then 63 bytes and the entire
+  // name must be under 255 bytes.
+  name : text;
+  // The record type refers to the classification or category of a specific record within the
+  // system, e.g. "CID", "A", "CNAME", "TXT", "MX", "AAAA", "NC", "NS", "DNSKEY", "NSEC".
+  //
+  // Also, "ANY" is a reserved type that can only be used in lookups to retrieve all records of a domain.
+  type : text;
+  // The Time to Live (TTL) is a parameter in a record that specifies the amount of time for
+  // which the record should be cached before being refreshed from the authoritative naming canister.
+  //
+  // This value must be set in seconds and the minimum value is 0 seconds, which means not cached.
+  // Common values for TTL include 3600 seconds (1 hour), 86400 seconds (24 hours), or other intervals
+  // based on specific needs.
+  ttl : nat32;
+  // The record data in a domain record refers to the specific information associated with that record type.
+  // Format of the data depends on the type of record to fit its purpose, but it must not exceed 2550 bytes.
+  data : text;
+};
+
+// DomainLookup is the result of a lookup operation, this structure is standard to enable clients to perform a
+// name lookup and handle the result in a generic way.
+type DomainLookup = record {
+  // The list of answers that match the lookup, the answers section is the most important part of
+  // the lookup result as it contains the actual data that the client is looking for.
+  answers : vec DomainRecord;
+  // Additionals are records that are not a direct match with the lookuped up record type but facilitate the process,
+  // e.g. returning the CID records from a NC lookup to prevent the client from having to perform another lookup.
+  additionals : vec DomainRecord;
+  // Authorities contains records that point toward the authoritative naming canister/server for the domain.
+  authorities : vec DomainRecord;
+};
+
+// Contains information about the pagination of a result set.
+type PaginationInfo = record {
+  // The total number of items of a result set.
+  total : nat64;
+  // The number of items that were returned in the result set.
+  limit : nat64;
+  // The offset of the first record in the result set.
+  start : nat64;
+}
+
+// Specify the pagination options for a result set.
+type PaginationOptions = record {
+  // The offset of the first record in the result set, allowing the client to skip records.
+  start : nat64;
+  // The maximum number of records to return in the result set.
+  limit : nat64;
+}
+
+// Input parameters for the `get_records` operation.
+type GetRecordsInput = record {
+  // The domain name to get records for, must end with a dot (.).
+  domain : text;
+  // Pagination options for the result set, if not specified, the default values will be used:
+  // - start: 0
+  // - limit: 100
+  options : opt PaginationOptions;
+};
+
+// Result of the `get_records` operation, contains the list of records and pagination information.
+type GetRecordsResult = record {
+  // The list of records for the specified domain.
+  records : vec DomainRecord;
+  // Pagination information about the result set.
+  info : PaginationInfo;
+};
+
+// Specifies the type of operation to perform on a record.
+type ManageRecordOperationType = variant {
+  // If a record with the same name and type already exists, the operation will append to the list.
+  append;
+  // This operation will override the existing records using the name and type as the key.
+  override;
+  // This operation will remove the existing records using the name and type as the key.
+  remove;
+};
+
+// Input parameters for a domain record operation.
+type DomainRecordInput = record {
+  // The domain name, e.g. "mydomain.test.", the name is required for all operations and must end with a dot (.).
+  name : text;
+  // The record type refers to the classification or category of a specific record within the system.
+  type : text;
+  // The Time to Live (TTL) is a parameter in a record that specifies the amount of time for which the record
+  // should be cached. If not set the default value will be used.
+  ttl : nat32;
+  // The record data in a domain record refers to the specific information associated with that record type.
+  // If not set the default value will be used.
+  data : text;
+}
+
+// Input parameters for the `append` operation.
+type AppendRecordOperationInput = DomainRecordInput;
+
+// Input parameters for the `override` operation.
+type OverrideRecordOperationInput = DomainRecordInput;
+
+// Input parameters for the `remove` operation.
+type RemoveRecordOperationInput = record {
+  // The name of the record to remove, same restrictions as the name of a DomainRecord apply.
+  name : text;
+  // The type of the record to remove, same restrictions as the type of a DomainRecord apply.
+  // If no type is specified, all records with the specified name will be removed.
+  type : opt text;
+};
+
+// The operation to execute on the records, the operation type specifies how the operation will be performed.
+type ManageRecordsOperation = variant {
+  // If a record with the same name and type already exists, the operation will append to the list.
+  append : vec AppendRecordOperationInput;
+  // This operation will override the existing records using the name and type as the key.
+  override : vec OverrideRecordOperationInput;
+  // This operation will remove the existing records using the name and type as the key.
+  remove : vec RemoveRecordOperationInput;
+};
+
+// Input parameters for the `manage_records` operation.
+type ManageRecordsInput = record {
+  // The domain name to manage records for, must end with a dot (.).
+  domain : text;
+  // The list of operations to perform on the domain records.
+  operations : vec ManageRecordsOperation;
+  // Wether the changed records should be signed with the tECDSA api,
+  // the operation will fail if this is set to false and no signature
+  // is provided within the operations.
+  //
+  // Also, offchain signatures are only available if the canister has set `allow_offchain_signatures` to true.
+  sign_with_tecdsa : opt bool;
+};
+
+// A default type providing structure for update operations.
+type UpdateOperationResult = record {
+  // Indicates if the operation was successful.
+  success : bool;
+  // A message that can optionally contain more details about the operation.
+  message : opt text;
+};
+
+// Result of the `manage_records` operation.
+type ManageRecordsResult = UpdateOperationResult;
+
+// Certification information to validate a query.
+type Certification = record {
+  // The ic certificate that contains the certified variable with the root hash of the canister state tree.
+  ic_certificate : Certificate;
+  // The state tree of the canister.
+  state_tree : StateTree;
+}
+
+// Information about the naming canister.
+type NamingCanisterInfo = record {
+  // Wether or not the naming canister allows offchain signatures of domain record types.
+  allow_offchain_signatures : bool;
+  // The number of domains registered.
+  domains_registered : nat64;
+}
+
+// Result of the `get_info` operation.
+type GetInfoResult = record {
+  // The certification information available to validate the query.
+  certification : Certification;
+  // Information about the naming canister.
+  info : NamingCanisterInfo;
+}
+
+// Input parameters for the `get_domains` operation.
+type GetDomainsInput = record {
+  // Pagination options for the result set, if not specified, the default values will be used:
+  // - start: 0
+  // - limit: 100
+  options : opt PaginationOptions;
+};
+
+// Item of the `get_domains` result set.
+type GetDomainsItem = record {
+  // The domain name.
+  domain : text;
+}
+
+// Result of the `get_domains` operation.
+type GetDomainsResult = record {
+  // Pagination information about the result set.
+  info : PaginationInfo;
+  // The list of domains registered that the caller of the operation has access to.
+  items : vec GetDomainsItem;
+}
+
+// The init payload for the naming canister, which can be supplied on install and upgrade.
+type NamingCanisterInit = record {
+  // Sets the default on wether the records can be signed with offchain signatures.
+  // If not specified, the default value will be false which will fail any operations that
+  // send record types with RRSIG signatures, only tECDSA will be allowed, set it to true
+  // to enable records to be signed off-chain.
+  allow_offchain_signatures : opt bool;
+}
+
+service : (opt NamingCanisterInit) {
+  // Lookup a domain name and return the records that match the specified record type.
+  lookup(domain : text, record_type : text) -> (DomainLookup) query;
+  // Get records of the specified domain, the result set is paginated.
+  get_records(input : GetRecordsInput) -> (GetRecordsResult) query;
+  // Get the list of domains registered that the caller of the operation has access to.
+  get_domains(input : GetDomainsInput) -> (GetDomainsResult) query;
+  // Manage records of the specified domain based on the list of operations.
+  manage_records(input : ManageRecordsInput) -> (ManageRecordsResult);
+  // Get information about the naming canister.
+  get_info() -> (GetInfoResult) query;
+};
