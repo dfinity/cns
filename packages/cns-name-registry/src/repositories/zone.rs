@@ -69,3 +69,56 @@ impl Repository<DomainName, DomainZone> for DomainZoneRepository {
         DB.with(|m| m.borrow_mut().remove(&DomainZoneKey(key)))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn init_domain_zone_repository() {
+        let repository = DomainZoneRepository::default();
+        assert!(repository
+            .get("internetcomputer.tld.".to_string())
+            .is_none());
+    }
+
+    #[test]
+    fn insert_domain_zone() {
+        let repository = DomainZoneRepository::default();
+        let domain_zone = DomainZone {
+            name: "internetcomputer.tld.".to_string(),
+            records: Default::default(),
+        };
+        repository.insert(domain_zone.name.clone(), domain_zone.clone());
+        assert_eq!(
+            repository.get(domain_zone.name.clone()).unwrap(),
+            domain_zone
+        );
+    }
+
+    #[test]
+    fn remove_domain_zone() {
+        let repository = DomainZoneRepository::default();
+        let domain_zone = DomainZone {
+            name: "internetcomputer.tld.".to_string(),
+            records: Default::default(),
+        };
+        repository.insert(domain_zone.name.clone(), domain_zone.clone());
+        assert!(repository.get(domain_zone.name.clone()).is_some());
+        repository.remove(domain_zone.name.clone());
+        assert!(repository.get(domain_zone.name.clone()).is_none());
+    }
+
+    #[test]
+    fn get_domain_zone_by_key() {
+        let repository = DomainZoneRepository::default();
+        let domain_zone = DomainZone {
+            name: "internetcomputer.tld.".to_string(),
+            records: Default::default(),
+        };
+        repository.insert(domain_zone.name.clone(), domain_zone.clone());
+        let found_domain = repository.get(domain_zone.name.clone());
+        assert!(found_domain.is_some());
+        assert_eq!(found_domain.unwrap().name, domain_zone.name.clone());
+    }
+}

@@ -3,7 +3,7 @@ use ic_stable_structures::{BoundedStorable, Storable};
 use std::borrow::Cow;
 
 /// DomainRecord represents a Chain Name System (CNS) record item.
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct DomainRecord {
     /// The domain name, e.g. "mydomain.tld.", the name is required for all operations and must
     /// end with a dot (.). Names have well defined size limits and must have the parts between

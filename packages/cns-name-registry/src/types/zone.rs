@@ -10,7 +10,7 @@ pub const MAX_RECORDS_PER_ZONE: u32 = 25_000;
 pub type DomainName = String;
 
 /// Main struct that represents a domain zone with all the records that it is responsible for.
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct DomainZone {
     /// The domain name that this zone is managing.
     pub name: DomainName,
