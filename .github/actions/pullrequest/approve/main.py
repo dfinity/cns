@@ -109,8 +109,12 @@ def enable_pull_request_auto_merge(pull_request_node_id, authorization_token):
             )
         )
 
-    print("enable_pull_request_auto_merge")
-    print(request.json())
+    result: dict = request.json()
+    errors = result.get("errors", [])
+    if errors:
+        raise Exception(
+            "Mutation failed with errors = {}. mutation = {}".format(errors, mutation)
+        )
 
 
 def approve_pull_request(inputs: ActionInputs):
