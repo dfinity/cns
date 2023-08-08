@@ -1,6 +1,6 @@
 name: 'Test Generate Changelogs'
 
-on: workflow_dispatch
+on: pull_request
 
 jobs:
   update_changelogs:
