@@ -1,0 +1,55 @@
+name: 'Pull request creation'
+description: 'Action to create a pull requests'
+
+inputs:
+  author: 
+    description: 'The author of the code change'
+    default: 'Github Actions <github-actions[bot]@@users.noreply.github.com>'
+  committer:
+    description: 'The author of the commit'
+    default: 'Github Actions <github-actions[bot]@@users.noreply.github.com>'
+  branch-name: 
+    description: 'Branch name to use'
+    default: 'patch'
+  base-branch:
+    description: 'The base branch to create the PR against'
+    default: 'main'
+  commit-message: 
+    description: 'The commit message'
+    default: 'chore: automated by github actions'
+  token:
+    description: 'Access token to manage the pull request'
+    default: ${{ github.token }}
+
+outputs:
+  created: 
+    description: 'Boolean indicating if the pull request was created'
+  number:
+    description: 'Pull request number'
+  url:
+    description: 'Pull request url'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pygithub gitpython
+      shell: bash
+    - name: Create pull request
+      id: create-pull-request
+      run: |
+        python .github/actions/pullrequest/create/main.py
+      shell: bash
+      env: 
+        INPUT_AUTHOR: ${{ inputs.author }}
+        INPUT_BRANCH_NAME: ${{ inputs.branch-name }}
+        INPUT_BASE_BRANCH: ${{ inputs.base-branch }}
+        INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        INPUT_COMMITTER: ${{ inputs.committer }}
+        INPUT_TOKEN: ${{ inputs.token }}
