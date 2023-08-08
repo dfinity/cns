@@ -86,8 +86,8 @@ def fetch_pull_request_node_id(owner, name, pr_number, authorization_token):
 
 def enable_pull_request_auto_merge(pull_request_node_id, authorization_token):
     mutation = """
-        mutation EnablePullRequestAutoMerge {{
-            enablePullRequestAutoMerge(input: {{pullRequestId: "{node_id}"}}) {{
+        mutation AddPullRequestToMergeQueue {{
+            enqueuePullRequest(input: {{pullRequestId: "{node_id}"}}) {{
                 __typename
             }}
         }}
