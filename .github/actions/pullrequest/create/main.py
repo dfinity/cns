@@ -39,9 +39,11 @@ class ActionOutputs:
 
     def write(self):
         with open(self.output_file_path, "w") as file:
-            file.write(f"created={self.created}\n")
-            file.write(f"number={self.number}\n")
-            file.write(f"url={self.url}\n")
+            file.write(f"pull-request-created={str(self.created).lower()}\n")
+            if self.number:
+                file.write(f"pull-request-number={self.number}\n")
+            if self.url:
+                file.write(f"pull-request-url={self.url}\n")
 
 
 def extract_repo_path(url):

@@ -22,11 +22,11 @@ inputs:
     default: ${{ github.token }}
 
 outputs:
-  created: 
+  pull-request-created:
     description: 'Boolean indicating if the pull request was created'
-  number:
+  pull-request-number:
     description: 'Pull request number'
-  url:
+  pull-request-url:
     description: 'Pull request url'
 
 runs:

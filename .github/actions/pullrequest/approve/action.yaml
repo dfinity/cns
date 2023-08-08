@@ -13,9 +13,9 @@ inputs:
     default: ${{ github.token }}
 
 outputs:
-  approved: 
+  pull-request-approved:
     description: 'Boolean indicating if the pull request was approved'
-  mreged: 
+  pull-request-merged:
     description: 'Boolean indicating if the pull request was merged'
 
 runs:

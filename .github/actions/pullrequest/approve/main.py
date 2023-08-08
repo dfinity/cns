@@ -26,8 +26,8 @@ class ActionOutputs:
 
     def write(self):
         with open(self.output_file_path, "w") as file:
-            file.write(f"approved={self.approved}\n")
-            file.write(f"merged={self.merged}\n")
+            file.write(f"pull-request-approved={str(self.approved).lower()}\n")
+            file.write(f"pull-request-merged={str(self.merged).lower()}\n")
 
 
 def parse_env_bool(env_var_name, default=False):
