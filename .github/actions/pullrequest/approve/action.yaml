@@ -15,8 +15,10 @@ inputs:
 outputs:
   pull-request-approved:
     description: 'Boolean indicating if the pull request was approved'
+    value: ${{ steps.approve-pull-request.outputs.pull-request-approved }}
   pull-request-merged:
     description: 'Boolean indicating if the pull request was merged'
+    value: ${{ steps.approve-pull-request.outputs.pull-request-merged }}
 
 runs:
   using: 'composite'

@@ -24,10 +24,13 @@ inputs:
 outputs:
   pull-request-created:
     description: 'Boolean indicating if the pull request was created'
+    value: ${{ steps.create-pull-request.outputs.pull-request-created }}
   pull-request-number:
     description: 'Pull request number'
+    value: ${{ steps.create-pull-request.outputs.pull-request-number }}
   pull-request-url:
     description: 'Pull request url'
+    value: ${{ steps.create-pull-request.outputs.pull-request-url }}
 
 runs:
   using: 'composite'
