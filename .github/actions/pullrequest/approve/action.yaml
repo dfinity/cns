@@ -34,7 +34,7 @@ runs:
       run: |
         python .github/actions/pullrequest/approve/main.py
         if [ -f "/tmp/action_outputs.txt" ]; then
-          cat "/tmp/action_outputs.txt" >> $GITHUB_ENV
+          cat "/tmp/action_outputs.txt" >> $GITHUB_OUTPUT
         fi
       shell: bash
       env: 
