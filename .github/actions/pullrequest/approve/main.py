@@ -34,7 +34,7 @@ def parse_env_bool(env_var_name, default=False):
     value = os.environ.get(env_var_name)
     if value is None:
         return default
-    return value.lower() == "true" | value == "1"
+    return value.lower() == "true" or value == "1"
 
 
 def extract_repo_path(url):
