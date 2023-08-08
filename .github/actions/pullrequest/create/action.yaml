@@ -3,6 +3,9 @@ description: 'Action to create a pull requests'
 
 inputs:
   author: 
+    description: 'The author of the code change'
+    default: 'Github Actions <github-actions[bot]@@users.noreply.github.com>'
+  committer:
     description: 'The author of the commit'
     default: 'Github Actions <github-actions[bot]@@users.noreply.github.com>'
   branch-name: 
@@ -47,4 +50,5 @@ runs:
         INPUT_BRANCH_NAME: ${{ inputs.branch-name }}
         INPUT_BASE_BRANCH: ${{ inputs.base-branch }}
         INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        INPUT_COMMITTER: ${{ inputs.committer }}
         INPUT_TOKEN: ${{ inputs.token }}
