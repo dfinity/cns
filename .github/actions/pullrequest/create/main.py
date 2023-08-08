@@ -47,7 +47,7 @@ def create_pull_request(inputs: ActionInputs):
     outputs = ActionOutputs()
 
     # github_client = Github(inputs.token)
-    repo = Repo("../../../..")
+    repo = Repo(".")
     remote_repo_url = (
         repo.remotes[0].config_reader.get("url").split(":")[1].split(".")[0]
     )
