@@ -43,7 +43,9 @@ runs:
       shell: bash
     - name: Create pull request
       id: create-pull-request
-      run: python ./main.py
+      run: |
+        pwd
+        python .github/actions/pullrequest/create/main.py
       shell: bash
       env: 
         INPUT_AUTHOR: ${{ inputs.author }}
