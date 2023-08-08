@@ -1,0 +1,41 @@
+name: 'Pull request creation'
+description: 'Action to create a pull requests'
+
+inputs:
+  merge:
+    description: 'Wether to merge the pull request after approval'
+    default: false
+  pull-request-number:
+    description: 'Pull request number to approve'
+    required: true
+  token:
+    description: 'Access token to manage the pull request'
+    default: ${{ github.token }}
+
+outputs:
+  approved: 
+    description: 'Boolean indicating if the pull request was approved'
+  mreged: 
+    description: 'Boolean indicating if the pull request was merged'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pygithub gitpython
+      shell: bash
+    - name: Approve pull request
+      id: approve-pull-request
+      run: |
+        python .github/actions/pullrequest/approve/main.py
+      shell: bash
+      env: 
+        INPUT_MERGE: ${{ inputs.merge }}
+        INPUT_PULL_REQUEST_NUMBER: ${{ inputs.pull-request-number }}
+        INPUT_TOKEN: ${{ inputs.token }}

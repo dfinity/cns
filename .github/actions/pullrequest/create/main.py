@@ -65,7 +65,6 @@ def create_pull_request(inputs: ActionInputs):
         raise Exception("Could not find remote repository URL")
 
     # Get the Github repository
-    print(f"Remote repository URL: {remote_repo_path}")
     github_client = Github(inputs.token)
     github_repo = github_client.get_repo(remote_repo_path)
 
@@ -103,6 +102,7 @@ def create_pull_request(inputs: ActionInputs):
         base=inputs.base_branch,
         head=new_branch_name,
     )
+    pull_request.add_to_labels("auto-pr")
 
     # Adds information to action output
     outputs.created = 1
