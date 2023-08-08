@@ -111,7 +111,7 @@ def create_pull_request(inputs: ActionInputs):
 
     # Adds information to action output
     outputs.created = True
-    outputs.number = pull_request.id
+    outputs.number = pull_request.number
     outputs.url = pull_request.url
 
     print(f"New branch '{new_branch_name}' created, files added, and pushed to remote.")
