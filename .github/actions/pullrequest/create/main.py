@@ -2,6 +2,7 @@ import os
 import glob
 import random
 import string
+import re
 from github import Github
 from git import Repo
 from git import Actor
@@ -40,6 +41,14 @@ class ActionOutputs:
         print(f"::set-output name=url::{self.url}")
 
 
+def extract_repo_path(url):
+    pattern = r"(?:https?://github\.com/|github\.com:)([^/]+/[^/.]+)"
+    match = re.search(pattern, url)
+    if match:
+        return match.group(1)
+    return None
+
+
 def create_pull_request(inputs: ActionInputs):
     # Generate a random string of 6 characters
     random_suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -49,20 +58,16 @@ def create_pull_request(inputs: ActionInputs):
 
     # github_client = Github(inputs.token)
     repo = Repo(".")
-    remote_repo_url = (
-        repo.remotes[0].config_reader.get("url").split(":")[1].split(".")[0]
-    )
+    remote_repo_url = repo.remotes[0].config_reader.get("url")
+    remote_repo_path = extract_repo_path(remote_repo_url)
 
-    if not remote_repo_url:
+    if not remote_repo_path:
         raise Exception("Could not find remote repository URL")
 
-    url = repo.remotes[0].config_reader.get("url")
-
     # Get the Github repository
-    print(f"Remote repository URL: {remote_repo_url}")
-    print(f"Remote URL: {url}")
+    print(f"Remote repository URL: {remote_repo_path}")
     github_client = Github(inputs.token)
-    github_repo = github_client.get_repo(remote_repo_url)
+    github_repo = github_client.get_repo(remote_repo_path)
 
     # Create a new branch
     new_branch_name = f"bot/{inputs.branch_name}-{random_suffix}"
