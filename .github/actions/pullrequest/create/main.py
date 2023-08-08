@@ -63,7 +63,7 @@ def create_pull_request(inputs: ActionInputs):
     files_to_add = glob.glob("*")
     entries = repo.index.add(files_to_add)
 
-    if entries.count() == 0:
+    if len(entries) == 0:
         print("There are no changes to commit.")
         outputs.print()
         return
