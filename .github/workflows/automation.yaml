@@ -28,9 +28,12 @@ jobs:
           branch-name: 'changelogs'
           commit-message: 'chore: auto update changelogs'
       - name: 'Approve Pull Request'
-        uses: ./.github/actions/pullrequest/approve
-        if: ${{ steps.create-pull-request.outputs.created == 'true' }}
-        with:
-          token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
-          pull-request-number: ${{ steps.create-pull-request.outputs.number }}
-          merge: true
+        run: |
+          echo "Outputs: ${{ steps.create-pull-request.outputs }}"
+      # - name: 'Approve Pull Request'
+      #   uses: ./.github/actions/pullrequest/approve
+      #   if: ${{ steps.create-pull-request.outputs.created == 'true' }}
+      #   with:
+      #     token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
+      #     pull-request-number: ${{ steps.create-pull-request.outputs.number }}
+      #     merge: true
