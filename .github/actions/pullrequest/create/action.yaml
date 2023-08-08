@@ -42,6 +42,7 @@ runs:
         pip install pygithub gitpython
       shell: bash
     - name: Create pull request
+      id: create-pull-request
       run: |
         python .github/actions/pullrequest/create/main.py
         if [ -f "/tmp/action_outputs.txt" ]; then

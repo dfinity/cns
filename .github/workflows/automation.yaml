@@ -34,7 +34,7 @@ jobs:
           echo "pr-url: ${{ steps.create-pull-request.outputs.pull-request-url }}"
       - name: 'Approve Pull Request'
         uses: ./.github/actions/pullrequest/approve
-        if: ${{ steps.create-pull-request.outputs.pull-request-created == 'true' }}
+        if: ${{ steps.create-pull-request.outputs.pull-request-created }}
         with:
           token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
           pull-request-number: ${{ steps.create-pull-request.outputs.pull-request-number }}
