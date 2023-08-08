@@ -74,8 +74,8 @@ def create_pull_request(inputs: ActionInputs):
         inputs.commit_message,
         parent_commits=None,
         head=True,
-        author=Actor(inputs.author),
-        committer=Actor(inputs.committer),
+        author=Actor._from_string(inputs.author),
+        committer=Actor._from_string(inputs.committer),
     )
 
     # Push the changes to the remote repository
