@@ -27,11 +27,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch-name: 'changelogs'
           commit-message: 'chore: auto update changelogs'
-      - name: 'Validate Outputs'
-        run: |
-          echo "pr-created: ${{ steps.create-pull-request.outputs.pull-request-created }}"
-          echo "pr-number: ${{ steps.create-pull-request.outputs.pull-request-number }}"
-          echo "pr-url: ${{ steps.create-pull-request.outputs.pull-request-url }}"
       - name: 'Approve Pull Request'
         uses: ./.github/actions/pullrequest/approve
         if: ${{ steps.create-pull-request.outputs.pull-request-created }}

@@ -7,7 +7,7 @@ from git import Repo
 class ActionInputs:
     def __init__(self):
         self.should_merge = parse_env_bool("INPUT_MERGE", False)
-        self.pull_request_number = os.environ.get("INPUT_PULL_REQUEST_NUMBER")
+        self.pull_request_number = int(os.environ.get("INPUT_PULL_REQUEST_NUMBER"))
         self.token = os.environ.get("INPUT_TOKEN")
 
         if not self.token:
