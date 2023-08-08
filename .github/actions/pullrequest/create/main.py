@@ -30,15 +30,18 @@ class ActionInputs:
 
 
 class ActionOutputs:
+    output_file_path = "/tmp/action_outputs.txt"
+
     def __init__(self):
-        self.created = 0
+        self.created = False
         self.number = None
         self.url = None
 
-    def print(self):
-        print(f"::set-output name=created::{self.created}")
-        print(f"::set-output name=number::{self.number}")
-        print(f"::set-output name=url::{self.url}")
+    def write(self):
+        with open(self.output_file_path, "w") as file:
+            file.write(f"created={self.created}\n")
+            file.write(f"number={self.number}\n")
+            file.write(f"url={self.url}\n")
 
 
 def extract_repo_path(url):
@@ -79,7 +82,7 @@ def create_pull_request(inputs: ActionInputs):
 
     if len(entries) == 0:
         print("There are no changes to commit.")
-        outputs.print()
+        outputs.write()
         return
 
     # Commit changes
@@ -105,12 +108,12 @@ def create_pull_request(inputs: ActionInputs):
     pull_request.add_to_labels("auto-pr")
 
     # Adds information to action output
-    outputs.created = 1
+    outputs.created = True
     outputs.number = pull_request.id
     outputs.url = pull_request.url
 
     print(f"New branch '{new_branch_name}' created, files added, and pushed to remote.")
-    outputs.print()
+    outputs.write()
 
 
 if __name__ == "__main__":

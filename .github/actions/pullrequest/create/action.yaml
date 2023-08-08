@@ -45,6 +45,9 @@ runs:
       id: create-pull-request
       run: |
         python .github/actions/pullrequest/create/main.py
+        if [ -f "/tmp/action_outputs.txt" ]; then
+          cat "/tmp/action_outputs.txt" >> $GITHUB_ENV
+        fi
       shell: bash
       env: 
         INPUT_AUTHOR: ${{ inputs.author }}
