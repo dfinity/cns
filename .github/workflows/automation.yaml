@@ -24,13 +24,13 @@ jobs:
         id: create-pull-request
         uses: ./.github/actions/pullrequest/create
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           branch-name: 'changelogs'
           commit-message: 'chore: auto update changelogs'
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Approve Pull Request'
         uses: ./.github/actions/pullrequest/approve
         if: ${{ steps.create-pull-request.outputs.pull-request-created }}
         with:
-          token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
+          auto-merge: true
           pull-request-number: ${{ steps.create-pull-request.outputs.pull-request-number }}
-          merge: true
+          token: ${{ secrets.GH_PRIVILEGED_TOKEN }}

@@ -2,8 +2,8 @@ name: 'Pull request creation'
 description: 'Action to create a pull requests'
 
 inputs:
-  merge:
-    description: 'Wether to merge the pull request after approval'
+  auto-merge:
+    description: 'Wether to set to auto merge the pull request after approval'
     default: false
   pull-request-number:
     description: 'Pull request number to approve'
@@ -16,9 +16,6 @@ outputs:
   pull-request-approved:
     description: 'Boolean indicating if the pull request was approved'
     value: ${{ steps.approve-pull-request.outputs.pull-request-approved }}
-  pull-request-merged:
-    description: 'Boolean indicating if the pull request was merged'
-    value: ${{ steps.approve-pull-request.outputs.pull-request-merged }}
 
 runs:
   using: 'composite'
@@ -41,6 +38,6 @@ runs:
         fi
       shell: bash
       env: 
-        INPUT_MERGE: ${{ inputs.merge }}
+        INPUT_AUTO_MERGE: ${{ inputs.auto-merge }}
         INPUT_PULL_REQUEST_NUMBER: ${{ inputs.pull-request-number }}
         INPUT_TOKEN: ${{ inputs.token }}
