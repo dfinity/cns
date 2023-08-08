@@ -109,6 +109,9 @@ def enable_pull_request_auto_merge(pull_request_node_id, authorization_token):
             )
         )
 
+    print("enable_pull_request_auto_merge")
+    print(request.json())
+
 
 def approve_pull_request(inputs: ActionInputs):
     # Init action outputs
@@ -137,6 +140,7 @@ def approve_pull_request(inputs: ActionInputs):
     pull_request.create_review(event="APPROVE")
 
     if inputs.should_auto_merge:
+        print(f"Enabling auto merge for pull request with id({pull_request_node_id})")
         pull_request.add_to_labels("auto-merge")
         enable_pull_request_auto_merge(pull_request_node_id, inputs.token)
 
