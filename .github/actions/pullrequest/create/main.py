@@ -4,6 +4,7 @@ import random
 import string
 from github import Github
 from git import Repo
+from git import Actor
 
 
 class ActionInputs:
@@ -73,8 +74,8 @@ def create_pull_request(inputs: ActionInputs):
         inputs.commit_message,
         parent_commits=None,
         head=True,
-        author=inputs.author,
-        committer=inputs.committer,
+        author=Actor(inputs.author),
+        committer=Actor(inputs.committer),
     )
 
     # Push the changes to the remote repository
