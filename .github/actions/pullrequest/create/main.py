@@ -56,6 +56,15 @@ def create_pull_request(inputs: ActionInputs):
     if not remote_repo_url:
         raise Exception("Could not find remote repository URL")
 
+    url = repo.remotes[0].config_reader.get("url")
+
+    # Get the Github repository
+    print(f"Remote repository URL: {remote_repo_url}")
+    print(f"Remote URL: {url}")
+    github_client = Github(inputs.token)
+    github_repo = github_client.get_repo(remote_repo_url)
+
+    # Create a new branch
     new_branch_name = f"bot/{inputs.branch_name}-{random_suffix}"
     new_branch = repo.create_head(new_branch_name)
     new_branch.checkout()
@@ -83,8 +92,6 @@ def create_pull_request(inputs: ActionInputs):
     origin.push(new_branch)
 
     # Create a pull request
-    github_client = Github(inputs.token)
-    github_repo = github_client.get_repo(remote_repo_url)
     pull_request = github_repo.create_pull(
         title=inputs.commit_message,
         body="Automatically created by Github Actions",
