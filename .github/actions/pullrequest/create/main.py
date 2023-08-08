@@ -56,7 +56,7 @@ def create_pull_request(inputs: ActionInputs):
         raise Exception("Could not find remote repository URL")
 
     new_branch_name = f"bot/{inputs.branch_name}-{random_suffix}"
-    new_branch = repo.create_head(new_branch_name, repo.active_branch)
+    new_branch = repo.create_head(new_branch_name)
     new_branch.checkout()
 
     # Add files matching the pattern

@@ -44,7 +44,6 @@ runs:
     - name: Create pull request
       id: create-pull-request
       run: |
-        pwd
         python .github/actions/pullrequest/create/main.py
       shell: bash
       env: 
