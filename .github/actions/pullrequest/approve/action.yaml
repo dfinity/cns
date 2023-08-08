@@ -31,9 +31,11 @@ runs:
         pip install pygithub gitpython
       shell: bash
     - name: Approve pull request
-      id: approve-pull-request
       run: |
         python .github/actions/pullrequest/approve/main.py
+        if [ -f "/tmp/action_outputs.txt" ]; then
+          cat "/tmp/action_outputs.txt" >> $GITHUB_ENV
+        fi
       shell: bash
       env: 
         INPUT_MERGE: ${{ inputs.merge }}

@@ -18,13 +18,16 @@ class ActionInputs:
 
 
 class ActionOutputs:
-    def __init__(self):
-        self.approved = 0
-        self.merged = 0
+    output_file_path = "/tmp/action_outputs.txt"
 
-    def print(self):
-        print(f"::set-output name=approved::{self.approved}")
-        print(f"::set-output name=merged::{self.merged}")
+    def __init__(self):
+        self.approved = False
+        self.merged = False
+
+    def write(self):
+        with open(self.output_file_path, "w") as file:
+            file.write(f"approved={self.approved}\n")
+            file.write(f"merged={self.merged}\n")
 
 
 def parse_env_bool(env_var_name, default=False):
@@ -65,13 +68,13 @@ def approve_pull_request(inputs: ActionInputs):
 
     if inputs.should_merge:
         pull_request.merge(merge_method="squash")
-        outputs.merged = 1
+        outputs.merged = True
 
     # Adds information to action output
-    outputs.approved = 1
+    outputs.approved = True
 
     print(f"Pull request was approved")
-    outputs.print()
+    outputs.write()
 
 
 if __name__ == "__main__":
