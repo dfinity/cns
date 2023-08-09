@@ -20,12 +20,17 @@ jobs:
         run: pip install -U commitizen
       - name: 'Update Changelogs'
         run: cz changelog --incremental
-      - name: 'Create PR and merge'
-        uses: ./.github/actions/pr-handler
+      - name: 'Create Pull Request'
+        id: create-pull-request
+        uses: ./.github/actions/pullrequest/create
         with:
           branch-name: 'changelogs'
           commit-message: 'chore: auto update changelogs'
-          pull-request-body: 'Automated by github actions generating the changelogs.'
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: 'Approve Pull Request'
+        uses: ./.github/actions/pullrequest/approve
+        if: ${{ steps.create-pull-request.outputs.pull-request-created }}
+        with:
           auto-merge: true
-          gh-approve-token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
+          pull-request-number: ${{ steps.create-pull-request.outputs.pull-request-number }}
+          token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
