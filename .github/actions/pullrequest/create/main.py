@@ -39,10 +39,9 @@ class ActionOutputs:
 
     def write(self):
         with open(self.output_file_path, "w") as file:
-            file.write(f"pull-request-created={str(self.created).lower()}\n")
-            if self.number:
+            if self.created and self.number and self.url:
+                file.write(f"pull-request-created={str(self.created).lower()}\n")
                 file.write(f"pull-request-number={self.number}\n")
-            if self.url:
                 file.write(f"pull-request-url={self.url}\n")
 
 
@@ -88,7 +87,7 @@ def create_pull_request(inputs: ActionInputs):
     # if len(entries) == 0:
     print("There are no changes to commit.")
     outputs.write()
-        # return
+    # return
 
     # Commit changes
     # repo.index.commit(
