@@ -82,40 +82,43 @@ def create_pull_request(inputs: ActionInputs):
     files_to_add = glob.glob("*")
     entries = repo.index.add(files_to_add)
 
-    if len(entries) == 0:
-        print("There are no changes to commit.")
-        outputs.write()
-        return
+    print(f"Added {len(entries)} files to index.")
+    print(f"Files added: {entries}")
+
+    # if len(entries) == 0:
+    print("There are no changes to commit.")
+    outputs.write()
+        # return
 
     # Commit changes
-    repo.index.commit(
-        inputs.commit_message,
-        parent_commits=None,
-        head=True,
-        author=Actor._from_string(inputs.author),
-        committer=Actor._from_string(inputs.committer),
-    )
+    # repo.index.commit(
+    #     inputs.commit_message,
+    #     parent_commits=None,
+    #     head=True,
+    #     author=Actor._from_string(inputs.author),
+    #     committer=Actor._from_string(inputs.committer),
+    # )
 
-    # Push the changes to the remote repository
-    origin = repo.remote(name="origin")
-    origin.push(new_branch)
+    # # Push the changes to the remote repository
+    # origin = repo.remote(name="origin")
+    # origin.push(new_branch)
 
-    # Create a pull request
-    pull_request = github_repo.create_pull(
-        title=inputs.commit_message,
-        body="Automatically created by Github Actions",
-        base=inputs.base_branch,
-        head=new_branch_name,
-    )
-    pull_request.add_to_labels("auto-pr")
+    # # Create a pull request
+    # pull_request = github_repo.create_pull(
+    #     title=inputs.commit_message,
+    #     body="Automatically created by Github Actions",
+    #     base=inputs.base_branch,
+    #     head=new_branch_name,
+    # )
+    # pull_request.add_to_labels("auto-pr")
 
-    # Adds information to action output
-    outputs.created = True
-    outputs.number = pull_request.number
-    outputs.url = pull_request.url
+    # # Adds information to action output
+    # outputs.created = True
+    # outputs.number = pull_request.number
+    # outputs.url = pull_request.url
 
-    print(f"New branch '{new_branch_name}' created, files added, and pushed to remote.")
-    outputs.write()
+    # print(f"New branch '{new_branch_name}' created, files added, and pushed to remote.")
+    # outputs.write()
 
 
 if __name__ == "__main__":
