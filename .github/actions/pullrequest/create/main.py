@@ -85,9 +85,6 @@ def create_pull_request(inputs: ActionInputs):
     # Check for changes compared to the previous commit
     diff_index = current_commit.diff(None)
 
-    print(f"Added {len(diff_index)} files to index.")
-    print(f"Files added: {diff_index}")
-
     if len(diff_index) == 0:
         print("There are no changes to commit.")
         outputs.write()
