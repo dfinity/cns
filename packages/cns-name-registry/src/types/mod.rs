@@ -11,3 +11,7 @@ pub use record_type::*;
 /// Types to represent a domain name zone.
 mod zone;
 pub use zone::*;
+
+/// Types to represent a domain name zone entry.
+mod zone_entry;
+pub use zone_entry::*;

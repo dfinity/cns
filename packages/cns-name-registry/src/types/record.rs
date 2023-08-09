@@ -2,8 +2,13 @@ use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::{BoundedStorable, Storable};
 use std::borrow::Cow;
 
+/// The domain name ascii encoded, e.g. "mydomain.tld.", must end with a dot (.) and can't be longer than 255 bytes.
+pub type DomainName = String;
+
+pub const MAX_ASCII_CHAR_VALUE: u8 = 255u8;
+
 /// DomainRecord represents a Chain Name System (CNS) record item.
-#[derive(CandidType, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct DomainRecord {
     /// The domain name, e.g. "mydomain.tld.", the name is required for all operations and must
     /// end with a dot (.). Names have well defined size limits and must have the parts between
@@ -11,7 +16,7 @@ pub struct DomainRecord {
     /// name must be under 255 bytes.
     ///
     /// Names are encoded in ascii and are case insensitive, but the canonical form is lowercase.
-    pub name: String,
+    pub name: DomainName,
     /// The record type refers to the classification or category of a specific record within the
     /// system, e.g. "CID", "A", "CNAME", "TXT", "MX", "AAAA", "NC", "NS", "DNSKEY", "NSEC".
     ///
@@ -26,10 +31,57 @@ pub struct DomainRecord {
     /// This value must be set in seconds and the minimum value is 0 seconds, which means not cached.
     /// Common values for TTL include 3600 seconds (1 hour), 86400 seconds (24 hours), or other intervals
     /// based on specific needs.
-    pub ttl: u32,
-    /// The record data in a domaiØn record refers to the specific information associated with that record type.
+    pub ttl: Option<u32>,
+    /// The record data in a domain record refers to the specific information associated with that record type.
     /// Format of the data depends on the type of record to fit its purpose, but it must not exceed 2550 bytes.
-    pub data: String,
+    pub data: Option<String>,
+}
+
+impl DomainRecord {
+    pub fn max_domain_name_value() -> String {
+        std::iter::repeat(MAX_ASCII_CHAR_VALUE as char)
+            .take(domain_record_byte_size::FIELD_NAME as usize)
+            .collect::<String>()
+    }
+
+    pub fn max_record_type_value() -> String {
+        std::iter::repeat(MAX_ASCII_CHAR_VALUE as char)
+            .take(domain_record_byte_size::FIELD_RECORD_TYPE as usize)
+            .collect::<String>()
+    }
+
+    pub fn max_data_value() -> String {
+        std::iter::repeat(MAX_ASCII_CHAR_VALUE as char)
+            .take(domain_record_byte_size::FIELD_DATA as usize)
+            .collect::<String>()
+    }
+
+    pub fn max_ttl_value() -> u32 {
+        u32::MAX
+    }
+}
+
+impl DomainRecord {
+    /// Creates a new DomainRecord.
+    pub fn new(name: String, record_type: String, ttl: Option<u32>, data: Option<String>) -> Self {
+        Self {
+            name,
+            record_type,
+            ttl,
+            data,
+        }
+    }
+}
+
+impl Default for DomainRecord {
+    fn default() -> Self {
+        Self {
+            name: "".to_string(),
+            record_type: "".to_string(),
+            ttl: None,
+            data: None,
+        }
+    }
 }
 
 /// Size definitions for DomainRecords.
@@ -78,8 +130,8 @@ mod tests {
         let domain_record = DomainRecord {
             name: "internetcomputer.tld.".to_string(),
             record_type: "CID".to_string(),
-            ttl: 3600,
-            data: "qoctq-giaaa-aaaaa-aaaea-cai".to_string(),
+            ttl: Some(3600),
+            data: Some("qoctq-giaaa-aaaaa-aaaea-cai".to_string()),
         };
         let bytes = domain_record.to_bytes();
         let domain_record_back = DomainRecord::from_bytes(Cow::Borrowed(&bytes));

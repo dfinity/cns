@@ -1,34 +1,15 @@
 use crate::{
     repositories::{with_memory_manager, Memory, Repository, DOMAIN_ZONES_MEMORY_ID},
-    types::{domain_zone_byte_size, DomainName, DomainZone},
+    types::DomainZoneEntry,
 };
-use ic_stable_structures::{BTreeMap, BoundedStorable, Storable};
+use ic_stable_structures::BTreeMap;
 use std::cell::RefCell;
 
-/// The key used to store a DomainZone within the repository.
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone)]
-pub struct DomainZoneKey(DomainName);
-
 /// The database schema for the DomainZone repository.
-pub type DomainZoneDatabase = BTreeMap<DomainZoneKey, DomainZone, Memory>;
-
-/// Adds serialization and deserialization support to DomainZoneKey to stable memory.
-impl Storable for DomainZoneKey {
-    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
-        // DomainName is a String that already implements `Storable`.
-        self.0.to_bytes()
-    }
-
-    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
-        Self(String::from_bytes(bytes))
-    }
-}
-
-/// Represents the memory required to store a DomainZoneKey in stable memory.
-impl BoundedStorable for DomainZoneKey {
-    const MAX_SIZE: u32 = domain_zone_byte_size::FIELD_NAME;
-    const IS_FIXED_SIZE: bool = false;
-}
+///
+/// DomainZone is used as the key & value hereby transorming the BTreeMap into a Set and enabling a more efficient
+/// lookup and update operations when accessing stable memory.
+pub type DomainZoneDatabase = BTreeMap<DomainZoneEntry, (), Memory>;
 
 thread_local! {
   /// The memory reference to the DomainZone repository.
@@ -56,69 +37,198 @@ impl Default for DomainZoneRepository {
 }
 
 /// Common interfaces for the DomainZone repository, it enables storing, retrieving and removing domain zones.
-impl Repository<DomainName, DomainZone> for DomainZoneRepository {
-    fn get(&self, key: DomainName) -> Option<DomainZone> {
-        DB.with(|m| m.borrow().get(&DomainZoneKey(key)))
+impl Repository<DomainZoneEntry> for DomainZoneRepository {
+    fn search(&self, key: &DomainZoneEntry) -> Vec<DomainZoneEntry> {
+        DB.with(|m| {
+            let results = m
+                .borrow()
+                .range(key..=&key.default_upper_range_key())
+                .map(|(k, _)| k)
+                .collect::<Vec<DomainZoneEntry>>();
+
+            results
+        })
     }
 
-    fn insert(&self, key: DomainName, zone: DomainZone) -> Option<DomainZone> {
-        DB.with(|m| m.borrow_mut().insert(DomainZoneKey(key), zone))
+    fn get(&self, record: &DomainZoneEntry) -> Option<DomainZoneEntry> {
+        let found = DB.with(|m| m.borrow_mut().get(record));
+
+        match found.is_some() {
+            true => Some(record.clone()),
+            _ => None,
+        }
     }
 
-    fn remove(&self, key: DomainName) -> Option<DomainZone> {
-        DB.with(|m| m.borrow_mut().remove(&DomainZoneKey(key)))
+    fn insert(&self, record: &DomainZoneEntry) {
+        DB.with(|m| m.borrow_mut().insert(record.clone(), ()));
+    }
+
+    fn remove(&self, record: &DomainZoneEntry) -> Option<DomainZoneEntry> {
+        let removed = DB.with(|m| m.borrow_mut().remove(record));
+
+        match removed.is_some() {
+            true => Some(record.clone()),
+            _ => None,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::{DomainRecord, DomainRecordTypes, DomainZone};
 
     #[test]
     fn init_domain_zone_repository() {
         let repository = DomainZoneRepository::default();
         assert!(repository
-            .get("internetcomputer.tld.".to_string())
-            .is_none());
+            .search(&DomainZoneEntry::new(
+                DomainZone {
+                    name: "internetcomputer.tld.".to_string()
+                },
+                DomainRecord::default()
+            ))
+            .is_empty());
     }
 
     #[test]
     fn insert_domain_zone() {
         let repository = DomainZoneRepository::default();
-        let domain_zone = DomainZone {
-            name: "internetcomputer.tld.".to_string(),
-            records: Default::default(),
-        };
-        repository.insert(domain_zone.name.clone(), domain_zone.clone());
+        repository.insert(&DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord::default(),
+        ));
+        repository.insert(&DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord {
+                name: "internetcomputer.tld.".to_string(),
+                record_type: DomainRecordTypes::CNAME.to_string(),
+                ttl: Some(0),
+                data: Some("ic.boundary.network.".to_string()),
+            },
+        ));
+        let results = repository.search(&DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord::default(),
+        ));
+
+        assert_eq!(results.len(), 2);
         assert_eq!(
-            repository.get(domain_zone.name.clone()).unwrap(),
-            domain_zone
+            DomainZoneEntry::new(
+                DomainZone {
+                    name: "internetcomputer.tld.".to_string(),
+                },
+                DomainRecord::default(),
+            ),
+            results.get(0).unwrap().to_owned()
+        );
+        assert_eq!(
+            DomainZoneEntry::new(
+                DomainZone {
+                    name: "internetcomputer.tld.".to_string(),
+                },
+                DomainRecord {
+                    name: "internetcomputer.tld.".to_string(),
+                    record_type: DomainRecordTypes::CNAME.to_string(),
+                    ttl: Some(0),
+                    data: Some("ic.boundary.network.".to_string()),
+                },
+            ),
+            results.get(1).unwrap().to_owned()
         );
     }
 
     #[test]
-    fn remove_domain_zone() {
+    fn remove_domain_zone_exact_match() {
         let repository = DomainZoneRepository::default();
-        let domain_zone = DomainZone {
-            name: "internetcomputer.tld.".to_string(),
-            records: Default::default(),
-        };
-        repository.insert(domain_zone.name.clone(), domain_zone.clone());
-        assert!(repository.get(domain_zone.name.clone()).is_some());
-        repository.remove(domain_zone.name.clone());
-        assert!(repository.get(domain_zone.name.clone()).is_none());
+        let domain_zone_entry = DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord::default(),
+        );
+        repository.insert(&domain_zone_entry);
+        assert!(repository.get(&domain_zone_entry).is_some());
+        repository.remove(&domain_zone_entry);
+        assert!(repository.get(&domain_zone_entry).is_none());
     }
 
     #[test]
-    fn get_domain_zone_by_key() {
+    fn search_domain_zone_partial_match() {
         let repository = DomainZoneRepository::default();
-        let domain_zone = DomainZone {
-            name: "internetcomputer.tld.".to_string(),
-            records: Default::default(),
-        };
-        repository.insert(domain_zone.name.clone(), domain_zone.clone());
-        let found_domain = repository.get(domain_zone.name.clone());
-        assert!(found_domain.is_some());
-        assert_eq!(found_domain.unwrap().name, domain_zone.name.clone());
+        repository.insert(&DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord::default(),
+        ));
+        repository.insert(&DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord {
+                name: "internetcomputer.tld.".to_string(),
+                record_type: DomainRecordTypes::CNAME.to_string(),
+                ttl: Some(0),
+                data: Some("ic.boundary.network.".to_string()),
+            },
+        ));
+        repository.insert(&DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord {
+                name: "subdomain.internetcomputer.tld.".to_string(),
+                record_type: DomainRecordTypes::CNAME.to_string(),
+                ttl: Some(0),
+                data: Some("ic.boundary.network.".to_string()),
+            },
+        ));
+        repository.insert(&DomainZoneEntry::new(
+            DomainZone {
+                name: "canister.tld.".to_string(),
+            },
+            DomainRecord {
+                name: "canister.tld.".to_string(),
+                record_type: DomainRecordTypes::TXT.to_string(),
+                ttl: Some(0),
+                data: Some("ic.boundary.network.".to_string()),
+            },
+        ));
+
+        let results_icp = repository.search(&DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord::default(),
+        ));
+
+        let results_canister = repository.search(&DomainZoneEntry::new(
+            DomainZone {
+                name: "canister.tld.".to_string(),
+            },
+            DomainRecord::default(),
+        ));
+        assert_eq!(results_icp.len(), 3);
+        assert_eq!(results_canister.len(), 1);
+    }
+
+    #[test]
+    fn get_domain_zone_exact_match() {
+        let repository = DomainZoneRepository::default();
+        let domain_zone_entry = DomainZoneEntry::new(
+            DomainZone {
+                name: "internetcomputer.tld.".to_string(),
+            },
+            DomainRecord::default(),
+        );
+        repository.insert(&domain_zone_entry);
+        assert!(repository.get(&domain_zone_entry).is_some());
     }
 }

@@ -23,8 +23,9 @@ pub fn with_memory_manager<R>(f: impl FnOnce(&MemoryManager<DefaultMemoryImpl>) 
 }
 
 /// A repository is a generic interface for storing and retrieving data.
-pub trait Repository<K, V> {
-    fn get(&self, key: K) -> Option<V>;
-    fn insert(&self, key: K, value: V) -> Option<V>;
-    fn remove(&self, key: K) -> Option<V>;
+pub trait Repository<Record> {
+    fn get(&self, record: &Record) -> Option<Record>;
+    fn insert(&self, record: &Record);
+    fn remove(&self, record: &Record) -> Option<Record>;
+    fn search(&self, record: &Record) -> Vec<Record>;
 }
