@@ -24,8 +24,31 @@ pub fn with_memory_manager<R>(f: impl FnOnce(&MemoryManager<DefaultMemoryImpl>) 
 
 /// A repository is a generic interface for storing and retrieving data.
 pub trait Repository<Record> {
+    /// Returns the record associated with the key.
     fn get(&self, record: &Record) -> Option<Record>;
+
+    /// Inserts a record into the repository.
     fn insert(&self, record: &Record);
+
+    /// Removes a record from the repository.
     fn remove(&self, record: &Record) -> Option<Record>;
-    fn search(&self, record: &Record) -> Vec<Record>;
+}
+
+/// Responsible for searching for records in a repository.
+pub trait RepositorySearch<SearchInput, SearchResultItem>
+where
+    SearchInput: RepositorySearchInto<SearchResultItem>,
+{
+    /// Searches for records in a repository based on the search input and returns a list of results
+    /// that match the search criteria and are within the range of the search input.
+    fn search(&self, input: &SearchInput) -> Vec<SearchResultItem>;
+}
+
+/// This trait facilitates the mapping between a search input and the target ranges for searching in a repository.
+pub trait RepositorySearchInto<SearchResultItem> {
+    /// Converts the search input into a lower range key for searching in a repository.
+    fn into_lower_range_key(&self) -> Result<SearchResultItem, String>;
+
+    /// Converts the search input into a upper range key for searching in a repository.
+    fn into_upper_range_key(&self) -> Result<SearchResultItem, String>;
 }

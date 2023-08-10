@@ -1,4 +1,9 @@
-use crate::types::{DomainRecord, DomainZone};
+use crate::{
+    repositories::RepositorySearchInto,
+    types::{
+        DomainRecord, DomainRecordInput, DomainZone, DomainZoneInput, RecordName, ZoneApexDomain,
+    },
+};
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::{BoundedStorable, Storable};
 use std::borrow::Cow;
@@ -10,48 +15,93 @@ use std::borrow::Cow;
 pub struct DomainZoneEntry(DomainZone, DomainRecord);
 
 impl DomainZoneEntry {
-    pub fn default_upper_range_key(&self) -> Self {
-        let zone = self.0.clone();
-        let record = self.1.clone();
+    pub const TUPLE_ZONE_BYTE_SIZE: u32 = DomainZone::MAX_SIZE;
+    pub const TUPLE_RECORD_BYTE_SIZE: u32 = DomainRecord::MAX_SIZE;
 
-        Self(
-            DomainZone { name: zone.name },
-            DomainRecord {
-                name: match record.name.is_empty() {
-                    true => DomainRecord::max_domain_name_value(),
-                    _ => record.name,
-                },
-                record_type: match record.record_type.is_empty() {
-                    true => DomainRecord::max_record_type_value(),
-                    _ => record.record_type,
-                },
-                ttl: match record.ttl.is_some() {
-                    true => record.ttl,
-                    _ => Some(DomainRecord::max_ttl_value()),
-                },
-                data: match record.data.is_some() {
-                    true => record.data,
-                    _ => Some(DomainRecord::max_data_value()),
-                },
-            },
-        )
-    }
+    pub const MAX_SIZE: u32 = Self::TUPLE_ZONE_BYTE_SIZE + Self::TUPLE_RECORD_BYTE_SIZE;
 
     pub fn new(zone: DomainZone, record: DomainRecord) -> Self {
         Self(zone, record)
     }
 }
 
-/// Size definitions for DomainZoneEntry.
-pub mod domain_zone_entry_byte_size {
-    use crate::types::{domain_record_byte_size, domain_zone_byte_size};
+/// Represents a zone entry input for creating, updating or facilitating optional search
+/// operations over the DomainZoneEntry.
+#[derive(Clone, Debug)]
+pub struct DomainZoneEntryInput(DomainZoneInput, DomainRecordInput);
 
-    // The size of each field in a DomainZoneEntry.
-    pub const TUPLE_ZONE: u32 = domain_zone_byte_size::MAX_SIZE;
-    pub const TUPLE_RECORD: u32 = domain_record_byte_size::MAX_SIZE;
+impl DomainZoneEntryInput {
+    pub fn new(zone: DomainZoneInput, record: DomainRecordInput) -> Self {
+        Self(zone, record)
+    }
+}
 
-    /// The maximum byte size of a DomainZoneEntry.
-    pub const MAX_SIZE: u32 = TUPLE_ZONE + TUPLE_RECORD;
+impl RepositorySearchInto<DomainZoneEntry> for DomainZoneEntryInput {
+    fn into_lower_range_key(&self) -> Result<DomainZoneEntry, String> {
+        let zone = self.0.clone();
+        let record = self.1.clone();
+        let apex_domain = match zone.name {
+            Some(name) => ZoneApexDomain::new(name).map_err(|e| e.to_string())?,
+            _ => ZoneApexDomain::new(".".to_string()).map_err(|e| e.to_string())?,
+        };
+
+        Ok(DomainZoneEntry(
+            DomainZone {
+                name: apex_domain.clone(),
+            },
+            DomainRecord {
+                name: match record.name {
+                    Some(name) => RecordName::new(name, &apex_domain).unwrap(),
+                    _ => RecordName::default(),
+                },
+                record_type: match record.record_type {
+                    Some(record_type) => record_type,
+                    _ => String::default(),
+                },
+                ttl: match record.ttl {
+                    Some(ttl) => ttl,
+                    _ => 0,
+                },
+                data: match record.data {
+                    Some(data) => data,
+                    _ => String::default(),
+                },
+            },
+        ))
+    }
+
+    fn into_upper_range_key(&self) -> Result<DomainZoneEntry, String> {
+        let zone = self.0.clone();
+        let record = self.1.clone();
+        let apex_domain = match zone.name {
+            Some(name) => ZoneApexDomain::new(name).map_err(|e| e.to_string())?,
+            _ => ZoneApexDomain::new(".".to_string()).map_err(|e| e.to_string())?,
+        };
+
+        Ok(DomainZoneEntry(
+            DomainZone {
+                name: apex_domain.clone(),
+            },
+            DomainRecord {
+                name: match record.name {
+                    Some(name) => RecordName::new(name, &apex_domain).unwrap(),
+                    _ => DomainRecord::max_record_name_value(Some(apex_domain.clone())),
+                },
+                record_type: match record.record_type {
+                    Some(record_type) => record_type,
+                    _ => DomainRecord::max_record_type_value(),
+                },
+                ttl: match record.ttl {
+                    Some(ttl) => ttl,
+                    _ => DomainRecord::max_ttl_value(),
+                },
+                data: match record.data {
+                    Some(data) => data,
+                    _ => DomainRecord::max_data_value(),
+                },
+            },
+        ))
+    }
 }
 
 // Adds serialization and deserialization support to DomainZone to stable memory.
@@ -67,7 +117,7 @@ impl Storable for DomainZoneEntry {
 
 /// Represents the memory required to store a DomainZone in stable memory.
 impl BoundedStorable for DomainZoneEntry {
-    const MAX_SIZE: u32 = domain_zone_entry_byte_size::MAX_SIZE;
+    const MAX_SIZE: u32 = DomainZoneEntry::MAX_SIZE;
 
     const IS_FIXED_SIZE: bool = false;
 }
@@ -75,26 +125,21 @@ impl BoundedStorable for DomainZoneEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn bounded_storable_for_domain_zone_entry_has_expected_size() {
-        assert_eq!(
-            DomainZoneEntry::MAX_SIZE,
-            domain_zone_entry_byte_size::MAX_SIZE
-        );
-    }
+    use crate::types::{RecordName, ZoneApexDomain};
 
     #[test]
     fn deserialization_for_domain_zone_entry_match() {
+        let zone_apex_domain = ZoneApexDomain::new(String::from("internetcomputer.icp.")).unwrap();
+        let record_name = RecordName::new(String::from("@"), &zone_apex_domain).unwrap();
         let domain_zone_entry = DomainZoneEntry::new(
             DomainZone {
-                name: "internetcomputer.icp.".to_string(),
+                name: zone_apex_domain,
             },
             DomainRecord {
-                name: "internetcomputer.icp.".to_string(),
+                name: record_name,
                 record_type: "A".to_string(),
-                ttl: Some(3600),
-                data: None,
+                ttl: 3600,
+                data: String::default(),
             },
         );
 

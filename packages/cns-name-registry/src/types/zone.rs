@@ -1,30 +1,42 @@
-use crate::types::DomainName;
+use crate::types::ZoneApexDomain;
 use candid::{CandidType, Decode, Deserialize, Encode};
-use ic_stable_structures::{BoundedStorable, Storable};
+use ic_stable_structures::Storable;
 use std::borrow::Cow;
 
-/// Main struct that represents a domain zone with all the records that it is responsible for.
-///
-/// It contains the domain name and a list of records that are managed by the zone.
+/// Represents a domain zone with all the records that it is responsible for.
+/// 
+/// The zone name correlates to the apex domain of a zone and manages a list of records associated with it.
 #[derive(Clone, Debug, Ord, Eq, CandidType, Deserialize, PartialEq, PartialOrd)]
 pub struct DomainZone {
     /// The zone name correlates to the main domain of a zone and manages a list of records associated with it.
-    pub name: DomainName,
+    pub name: ZoneApexDomain,
 }
 
-/// Size definitions for DomainZone.
-pub mod domain_zone_byte_size {
-    // The size of each field in a DomainZone.
-    pub const FIELD_NAME: u32 = 255;
+impl DomainZone {
+    pub const FIELD_NAME_BYTE_SIZE: u32 = 255;
 
     /// The maximum byte size of a DomainZone.
-    pub const MAX_SIZE: u32 = FIELD_NAME;
+    ///  
+    /// Represents the memory required to store a DomainZone in stable memory.
+    pub const MAX_SIZE: u32 = Self::FIELD_NAME_BYTE_SIZE;
+
+    pub fn new(name: ZoneApexDomain) -> Self {
+        Self { name }
+    }
+}
+
+/// DomainZoneInput represents a zone apex item input for creating, updating or facilitating optional search
+/// operations over the DomainZone.
+#[derive(Clone, Debug, Default)]
+pub struct DomainZoneInput {
+    /// The zone apex name, e.g. "mydomain.tld.".
+    pub name: Option<String>,
 }
 
 impl Default for DomainZone {
     fn default() -> Self {
         Self {
-            name: "".to_string(),
+            name: ZoneApexDomain::default(),
         }
     }
 }
@@ -40,26 +52,14 @@ impl Storable for DomainZone {
     }
 }
 
-/// Represents the memory required to store a DomainZone in stable memory.
-impl BoundedStorable for DomainZone {
-    const MAX_SIZE: u32 = domain_zone_byte_size::MAX_SIZE;
-
-    const IS_FIXED_SIZE: bool = false;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn bounded_storable_for_domain_zone_has_expected_size() {
-        assert_eq!(DomainZone::MAX_SIZE, domain_zone_byte_size::MAX_SIZE);
-    }
-
-    #[test]
     fn deserialization_for_domain_zone_match() {
         let domain_zone = DomainZone {
-            name: "internetcomputer.tld.".to_string(),
+            name: ZoneApexDomain::new(String::from("internetcomputer.tld.")).unwrap(),
         };
 
         let serialized_domain_zone = domain_zone.to_bytes();

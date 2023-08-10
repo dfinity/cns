@@ -1,13 +1,13 @@
+use crate::{
+    common::MAX_DOMAIN_ASCII_CHAR_VALUE,
+    types::{RecordName, ZoneApexDomain},
+    utils::repeat_char,
+};
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::{BoundedStorable, Storable};
 use std::borrow::Cow;
 
-/// The domain name ascii encoded, e.g. "mydomain.tld.", must end with a dot (.) and can't be longer than 255 bytes.
-pub type DomainName = String;
-
-pub const MAX_ASCII_CHAR_VALUE: u8 = 255u8;
-
-/// DomainRecord represents a Chain Name System (CNS) record item.
+/// DomainRecord represents a zone record item.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct DomainRecord {
     /// The domain name, e.g. "mydomain.tld.", the name is required for all operations and must
@@ -16,7 +16,7 @@ pub struct DomainRecord {
     /// name must be under 255 bytes.
     ///
     /// Names are encoded in ascii and are case insensitive, but the canonical form is lowercase.
-    pub name: DomainName,
+    pub name: RecordName,
     /// The record type refers to the classification or category of a specific record within the
     /// system, e.g. "CID", "A", "CNAME", "TXT", "MX", "AAAA", "NC", "NS", "DNSKEY", "NSEC".
     ///
@@ -31,39 +31,41 @@ pub struct DomainRecord {
     /// This value must be set in seconds and the minimum value is 0 seconds, which means not cached.
     /// Common values for TTL include 3600 seconds (1 hour), 86400 seconds (24 hours), or other intervals
     /// based on specific needs.
-    pub ttl: Option<u32>,
+    pub ttl: u32,
     /// The record data in a domain record refers to the specific information associated with that record type.
     /// Format of the data depends on the type of record to fit its purpose, but it must not exceed 2550 bytes.
+    pub data: String,
+}
+
+/// DomainRecordInput represents a zone record item input for creating, updating or facilitating optional search
+/// operations over the DomainRecord.
+#[derive(Clone, Debug, Default)]
+pub struct DomainRecordInput {
+    /// The record name, e.g. "mydomain.tld.".
+    pub name: Option<String>,
+    /// The record type associated with the name e.g. "CID", "A", "CNAME", "TXT", "NSEC".
+    pub record_type: Option<String>,
+    /// The Time to Live (TTL) refers to the amount of time for which the record should be cached.
+    pub ttl: Option<u32>,
+    /// The record data in a domain record refers to the specific information associated with that record type.
     pub data: Option<String>,
 }
 
 impl DomainRecord {
-    pub fn max_domain_name_value() -> String {
-        std::iter::repeat(MAX_ASCII_CHAR_VALUE as char)
-            .take(domain_record_byte_size::FIELD_NAME as usize)
-            .collect::<String>()
-    }
+    pub const FIELD_NAME_BYTE_SIZE: u32 = 255;
+    pub const FIELD_RECORD_TYPE_BYTE_SIZE: u32 = 12;
+    pub const FIELD_TTL_BYTE_SIZE: u32 = 4;
+    pub const FIELD_DATA_BYTE_SIZE: u32 = 2550;
 
-    pub fn max_record_type_value() -> String {
-        std::iter::repeat(MAX_ASCII_CHAR_VALUE as char)
-            .take(domain_record_byte_size::FIELD_RECORD_TYPE as usize)
-            .collect::<String>()
-    }
+    pub const MAX_SIZE: u32 = Self::FIELD_NAME_BYTE_SIZE
+        + Self::FIELD_RECORD_TYPE_BYTE_SIZE
+        + Self::FIELD_TTL_BYTE_SIZE
+        + Self::FIELD_DATA_BYTE_SIZE;
 
-    pub fn max_data_value() -> String {
-        std::iter::repeat(MAX_ASCII_CHAR_VALUE as char)
-            .take(domain_record_byte_size::FIELD_DATA as usize)
-            .collect::<String>()
-    }
+    pub const DEFAULT_TTL: u32 = 0;
 
-    pub fn max_ttl_value() -> u32 {
-        u32::MAX
-    }
-}
-
-impl DomainRecord {
     /// Creates a new DomainRecord.
-    pub fn new(name: String, record_type: String, ttl: Option<u32>, data: Option<String>) -> Self {
+    pub fn new(name: RecordName, record_type: String, ttl: u32, data: String) -> Self {
         Self {
             name,
             record_type,
@@ -71,29 +73,39 @@ impl DomainRecord {
             data,
         }
     }
+
+    pub fn max_record_name_value(apex_domain: Option<ZoneApexDomain>) -> RecordName {
+        RecordName::max_value(apex_domain)
+    }
+
+    pub fn max_record_type_value() -> String {
+        repeat_char(
+            MAX_DOMAIN_ASCII_CHAR_VALUE as char,
+            Self::FIELD_RECORD_TYPE_BYTE_SIZE as usize,
+        )
+    }
+
+    pub fn max_data_value() -> String {
+        repeat_char(
+            MAX_DOMAIN_ASCII_CHAR_VALUE as char,
+            Self::FIELD_DATA_BYTE_SIZE as usize,
+        )
+    }
+
+    pub fn max_ttl_value() -> u32 {
+        u32::MAX
+    }
 }
 
 impl Default for DomainRecord {
     fn default() -> Self {
         Self {
-            name: "".to_string(),
-            record_type: "".to_string(),
-            ttl: None,
-            data: None,
+            name: RecordName::default(),
+            record_type: String::default(),
+            ttl: Self::DEFAULT_TTL,
+            data: String::default(),
         }
     }
-}
-
-/// Size definitions for DomainRecords.
-pub mod domain_record_byte_size {
-    // The size of each field in a DomainRecord.
-    pub const FIELD_NAME: u32 = 255;
-    pub const FIELD_RECORD_TYPE: u32 = 12;
-    pub const FIELD_TTL: u32 = 4;
-    pub const FIELD_DATA: u32 = 2550;
-
-    /// The maximum byte size of a DomainRecord.
-    pub const MAX_SIZE: u32 = FIELD_NAME + FIELD_RECORD_TYPE + FIELD_TTL + FIELD_DATA;
 }
 
 /// Adds serialization and deserialization support to DomainRecord to stable memory.
@@ -109,7 +121,7 @@ impl Storable for DomainRecord {
 
 /// Represents the memory required to store a DomainRecord in stable memory.
 impl BoundedStorable for DomainRecord {
-    const MAX_SIZE: u32 = domain_record_byte_size::MAX_SIZE;
+    const MAX_SIZE: u32 = DomainRecord::MAX_SIZE;
 
     const IS_FIXED_SIZE: bool = false;
 }
@@ -117,21 +129,16 @@ impl BoundedStorable for DomainRecord {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ic_stable_structures::{BoundedStorable, Storable};
+    use crate::types::ZoneApexDomain;
     use std::borrow::Cow;
-
-    #[test]
-    fn bounded_storable_for_domain_record_has_expected_size() {
-        assert_eq!(DomainRecord::MAX_SIZE, domain_record_byte_size::MAX_SIZE);
-    }
 
     #[test]
     fn deserialization_for_domain_record_match() {
         let domain_record = DomainRecord {
-            name: "internetcomputer.tld.".to_string(),
+            name: RecordName::new("@".to_string(), &ZoneApexDomain::default()).unwrap(),
             record_type: "CID".to_string(),
-            ttl: Some(3600),
-            data: Some("qoctq-giaaa-aaaaa-aaaea-cai".to_string()),
+            ttl: 3600,
+            data: "qoctq-giaaa-aaaaa-aaaea-cai".to_string(),
         };
         let bytes = domain_record.to_bytes();
         let domain_record_back = DomainRecord::from_bytes(Cow::Borrowed(&bytes));
