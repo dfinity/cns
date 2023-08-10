@@ -47,8 +47,8 @@ where
 /// This trait facilitates the mapping between a search input and the target ranges for searching in a repository.
 pub trait RepositorySearchInto<SearchResultItem> {
     /// Converts the search input into a lower range key for searching in a repository.
-    fn into_lower_range_key(&self) -> Result<SearchResultItem, String>;
+    fn map_to_lower_range_key(&self) -> Result<SearchResultItem, String>;
 
     /// Converts the search input into a upper range key for searching in a repository.
-    fn into_upper_range_key(&self) -> Result<SearchResultItem, String>;
+    fn map_to_upper_range_key(&self) -> Result<SearchResultItem, String>;
 }

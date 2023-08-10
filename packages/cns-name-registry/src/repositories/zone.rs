@@ -67,8 +67,8 @@ impl RepositorySearch<DomainZoneEntryInput, DomainZoneEntry> for DomainZoneRepos
     fn search(&self, input: &DomainZoneEntryInput) -> Vec<DomainZoneEntry> {
         DB.with(|m| {
             // todo: handle panics and return an error
-            let start_key = input.into_lower_range_key().unwrap();
-            let end_key = input.into_upper_range_key().unwrap();
+            let start_key = input.map_to_lower_range_key().unwrap();
+            let end_key = input.map_to_upper_range_key().unwrap();
 
             let results = m
                 .borrow()

@@ -4,9 +4,9 @@ use ic_stable_structures::Storable;
 use std::borrow::Cow;
 
 /// Represents a domain zone with all the records that it is responsible for.
-/// 
+///
 /// The zone name correlates to the apex domain of a zone and manages a list of records associated with it.
-#[derive(Clone, Debug, Ord, Eq, CandidType, Deserialize, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Ord, Eq, CandidType, Deserialize, PartialEq, PartialOrd)]
 pub struct DomainZone {
     /// The zone name correlates to the main domain of a zone and manages a list of records associated with it.
     pub name: ZoneApexDomain,
@@ -31,14 +31,6 @@ impl DomainZone {
 pub struct DomainZoneInput {
     /// The zone apex name, e.g. "mydomain.tld.".
     pub name: Option<String>,
-}
-
-impl Default for DomainZone {
-    fn default() -> Self {
-        Self {
-            name: ZoneApexDomain::default(),
-        }
-    }
 }
 
 /// Adds serialization and deserialization support to DomainZone to stable memory.

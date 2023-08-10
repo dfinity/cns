@@ -37,7 +37,7 @@ impl DomainZoneEntryInput {
 }
 
 impl RepositorySearchInto<DomainZoneEntry> for DomainZoneEntryInput {
-    fn into_lower_range_key(&self) -> Result<DomainZoneEntry, String> {
+    fn map_to_lower_range_key(&self) -> Result<DomainZoneEntry, String> {
         let zone = self.0.clone();
         let record = self.1.clone();
         let apex_domain = match zone.name {
@@ -70,7 +70,7 @@ impl RepositorySearchInto<DomainZoneEntry> for DomainZoneEntryInput {
         ))
     }
 
-    fn into_upper_range_key(&self) -> Result<DomainZoneEntry, String> {
+    fn map_to_upper_range_key(&self) -> Result<DomainZoneEntry, String> {
         let zone = self.0.clone();
         let record = self.1.clone();
         let apex_domain = match zone.name {
@@ -85,7 +85,7 @@ impl RepositorySearchInto<DomainZoneEntry> for DomainZoneEntryInput {
             DomainRecord {
                 name: match record.name {
                     Some(name) => RecordName::new(name, &apex_domain).unwrap(),
-                    _ => DomainRecord::max_record_name_value(Some(apex_domain.clone())),
+                    _ => DomainRecord::max_record_name_value(Some(apex_domain)),
                 },
                 record_type: match record.record_type {
                     Some(record_type) => record_type,
