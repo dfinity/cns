@@ -24,14 +24,14 @@ pub fn with_memory_manager<R>(f: impl FnOnce(&MemoryManager<DefaultMemoryImpl>) 
 
 /// A repository is a generic interface for storing and retrieving data.
 pub trait Repository<Record> {
-    /// Returns the record associated with the key.
-    fn get(&self, record: &Record) -> Option<Record>;
+    /// Returns `true` if the repository contains a record for the specified key.
+    fn exists(&self, record: &Record) -> bool;
 
     /// Inserts a record into the repository.
-    fn insert(&self, record: &Record);
+    fn insert(&self, record: Record);
 
     /// Removes a record from the repository.
-    fn remove(&self, record: &Record) -> Option<Record>;
+    fn remove(&self, record: &Record) -> bool;
 }
 
 /// Responsible for searching for records in a repository.

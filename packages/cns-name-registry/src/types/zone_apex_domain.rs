@@ -4,7 +4,7 @@ use crate::{
 };
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::{BoundedStorable, Storable};
-use std::borrow::Cow;
+use std::{borrow::Cow, ops::Deref};
 
 /// The apex domain name, e.g. "mydomain.tld.", the name is required for all operations and must
 /// end with a dot (.). Names have well defined size limits and must have the parts between
@@ -27,13 +27,8 @@ impl ZoneApexDomain {
         Ok(Self(name))
     }
 
-    /// Returns the domain name as a primitive string.
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-
     /// Validates the apex domain name and returns an error if it is invalid.
-    pub fn validate(domain_name: &str) -> Result<(), ZoneApexDomainError> {
+    fn validate(domain_name: &str) -> Result<(), ZoneApexDomainError> {
         if domain_name.is_empty() {
             return Err(ZoneApexDomainError::NonEmptyDomain);
         }
@@ -80,6 +75,15 @@ impl ZoneApexDomain {
 impl Default for ZoneApexDomain {
     fn default() -> Self {
         Self(".".to_string())
+    }
+}
+
+impl Deref for ZoneApexDomain {
+    type Target = str;
+
+    /// Returns the domain name as a primitive string.
+    fn deref(&self) -> &Self::Target {
+        self.0.as_str()
     }
 }
 

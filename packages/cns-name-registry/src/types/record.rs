@@ -1,4 +1,5 @@
 use crate::{
+    builders::DomainRecordBuilder,
     common::MAX_DOMAIN_ASCII_CHAR_VALUE,
     types::{RecordName, ZoneApexDomain},
     utils::repeat_char,
@@ -74,6 +75,10 @@ impl DomainRecord {
         }
     }
 
+    pub fn builder() -> DomainRecordBuilder {
+        DomainRecordBuilder::new()
+    }
+
     pub fn max_record_name_value(apex_domain: Option<ZoneApexDomain>) -> RecordName {
         RecordName::max_value(apex_domain)
     }
@@ -146,5 +151,23 @@ mod tests {
         assert_eq!(domain_record.record_type, domain_record_back.record_type);
         assert_eq!(domain_record.ttl, domain_record_back.ttl);
         assert_eq!(domain_record.data, domain_record_back.data);
+    }
+
+    #[test]
+    fn record_create_from_builder() {
+        let domain_record = DomainRecord::builder()
+            .name(RecordName::new("@".to_string(), &ZoneApexDomain::default()).unwrap())
+            .record_type("CID".to_string())
+            .ttl(3600)
+            .data("qoctq-giaaa-aaaaa-aaaea-cai".to_string())
+            .build();
+
+        assert_eq!(domain_record.name, RecordName::default());
+        assert_eq!(domain_record.record_type, "CID".to_string());
+        assert_eq!(domain_record.ttl, 3600);
+        assert_eq!(
+            domain_record.data,
+            "qoctq-giaaa-aaaaa-aaaea-cai".to_string()
+        );
     }
 }

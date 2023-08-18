@@ -40,26 +40,16 @@ impl Default for DomainZoneRepository {
 
 /// Common interfaces for the DomainZone repository, it enables storing, retrieving and removing domain zones.
 impl Repository<DomainZoneEntry> for DomainZoneRepository {
-    fn get(&self, record: &DomainZoneEntry) -> Option<DomainZoneEntry> {
-        let found = DB.with(|m| m.borrow_mut().get(record));
-
-        match found.is_some() {
-            true => Some(record.clone()),
-            _ => None,
-        }
+    fn exists(&self, record: &DomainZoneEntry) -> bool {
+        DB.with(|m| m.borrow().get(record).is_some())
     }
 
-    fn insert(&self, record: &DomainZoneEntry) {
-        DB.with(|m| m.borrow_mut().insert(record.clone(), ()));
+    fn insert(&self, record: DomainZoneEntry) {
+        DB.with(|m| m.borrow_mut().insert(record, ()));
     }
 
-    fn remove(&self, record: &DomainZoneEntry) -> Option<DomainZoneEntry> {
-        let removed = DB.with(|m| m.borrow_mut().remove(record));
-
-        match removed.is_some() {
-            true => Some(record.clone()),
-            _ => None,
-        }
+    fn remove(&self, record: &DomainZoneEntry) -> bool {
+        DB.with(|m| m.borrow_mut().remove(record).is_some())
     }
 }
 
@@ -83,6 +73,8 @@ impl RepositorySearch<DomainZoneEntryInput, DomainZoneEntry> for DomainZoneRepos
 
 #[cfg(test)]
 mod tests {
+    use std::ops::Deref;
+
     use super::*;
     use crate::types::{
         DomainRecord, DomainRecordInput, DomainRecordTypes, DomainZone, DomainZoneInput,
@@ -105,13 +97,13 @@ mod tests {
     #[test]
     fn insert_domain_zone() {
         let repository = DomainZoneRepository::default();
-        repository.insert(&DomainZoneEntry::new(
+        repository.insert(DomainZoneEntry::new(
             DomainZone {
                 name: ZoneApexDomain::new(String::from("internetcomputer.tld.")).unwrap(),
             },
             DomainRecord::default(),
         ));
-        repository.insert(&DomainZoneEntry::new(
+        repository.insert(DomainZoneEntry::new(
             DomainZone {
                 name: ZoneApexDomain::new(String::from("internetcomputer.tld.")).unwrap(),
             },
@@ -164,10 +156,10 @@ mod tests {
             },
             DomainRecord::default(),
         );
-        repository.insert(&domain_zone_entry);
-        assert!(repository.get(&domain_zone_entry).is_some());
+        repository.insert(domain_zone_entry.clone());
+        assert!(repository.exists(&domain_zone_entry));
         repository.remove(&domain_zone_entry);
-        assert!(repository.get(&domain_zone_entry).is_none());
+        assert!(!repository.exists(&domain_zone_entry));
     }
 
     #[test]
@@ -175,13 +167,13 @@ mod tests {
         let repository = DomainZoneRepository::default();
         let internetcomputer_apex =
             ZoneApexDomain::new(String::from("internetcomputer.tld.")).unwrap();
-        repository.insert(&DomainZoneEntry::new(
+        repository.insert(DomainZoneEntry::new(
             DomainZone {
                 name: internetcomputer_apex.clone(),
             },
             DomainRecord::default(),
         ));
-        repository.insert(&DomainZoneEntry::new(
+        repository.insert(DomainZoneEntry::new(
             DomainZone {
                 name: internetcomputer_apex.clone(),
             },
@@ -192,7 +184,7 @@ mod tests {
                 data: "ic.boundary.network.".to_string(),
             },
         ));
-        repository.insert(&DomainZoneEntry::new(
+        repository.insert(DomainZoneEntry::new(
             DomainZone {
                 name: internetcomputer_apex.clone(),
             },
@@ -203,7 +195,7 @@ mod tests {
                 data: "ic.boundary.network.".to_string(),
             },
         ));
-        repository.insert(&DomainZoneEntry::new(
+        repository.insert(DomainZoneEntry::new(
             DomainZone {
                 name: ZoneApexDomain::new(String::from("canister.tld.")).unwrap(),
             },
@@ -217,7 +209,7 @@ mod tests {
 
         let results_icp = repository.search(&DomainZoneEntryInput::new(
             DomainZoneInput {
-                name: Some(internetcomputer_apex.as_str().to_string()),
+                name: Some(internetcomputer_apex.deref().to_string()),
             },
             DomainRecordInput::default(),
         ));
@@ -241,7 +233,7 @@ mod tests {
             },
             DomainRecord::default(),
         );
-        repository.insert(&domain_zone_entry);
-        assert!(repository.get(&domain_zone_entry).is_some());
+        repository.insert(domain_zone_entry.clone());
+        assert!(repository.exists(&domain_zone_entry));
     }
 }

@@ -1,6 +1,6 @@
 use crate::types::ZoneApexDomain;
 use candid::{CandidType, Decode, Deserialize, Encode};
-use ic_stable_structures::Storable;
+use ic_stable_structures::{BoundedStorable, Storable};
 use std::borrow::Cow;
 
 /// Represents a domain zone with all the records that it is responsible for.
@@ -42,6 +42,13 @@ impl Storable for DomainZone {
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         Decode!(bytes.as_ref(), Self).unwrap()
     }
+}
+
+/// Represents the memory required to store a DomainZone in stable memory.
+impl BoundedStorable for DomainZone {
+    const MAX_SIZE: u32 = DomainZone::MAX_SIZE;
+
+    const IS_FIXED_SIZE: bool = false;
 }
 
 #[cfg(test)]

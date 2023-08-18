@@ -6,7 +6,7 @@ use crate::{
 };
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::{BoundedStorable, Storable};
-use std::{borrow::Cow, cmp};
+use std::{borrow::Cow, cmp, ops::Deref};
 
 /// The domain name, e.g. "mydomain.tld.", the name is required for all operations and must
 /// end with a dot (.). Names have well defined size limits and must have the parts between
@@ -32,15 +32,8 @@ impl RecordName {
         Ok(Self(lowercased_name))
     }
 
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-
     /// Validates the apex domain name and returns an error if it is invalid.
-    pub fn validate(
-        record_name: &str,
-        apex_domain: &ZoneApexDomain,
-    ) -> Result<(), RecordNameError> {
+    fn validate(record_name: &str, apex_domain: &ZoneApexDomain) -> Result<(), RecordNameError> {
         if record_name.is_empty() {
             return Err(RecordNameError::NonEmptyName);
         }
@@ -81,7 +74,7 @@ impl RecordName {
         }
 
         // Validates the fully qualified domain name
-        let domain_name = format!("{}.{}", record_name, apex_domain.as_str());
+        let domain_name = format!("{}.{}", record_name, apex_domain.deref());
         if domain_name.len() > Self::MAX_SIZE {
             return Err(RecordNameError::NameTooLong {
                 name_length: domain_name.len(),
@@ -100,7 +93,7 @@ impl RecordName {
 
     /// Generates the maximum value of a record name based on the apex domain.
     pub fn max_value(apex_domain: Option<ZoneApexDomain>) -> RecordName {
-        let apex_domain_length = apex_domain.as_ref().map_or(0, |d| d.as_str().len());
+        let apex_domain_length = apex_domain.as_ref().map_or(0, |d| d.deref().len());
         let max_length = cmp::max(0, Self::MAX_SIZE - apex_domain_length - 1);
 
         if max_length == 0 {
@@ -125,6 +118,14 @@ impl RecordName {
     /// Generates the minimum value of a record name.
     pub fn min_value() -> RecordName {
         Self("@".to_string())
+    }
+}
+
+impl Deref for RecordName {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_str()
     }
 }
 
