@@ -38,6 +38,7 @@ pub trait Repository<Record> {
 pub trait RepositorySearch<SearchInput, SearchResultItem>
 where
     SearchInput: RepositorySearchInto<SearchResultItem>,
+    Self: Repository<SearchResultItem>,
 {
     /// Searches for records in a repository based on the search input and returns a list of results
     /// that match the search criteria and are within the range of the search input.
