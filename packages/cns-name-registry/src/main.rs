@@ -6,12 +6,12 @@
 //! The name registry canister is responsible for managing domain zones and their name records while enabling
 //! the resolution through standard protocols.
 
-pub mod builders;
-pub mod common;
-pub mod errors;
-pub mod repositories;
-pub mod types;
-pub mod utils;
+mod builders;
+mod common;
+mod errors;
+mod repositories;
+mod types;
+mod utils;
 
 fn main() {
     println!("Not implemented");
