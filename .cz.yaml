@@ -7,6 +7,6 @@ commitizen:
   version: 0.1.0
   version_scheme: semver
   version_files:
-    - packages/cns-naming-canister/Cargo.toml:version
-    - packages/cns-root-canister/Cargo.toml:version
-    - packages/cns-operator-canister/Cargo.toml:version
+    - canisters/name-registry/Cargo.toml:version
+    - canisters/operator/Cargo.toml:version
+    - canisters/root/Cargo.toml:version

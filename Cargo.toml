@@ -1,8 +1,8 @@
 [workspace]
 members = [
-  "packages/cns-naming-canister",
-  "packages/cns-root-canister",
-  "packages/cns-operator-canister",
+  "canisters/name-registry",
+  "canisters/operator",
+  "canisters/root",
 ]
 
 [profile.release]

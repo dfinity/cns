@@ -67,13 +67,13 @@ Off-chain it leverages the CNS resolver to provide a simple interface for users 
 
 ## Packages
 
-This repository is a monorepo that contains multiple packages under the [packages](./packages) folder. Together they create the building blocks for the Chain Name System.
+This repository is a monorepo that contains multiple packages and canisters under the [packages](./packages) and [canisters](./canisters) folders. Together they create the building blocks for the Chain Name System.
 
 | Package | Links | Description |
 |---|---|---|
-| `cns-naming-canister` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./packages/cns-naming-canister/) | The `naming-canister` contains a set of core interfaces that enable the management and retrieval of name records. |  
-| `cns-operator-canister` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./packages/cns-operator-canister/) | A package that builds on top of the `naming-canister` adding operator-like functionallity such as registering a new domain name. |  
-| `cns-root-canister` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./packages/cns-root-canister/) | The root canister of CNS, all name lookups start from as it. Its the replacement for the root name servers, a superset of the `naming-canister` that manages the top level domain namespace. |
+| `cns-name-registry` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/name-registry/) | The `cns-name-registry` contains a set of core interfaces that enable the management and retrieval of name records. |  
+| `cns-operator` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/operator/) | A canister that builds on top of the `cns-name-registry` adding operator-like functionallity such as registering a new domain name. |  
+| `cns-root` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/root/) | The root canister of CNS, all name lookups start from as it. Its the replacement for the root name servers, a superset of the `cns-name-registry` that manages the top level domain namespace. |
 
 ## Getting Started
 
