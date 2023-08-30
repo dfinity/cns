@@ -12,7 +12,6 @@ on:
     types: [checks_requested]
     branches:
       - main
-      - gh-readonly-queue/main/**
 
 jobs:
   check_pr_title:
