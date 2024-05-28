@@ -129,7 +129,7 @@ mod tests {
                 },
                 DomainRecord::default(),
             ),
-            results.get(0).unwrap().to_owned()
+            results.first().unwrap().to_owned()
         );
         assert_eq!(
             DomainZoneEntry::new(
