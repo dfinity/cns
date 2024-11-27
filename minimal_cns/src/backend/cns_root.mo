@@ -1,7 +1,7 @@
 import NameRegistry "canister:name_registry";
 import Text "mo:base/Text";
 
-shared ({ caller = initializer }) actor class () {
+shared actor class () {
     public shared func lookup(domain : Text, record_type : Text) : async NameRegistry.DomainLookup {
         let icp_tld : Text.Pattern = #text ".icp";
         let icp_tld_canister_id = "qoctq-giaaa-aaaaa-aaaea-cai";

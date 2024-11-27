@@ -1,4 +1,5 @@
 {
+  "dfx": "0.24.2",
   "canisters": {
     "cns_root": {
       "main": "minimal_cns/src/backend/cns_root.mo",
@@ -13,12 +14,6 @@
       "type": "rust",
       "candid": "canisters/name-registry/spec.did",
       "package": "cns-domain-registry"
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
     }
   },
   "output_env_file": ".env",
