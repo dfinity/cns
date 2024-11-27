@@ -14,7 +14,7 @@ type DomainRecord = record {
   // system, e.g. "CID", "A", "CNAME", "TXT", "MX", "AAAA", "NC", "NS", "DNSKEY", "NSEC".
   //
   // Also, "ANY" is a reserved type that can only be used in lookups to retrieve all records of a domain.
-  type : text;
+  record_type : text;
   // The Time to Live (TTL) is a parameter in a record that specifies the amount of time for
   // which the record should be cached before being refreshed from the authoritative naming canister.
   //
@@ -48,7 +48,7 @@ type PaginationInfo = record {
   limit : nat64;
   // The offset of the first record in the result set.
   start : nat64;
-}
+};
 
 // Specify the pagination options for a result set.
 type PaginationOptions = record {
@@ -56,7 +56,7 @@ type PaginationOptions = record {
   start : nat64;
   // The maximum number of records to return in the result set.
   limit : nat64;
-}
+};
 
 // Input parameters for the `get_records` operation.
 type GetRecordsInput = record {
@@ -91,14 +91,14 @@ type DomainRecordInput = record {
   // The domain name, e.g. "mydomain.test.", the name is required for all operations and must end with a dot (.).
   name : text;
   // The record type refers to the classification or category of a specific record within the system.
-  type : text;
+  record_type : text;
   // The Time to Live (TTL) is a parameter in a record that specifies the amount of time for which the record
   // should be cached. If not set the default value will be used.
   ttl : nat32;
   // The record data in a domain record refers to the specific information associated with that record type.
   // If not set the default value will be used.
   data : text;
-}
+};
 
 // Input parameters for the `append` operation.
 type AppendRecordOperationInput = DomainRecordInput;
@@ -112,7 +112,7 @@ type RemoveRecordOperationInput = record {
   name : text;
   // The type of the record to remove, same restrictions as the type of a DomainRecord apply.
   // If no type is specified, all records with the specified name will be removed.
-  type : opt text;
+  record_type : opt text;
 };
 
 // The operation to execute on the records, the operation type specifies how the operation will be performed.
@@ -156,7 +156,7 @@ type Certification = record {
   ic_certificate : Certificate;
   // The state tree of the canister.
   state_tree : StateTree;
-}
+};
 
 // Information about the naming canister.
 type NamingCanisterInfo = record {
@@ -164,7 +164,7 @@ type NamingCanisterInfo = record {
   allow_offchain_signatures : bool;
   // The number of domains registered.
   domains_registered : nat64;
-}
+};
 
 // Result of the `get_info` operation.
 type GetInfoResult = record {
@@ -172,7 +172,7 @@ type GetInfoResult = record {
   certification : Certification;
   // Information about the naming canister.
   info : NamingCanisterInfo;
-}
+};
 
 // Input parameters for the `get_domains` operation.
 type GetDomainsInput = record {
@@ -186,7 +186,7 @@ type GetDomainsInput = record {
 type GetDomainsItem = record {
   // The domain name.
   domain : text;
-}
+};
 
 // Result of the `get_domains` operation.
 type GetDomainsResult = record {
@@ -194,7 +194,7 @@ type GetDomainsResult = record {
   info : PaginationInfo;
   // The list of domains registered that the caller of the operation has access to.
   items : vec GetDomainsItem;
-}
+};
 
 // The init payload for the naming canister, which can be supplied on install and upgrade.
 type NamingCanisterInit = record {
@@ -203,17 +203,17 @@ type NamingCanisterInit = record {
   // send record types with RRSIG signatures, only tECDSA will be allowed, set it to true
   // to enable records to be signed off-chain.
   allow_offchain_signatures : opt bool;
-}
+};
 
-service : (opt NamingCanisterInit) {
+service : (opt NamingCanisterInit) -> {
   // Lookup a domain name and return the records that match the specified record type.
-  lookup(domain : text, record_type : text) -> (DomainLookup) query;
+  lookup : (domain : text, record_type : text) -> (DomainLookup) query;
   // Get records of the specified domain, the result set is paginated.
-  get_records(input : GetRecordsInput) -> (GetRecordsResult) query;
+  get_records : (input : GetRecordsInput) -> (GetRecordsResult) query;
   // Get the list of domains registered that the caller of the operation has access to.
-  get_domains(input : GetDomainsInput) -> (GetDomainsResult) query;
+  get_domains : (input : GetDomainsInput) -> (GetDomainsResult) query;
   // Manage records of the specified domain based on the list of operations.
-  manage_records(input : ManageRecordsInput) -> (ManageRecordsResult);
+  manage_records: (input : ManageRecordsInput) -> (ManageRecordsResult);
   // Get information about the naming canister.
-  get_info() -> (GetInfoResult) query;
+  get_info: () -> (GetInfoResult) query;
 };
