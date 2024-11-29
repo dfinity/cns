@@ -19,7 +19,7 @@ shared actor class () {
                         data = icpTldCanisterId;
                     }];
                 };
-                case ("CID") {
+                case _ {
                     authorities := [{
                         name = ".icp.";
                         record_type = "NC";
@@ -27,7 +27,6 @@ shared actor class () {
                         data = icpTldCanisterId;
                     }];
                 };
-                case _ {};
             };
         };
 

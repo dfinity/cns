@@ -2,14 +2,14 @@ import CnsRoot "canister:cns_root";
 
 actor {
     public func runTests() : async () {
-        await shouldGetIcpTldOperatorForNcLookups();
-        await shouldGetIcpTldOperatorForCidLookups();
+        await shouldGetIcpTldOperatorForNcIcpLookups();
+        await shouldGetIcpTldOperatorForOtherIcpLookups();
         await shouldNotGetOtherTldOperator();
     };
 
     let icpTldCanisterId = "qoctq-giaaa-aaaaa-aaaea-cai";
 
-    func shouldGetIcpTldOperatorForNcLookups() : async () {
+    func shouldGetIcpTldOperatorForNcIcpLookups() : async () {
         for (
             (domain, recordType) in [
                 (".icp", "NC"),
@@ -30,13 +30,15 @@ actor {
         };
     };
 
-    func shouldGetIcpTldOperatorForCidLookups() : async () {
+    func shouldGetIcpTldOperatorForOtherIcpLookups() : async () {
         for (
             (domain, recordType) in [
                 (".icp", "CID"),
                 ("example.icp", "Cid"),
                 ("another.ICP", "cid"),
                 ("one.more.Icp", "CId"),
+                ("another.example.icp", "NS"),
+                ("yet.another.one.icp", "WeirdReordType"),
             ].vals()
         ) {
             let response = await CnsRoot.lookup(domain, recordType);
@@ -55,7 +57,6 @@ actor {
         for (
             (domain, recordType) in [
                 (".fun", "NC"),
-                ("example.icp", "NS"),
                 ("example.com", "NC"),
                 ("another.dfn", "NS"),
                 ("", "NC"),
