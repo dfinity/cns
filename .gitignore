@@ -63,3 +63,9 @@ node_modules/
 ## generate output
 out
 dist
+
+## dfx
+.dfx/
+
+## IDEs
+.idea/
