@@ -1,4 +1,4 @@
-name: 'Code tests'
+name: 'Tests'
 
 on:
   pull_request:
@@ -13,19 +13,14 @@ on:
     branches:
       - main
 
-env:
-  # When getting Rust dependencies, retry on network error:
-  CARGO_NET_RETRY: 10
-  # Use the local .curlrc
-  CURL_HOME: .
-
 jobs:
-  rust_test:
+  rust_tests:
     name: 'rust-tests:required'
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+
       - name: 'Test cargo crates'
         run: cargo test
 
