@@ -1,0 +1,14 @@
+{
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "avoid",
+  "plugins": ["prettier-plugin-motoko"],
+  "overrides": [
+    {
+      "files": "*.mo",
+      "options": {
+        "trailingComma": "none"
+      }
+    }
+  ]
+}

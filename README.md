@@ -1,6 +1,7 @@
 > This system is still a work in progress and should only be used for development purposes.
 
 # Chain Name System
+
 [![Internet Computer](./docs/internet-computer-logo.jpg)](https://internetcomputer.org)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=for-the-badge)](./LICENSE)
 [![GitHub Tests Status](https://img.shields.io/github/actions/workflow/status/dfinity/cns/tests.yaml?style=for-the-badge&label=tests)](./actions/workflows/tests.yaml)
@@ -13,7 +14,7 @@
     - [Terms and Definitions](#terms-and-definitions)
     - [System Design](#system-design)
 - [Packages](#packages)
-- [Getting Started](#getting-started) 
+- [Getting Started](#getting-started)
   - [Who should be using this code](#who-should-be-using-this-code)
   - [Requirements](#requirements)
   - [Building the code](#building-the-code)
@@ -27,27 +28,27 @@
 
 ## Overview
 
-**Chain Name System (CNS)** is a decentralized, trustless discovery layer built directly on the Internet Computer. Aimed at reinventing the traditional Domain Name System (DNS), CNS leverages the power of canisters to enhance Internet infrastructure. 
+**Chain Name System (CNS)** is a decentralized, trustless discovery layer built directly on the Internet Computer. Aimed at reinventing the traditional Domain Name System (DNS), CNS leverages the power of canisters to enhance Internet infrastructure.
 
-Unlike DNS which relies on centrally managed root name servers, CNS utilizes a root canister, essentially decentralizing the domain management system. This approach enhances the reliability, autonomy, and democratic nature of domain management, empowering the community through a system of elected operators who oversee top-level domains. 
+Unlike DNS which relies on centrally managed root name servers, CNS utilizes a root canister, essentially decentralizing the domain management system. This approach enhances the reliability, autonomy, and democratic nature of domain management, empowering the community through a system of elected operators who oversee top-level domains.
 
 CNS is not just an alternative, but a forward-looking solution bringing about fair and community-centric Internet governance.
 
 ### Motivation and Goals
 
-* Enable users to host their domain records in a registry that is on chain in a verifiable manner.
+- Enable users to host their domain records in a registry that is on chain in a verifiable manner.
 
-* Decentralize the domain name system with top level domains (TLDs) owned by multiple operators elected by the community.
+- Decentralize the domain name system with top level domains (TLDs) owned by multiple operators elected by the community.
 
-* Provide services for users and decentralized autonomous organizations (DAOs) to register new domains and acquire full ownership of them.
+- Provide services for users and decentralized autonomous organizations (DAOs) to register new domains and acquire full ownership of them.
 
-* Provide a platform for decentralized applications.
+- Provide a platform for decentralized applications.
 
 ### High Level Architecture
 
-Ultimately CNS provides a complete name system solution on chain that is responsible for translating human-readable domain names to the respective IP addresses, dApp canister IDs, wallet addresses and others. 
+Ultimately CNS provides a complete name system solution on chain that is responsible for translating human-readable domain names to the respective IP addresses, dApp canister IDs, wallet addresses and others.
 
-On-chain, it consists of three main components (naming, operator and root canisters) that work together to provide this functionality and its root is a canister governened by a decentralized autonomous organization (DAO). 
+On-chain, it consists of three main components (naming, operator and root canisters) that work together to provide this functionality and its root is a canister governened by a decentralized autonomous organization (DAO).
 
 Off-chain it leverages the CNS resolver to provide a simple interface for users to interact with the system. The resolver will facilitate client-side libraries that can be used by applications to resolve names to their respective records in a verifiable manner.
 
@@ -59,7 +60,7 @@ Off-chain it leverages the CNS resolver to provide a simple interface for users 
 
 - **CNS Root:** The CNS Root is a canister deployed to a system subnet and controlled by the NNS that acts as a registry for domain records and maps the ownership of Top-level domains to their operators. It exposes an interface that enables Web 2 TLD Operators to claim ownership over their Web 3 counterpart.
 
-- **CNS Resolver:** A resolver that starts at the CNS Root to resolve a domain name and verifies the response. 
+- **CNS Resolver:** A resolver that starts at the CNS Root to resolve a domain name and verifies the response.
 
 #### System Design
 
@@ -69,11 +70,11 @@ Off-chain it leverages the CNS resolver to provide a simple interface for users 
 
 This repository is a monorepo that contains multiple packages and canisters under the [packages](./packages) and [canisters](./canisters) folders. Together they create the building blocks for the Chain Name System.
 
-| Package | Links | Description |
-|---|---|---|
-| `cns-name-registry` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/name-registry/) | The `cns-name-registry` contains a set of core interfaces that enable the management and retrieval of name records. |  
-| `cns-operator` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/operator/) | A canister that builds on top of the `cns-name-registry` adding operator-like functionallity such as registering a new domain name. |  
-| `cns-root` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/root/) | The root canister of CNS, all name lookups start from as it. Its the replacement for the root name servers, a superset of the `cns-name-registry` that manages the top level domain namespace. |
+| Package             | Links                                                                                                | Description                                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cns-name-registry` | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/name-registry/) | The `cns-name-registry` contains a set of core interfaces that enable the management and retrieval of name records.                                                                            |
+| `cns-operator`      | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/operator/)      | A canister that builds on top of the `cns-name-registry` adding operator-like functionallity such as registering a new domain name.                                                            |
+| `cns-root`          | [![README](https://img.shields.io/badge/-README-blue?style=flat-square)](./canisters/root/)          | The root canister of CNS, all name lookups start from as it. Its the replacement for the root name servers, a superset of the `cns-name-registry` that manages the top level domain namespace. |
 
 ## Getting Started
 
@@ -102,7 +103,8 @@ Check out our [contribution guidelines](./.github/CONTRIBUTING.md).
 
 We provide different platforms for you to engage with our community and the contributors behind Chain Name System (CNS). Here are the ways you can connect with us:
 
-### Working Group 
+### Working Group
+
 Be part of our naming system working group and join the meetings. Its a space where we brainstorm, share ideas and collaboratively make decisions that shape the future of CNS and the naming system.
 
 ### Developer Forum Thread

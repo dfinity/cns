@@ -213,7 +213,7 @@ service : (opt NamingCanisterInit) -> {
   // Get the list of domains registered that the caller of the operation has access to.
   get_domains : (input : GetDomainsInput) -> (GetDomainsResult) query;
   // Manage records of the specified domain based on the list of operations.
-  manage_records: (input : ManageRecordsInput) -> (ManageRecordsResult);
+  manage_records : (input : ManageRecordsInput) -> (ManageRecordsResult);
   // Get information about the naming canister.
-  get_info: () -> (GetInfoResult) query;
+  get_info : () -> (GetInfoResult) query;
 };

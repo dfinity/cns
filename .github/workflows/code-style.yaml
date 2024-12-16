@@ -1,8 +1,8 @@
 name: 'Code style'
 
-on: 
+on:
   pull_request:
-    types: 
+    types:
       - opened
       - edited
       - reopened
@@ -34,3 +34,16 @@ jobs:
         run: cargo clippy --verbose --tests --benches --workspace -- -D clippy::all
         env:
           RUST_BACKTRACE: 1
+
+  motoko_code_style:
+    name: 'motoko-code-style:required'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: dfinity/ci-tools/actions/setup-pnpm@main
+
+      - name: 'Check code formatting'
+        run: pnpm format:check

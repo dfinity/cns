@@ -3,17 +3,18 @@
   "canisters": {
     "cns_root": {
       "main": "minimal_cns/src/backend/cns_root.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["name_registry"]
     },
     "cns_root_test": {
       "main": "minimal_cns/src/backend/cns_root.test.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["cns_root"]
     },
     "name_registry": {
-      "main": "canisters/name-registry/src/main.rs",
       "type": "rust",
       "candid": "canisters/name-registry/spec.did",
-      "package": "cns-domain-registry"
+      "package": "cns_domain_registry"
     }
   },
   "output_env_file": ".env",

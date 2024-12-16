@@ -1,8 +1,8 @@
 name: 'Code tests'
 
-on: 
+on:
   pull_request:
-    types: 
+    types:
       - opened
       - edited
       - reopened
@@ -28,3 +28,26 @@ jobs:
         uses: actions/checkout@v3
       - name: 'Test cargo crates'
         run: cargo test
+
+  motoko_tests:
+    name: 'motoko-tests:required'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+
+      - name: Setup DFX
+        uses: dfinity/setup-dfx@main
+        with:
+          dfx-version: 'auto'
+
+      - name: 'Start DFX'
+        run: dfx start --background
+
+      - name: 'Test cns_root canister'
+        run: |
+          dfx deploy --no-wallet cns_root_test
+          dfx canister call cns_root_test runTests "()"
+
+      - name: 'Stop DFX'
+        run: dfx stop
