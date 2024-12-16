@@ -8,29 +8,8 @@ on:
 jobs:
   update_changelogs:
     name: 'generate-changelogs'
-    runs-on: ubuntu-latest
-    environment: automation
-    steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: ./.github/actions/setup-python
-      - name: 'Install Commitzen'
-        run: pip install -U commitizen
-      - name: 'Update Changelogs'
-        run: cz changelog --incremental
-      - name: 'Create Pull Request'
-        id: create-pull-request
-        uses: ./.github/actions/pullrequest/create
-        with:
-          branch-name: 'changelogs'
-          commit-message: 'chore: auto update changelogs'
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: 'Approve Pull Request'
-        uses: ./.github/actions/pullrequest/approve
-        if: ${{ steps.create-pull-request.outputs.pull-request-created }}
-        with:
-          auto-merge: true
-          pull-request-number: ${{ steps.create-pull-request.outputs.pull-request-number }}
-          token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
+    uses: dfinity/ci-tools/.github/workflows/generate-changelog.yaml@main
+    with:
+      auto_merge: true
+    secrets:
+      token: ${{ secrets.GH_PRIVILEGED_TOKEN }}
