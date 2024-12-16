@@ -16,24 +16,24 @@ shared actor class () {
             name = ".icp.";
             record_type = "NC";
             ttl = 3600;
-            data = icpTldCanisterId
-          }]
+            data = icpTldCanisterId;
+          }];
         };
         case _ {
           authorities := [{
             name = ".icp.";
             record_type = "NC";
             ttl = 3600;
-            data = icpTldCanisterId
-          }]
-        }
-      }
+            data = icpTldCanisterId;
+          }];
+        };
+      };
     };
 
     {
       answers = answers;
       additionals = [];
-      authorities = authorities
-    }
-  }
-}
+      authorities = authorities;
+    };
+  };
+};

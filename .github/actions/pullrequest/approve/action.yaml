@@ -37,7 +37,7 @@ runs:
           cat "/tmp/action_outputs.txt" >> $GITHUB_OUTPUT
         fi
       shell: bash
-      env: 
+      env:
         INPUT_AUTO_MERGE: ${{ inputs.auto-merge }}
         INPUT_PULL_REQUEST_NUMBER: ${{ inputs.pull-request-number }}
         INPUT_TOKEN: ${{ inputs.token }}
