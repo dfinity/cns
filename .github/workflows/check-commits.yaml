@@ -1,8 +1,8 @@
 name: 'Check commits'
 
-on: 
+on:
   pull_request:
-    types: 
+    types:
       - opened
       - edited
       - reopened

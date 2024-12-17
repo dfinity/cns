@@ -2,19 +2,19 @@ name: 'Pull request creation'
 description: 'Action to create a pull requests'
 
 inputs:
-  author: 
+  author:
     description: 'The author of the code change'
     default: 'Github Actions <github-actions[bot]@@users.noreply.github.com>'
   committer:
     description: 'The author of the commit'
     default: 'Github Actions <github-actions[bot]@@users.noreply.github.com>'
-  branch-name: 
+  branch-name:
     description: 'Branch name to use'
     default: 'patch'
   base-branch:
     description: 'The base branch to create the PR against'
     default: 'main'
-  commit-message: 
+  commit-message:
     description: 'The commit message'
     default: 'chore: automated by github actions'
   token:
@@ -52,7 +52,7 @@ runs:
           cat "/tmp/action_outputs.txt" >> $GITHUB_OUTPUT
         fi
       shell: bash
-      env: 
+      env:
         INPUT_AUTHOR: ${{ inputs.author }}
         INPUT_BRANCH_NAME: ${{ inputs.branch-name }}
         INPUT_BASE_BRANCH: ${{ inputs.base-branch }}

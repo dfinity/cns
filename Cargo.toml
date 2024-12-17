@@ -1,9 +1,7 @@
 [workspace]
-members = [
-  "canisters/name-registry",
-  "canisters/operator",
-  "canisters/root",
-]
+resolver = "2"
+
+members = ["canisters/name-registry", "canisters/operator", "canisters/root"]
 
 [profile.release]
 lto = true
