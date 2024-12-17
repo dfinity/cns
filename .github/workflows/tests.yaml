@@ -47,6 +47,7 @@ jobs:
       - name: 'Test cns_root canister'
         run: |
           dfx deploy --no-wallet cns_root_test
+          echo "Calling runTests on canister cns_root_test..."
           dfx canister call cns_root_test runTests "()"
 
       - name: 'Stop DFX'
