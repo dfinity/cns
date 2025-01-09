@@ -50,5 +50,19 @@ jobs:
           echo "Calling runTests on canister cns_root_test..."
           dfx canister call cns_root_test runTests "()"
 
+      - name: 'Test tld_operator canister'
+        run: |
+          dfx deploy --no-wallet tld_operator_test
+          echo "Adding tld_operator_test-canister as a controller of tld_operator-canister..."
+          dfx canister update-settings tld_operator --add-controller `dfx canister id tld_operator_test`
+          echo "Calling runTests on canister tld_operator_test..."
+          dfx canister call tld_operator_test runTests "()"
+
+      - name: 'Test tld_operator canister if not controller'
+        run: |
+          dfx deploy --no-wallet tld_operator_test_not_controller
+          echo "Calling runTestsIfNotController on canister tld_operator_test_not_controller..."
+          dfx canister call tld_operator_test_not_controller runTestsIfNotController "()"
+
       - name: 'Stop DFX'
         run: dfx stop
