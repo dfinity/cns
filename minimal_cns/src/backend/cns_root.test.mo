@@ -1,4 +1,6 @@
 import CnsRoot "canister:cns_root";
+import Nat32 "mo:base/Nat32";
+import Test "../test_utils"
 
 actor {
   public func runTests() : async () {
@@ -19,14 +21,15 @@ actor {
       ].vals()
     ) {
       let response = await CnsRoot.lookup(domain, recordType);
-      assert (response.answers.size() == 1);
-      assert (response.additionals.size() == 0);
-      assert (response.authorities.size() == 0);
+      let errMsg = "shouldGetIcpTldOperatorForNcIcpLookups() failed for domain: " # domain # ", recordType: " # recordType # "; ";
+      assert Test.isEqualInt(response.answers.size(), 1, errMsg # "size of response.answers");
+      assert Test.isEqualInt(response.additionals.size(), 0, errMsg # "size of response.additionals");
+      assert Test.isEqualInt(response.authorities.size(), 0, errMsg # "size of response.authorities");
       let domainRecord = response.answers[0];
-      assert (domainRecord.name == ".icp.");
-      assert (domainRecord.record_type == "NC");
-      assert (domainRecord.ttl == 3600);
-      assert (domainRecord.data == icpTldCanisterId);
+      assert Test.isEqualText(domainRecord.name, ".icp.", errMsg # "field: DomainRecord.name");
+      assert Test.isEqualText(domainRecord.record_type, "NC", errMsg # "field: DomainRecord.record_type");
+      assert Test.isEqualInt(Nat32.toNat(domainRecord.ttl), 3600, errMsg # "field: DomainRecord.ttl");
+      assert Test.isEqualText(domainRecord.data, icpTldCanisterId, errMsg # "field: DomainRecord.data");
     };
   };
 
@@ -42,14 +45,15 @@ actor {
       ].vals()
     ) {
       let response = await CnsRoot.lookup(domain, recordType);
-      assert (response.answers.size() == 0);
-      assert (response.additionals.size() == 0);
-      assert (response.authorities.size() == 1);
+      let errMsg = "shouldGetIcpTldOperatorForOtherIcpLookups() failed for domain: " # domain # ", recordType: " # recordType # "; ";
+      assert Test.isEqualInt(response.answers.size(), 0, errMsg # "size of response.answers");
+      assert Test.isEqualInt(response.additionals.size(), 0, errMsg # "size of response.additionals");
+      assert Test.isEqualInt(response.authorities.size(), 1, errMsg # "size of response.authorities");
       let domainRecord = response.authorities[0];
-      assert (domainRecord.name == ".icp.");
-      assert (domainRecord.record_type == "NC");
-      assert (domainRecord.ttl == 3600);
-      assert (domainRecord.data == icpTldCanisterId);
+      assert Test.isEqualText(domainRecord.name, ".icp.", errMsg # "field: DomainRecord.name");
+      assert Test.isEqualText(domainRecord.record_type, "NC", errMsg # "field: DomainRecord.record_type");
+      assert Test.isEqualInt(Nat32.toNat(domainRecord.ttl), 3600, errMsg # "field: DomainRecord.ttl");
+      assert Test.isEqualText(domainRecord.data, icpTldCanisterId, errMsg # "field: DomainRecord.data");
     };
   };
 
@@ -64,9 +68,10 @@ actor {
       ].vals()
     ) {
       let response = await CnsRoot.lookup(domain, recordType);
-      assert (response.answers.size() == 0);
-      assert (response.additionals.size() == 0);
-      assert (response.authorities.size() == 0);
+      let errMsg = "shouldNotGetOtherTldOperator() failed for domain: " # domain # ", recordType: " # recordType # "; size of response.";
+      assert Test.isEqualInt(response.answers.size(), 0, errMsg # "answers");
+      assert Test.isEqualInt(response.additionals.size(), 0, errMsg # "additionals");
+      assert Test.isEqualInt(response.authorities.size(), 0, errMsg # "sauthorities");
     };
   };
 

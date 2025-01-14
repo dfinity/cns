@@ -51,21 +51,18 @@ jobs:
           dfx canister call cns_root_test runTests "()"
 
       - name: 'Test tld_operator canister'
+        # NOTE: The functionality of tld_operator depends on whehter the caller is a controller or not,
+        #   so we proceed in two steps.  Initially the test canister (i.e. tld_operator_test) is not a controller,
+        #   so we test the behaviour for non-controller callers.  Afterwards we make the test canister
+        #   a controller of tld_operator, and test the behaviour for controller callers.
         run: |
           dfx deploy --no-wallet tld_operator_test
+          echo "Calling runTestsIfNotController on canister tld_operator_test ..."
+          dfx canister call tld_operator_test runTestsIfNotController "()"
           echo "Adding tld_operator_test-canister as a controller of tld_operator-canister..."
           dfx canister update-settings tld_operator --add-controller `dfx canister id tld_operator_test`
           echo "Calling runTests on canister tld_operator_test..."
           dfx canister call tld_operator_test runTests "()"
-
-      - name: 'Test tld_operator canister if not controller'
-        # NOTE: the canister tld_operator_test_not_controller uses the same WASM as tld_operator_test,
-        #   but it is used to test a different behaviour, namely that tld_operator-canister does not
-        #   accept certain calls when the caller is not a controller of tld_operator-canister.
-        run: |
-          dfx deploy --no-wallet tld_operator_test_not_controller
-          echo "Calling runTestsIfNotController on canister tld_operator_test_not_controller..."
-          dfx canister call tld_operator_test_not_controller runTestsIfNotController "()"
 
       - name: 'Stop DFX'
         run: dfx stop
