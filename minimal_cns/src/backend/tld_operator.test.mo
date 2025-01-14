@@ -3,6 +3,7 @@ import IcpTldOperator "canister:tld_operator";
 import Debug "mo:base/Debug";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
+import Test "../test_utils"
 
 actor {
   type DomainRecord = NameRegistry.DomainRecord;
@@ -18,31 +19,8 @@ actor {
     await shouldNotRegisterDomainIfNotController();
   };
 
-  func asText(maybe_text : ?Text) : Text {
-    return Option.get(maybe_text, "");
-  };
-
-  func isEqualInt(actual : Int, expected : Int, errMsg : Text) : Bool {
-    let isEq = actual == expected;
-    if (not isEq) {
-      Debug.print("Expected Int: " # debug_show (expected) # ", got: " # debug_show (actual) # "; error: " # errMsg);
-    };
-    return isEq;
-  };
-
-  func textContains(text : Text, subText : Text, errMsg : Text) : Bool {
-    let contains = Text.contains(text, #text subText);
-    if (not contains) {
-      Debug.print("Expected text '" # text # "' to contain '" # subText # "', error: " # errMsg);
-    };
-    return contains;
-  };
-
-  func isTrue(actual : Bool, errMsg : Text) : Bool {
-    if (not actual) {
-      Debug.print("Expected Bool to be true, error: " # errMsg);
-    };
-    return actual;
+  func asText(maybeText : ?Text) : Text {
+    return Option.get(maybeText, "");
   };
 
   func shouldNotLookupNonregisteredIcpDomain() : async () {
@@ -54,10 +32,10 @@ actor {
       ].vals()
     ) {
       let response = await IcpTldOperator.lookup(domain, recordType);
-      let errMsg = "shouldNotLookupNonregisteredIcpDomain() failed for domain: " # domain # ", recordType: " # recordType # ", size of ";
-      assert isEqualInt(response.answers.size(), 0, errMsg # "answers");
-      assert isEqualInt(response.additionals.size(), 0, errMsg # "additionals");
-      assert isEqualInt(response.authorities.size(), 0, errMsg # "authorities");
+      let errMsg = "shouldNotLookupNonregisteredIcpDomain() failed for domain: " # domain # ", recordType: " # recordType # ", size of response.";
+      assert Test.isEqualInt(response.answers.size(), 0, errMsg # "answers");
+      assert Test.isEqualInt(response.additionals.size(), 0, errMsg # "additionals");
+      assert Test.isEqualInt(response.authorities.size(), 0, errMsg # "authorities");
     };
   };
 
@@ -84,10 +62,10 @@ actor {
       assert isTrue(registerResponse.success, asText(registerResponse.message));
 
       let lookupResponse = await IcpTldOperator.lookup(domain, recordType);
-      let errMsg = "shouldRegisterAndLookupIcpDomain() failed for domain: " # domain # ", recordType: " # recordType # ", size of ";
-      assert isEqualInt(lookupResponse.answers.size(), 1, errMsg # "answers");
-      assert isEqualInt(lookupResponse.additionals.size(), 0, errMsg # "additionals");
-      assert isEqualInt(lookupResponse.authorities.size(), 0, errMsg # "authorities");
+      let errMsg = "shouldRegisterAndLookupIcpDomain() failed for domain: " # domain # ", recordType: " # recordType # ", size of response.";
+      assert Test.isEqualInt(lookupResponse.answers.size(), 1, errMsg # "answers");
+      assert Test.isEqualInt(lookupResponse.additionals.size(), 0, errMsg # "additionals");
+      assert Test.isEqualInt(lookupResponse.authorities.size(), 0, errMsg # "authorities");
 
       let responseDomainRecord = lookupResponse.answers[0];
       assert (responseDomainRecord == domainRecord);
@@ -116,7 +94,7 @@ actor {
       };
       let response = await IcpTldOperator.register(domain, registrationRecords);
       let errMsg = "shouldNotRegisterNonIcpDomain() failed for domain: " # domain;
-      assert isTrue(not response.success, errMsg);
+      assert Test.isTrue(not response.success, errMsg);
     };
   };
 
@@ -139,8 +117,8 @@ actor {
       };
       let response = await IcpTldOperator.register(domain, registrationRecords);
       let errMsg = "shouldNotRegisterIfInconsistentDomainRecord() failed for domain: " # domain;
-      assert isTrue(not response.success, errMsg);
-      assert textContains(asText(response.message), "Inconsistent domain record", errMsg);
+      assert Test.isTrue(not response.success, errMsg);
+      assert Test.textContains(asText(response.message), "Inconsistent domain record", errMsg);
     };
   };
 
@@ -163,8 +141,8 @@ actor {
       };
       let response = await IcpTldOperator.register(domain, registrationRecords);
       let errMsg = "shouldNotRegisterDomainIfNotController() failed for domain: " # domain;
-      assert isTrue(not response.success, errMsg);
-      assert textContains(asText(response.message), "only a canister controller can register", errMsg);
+      assert Test.isTrue(not response.success, errMsg);
+      assert Test.textContains(asText(response.message), "only a canister controller can register", errMsg);
     };
   };
 
