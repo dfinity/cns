@@ -59,6 +59,9 @@ jobs:
           dfx canister call tld_operator_test runTests "()"
 
       - name: 'Test tld_operator canister if not controller'
+        # NOTE: the canister tld_operator_test_not_controller uses the same WASM as tld_operator_test,
+        #   but it is used to test a different behaviour, namely that tld_operator-canister does not
+        #   accept certain calls when the caller is not a controller of tld_operator-canister.
         run: |
           dfx deploy --no-wallet tld_operator_test_not_controller
           echo "Calling runTestsIfNotController on canister tld_operator_test_not_controller..."
