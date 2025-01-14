@@ -1,4 +1,5 @@
 import CnsRoot "canister:cns_root";
+import Nat32 "mo:base/Nat32";
 import Test "../test_utils"
 
 actor {
@@ -27,7 +28,7 @@ actor {
       let domainRecord = response.answers[0];
       assert Test.isEqualText(domainRecord.name, ".icp.", errMsg # "field: DomainRecord.name");
       assert Test.isEqualText(domainRecord.record_type, "NC", errMsg # "field: DomainRecord.record_type");
-      assert Test.isEqualInt(domainRecord.ttl, 3600, errMsg # "field: DomainRecord.ttl");
+      assert Test.isEqualInt(Nat32.toNat(domainRecord.ttl), 3600, errMsg # "field: DomainRecord.ttl");
       assert Test.isEqualText(domainRecord.data, icpTldCanisterId, errMsg # "field: DomainRecord.data");
     };
   };
@@ -51,7 +52,7 @@ actor {
       let domainRecord = response.authorities[0];
       assert Test.isEqualText(domainRecord.name, ".icp.", errMsg # "field: DomainRecord.name");
       assert Test.isEqualText(domainRecord.record_type, "NC", errMsg # "field: DomainRecord.record_type");
-      assert Test.isEqualInt(domainRecord.ttl, 3600, errMsg # "field: DomainRecord.ttl");
+      assert Test.isEqualInt(Nat32.toNat(domainRecord.ttl), 3600, errMsg # "field: DomainRecord.ttl");
       assert Test.isEqualText(domainRecord.data, icpTldCanisterId, errMsg # "field: DomainRecord.data");
     };
   };

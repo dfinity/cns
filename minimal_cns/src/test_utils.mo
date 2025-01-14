@@ -2,7 +2,7 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 
 module {
-  public unc isEqualInt(actual : Int, expected : Int, errMsg : Text) : Bool {
+  public func isEqualInt(actual : Int, expected : Int, errMsg : Text) : Bool {
     let isEq = actual == expected;
     if (not isEq) {
       Debug.print("Expected Int: " # debug_show (expected) # ", got: " # debug_show (actual) # "; error: " # errMsg);
@@ -10,7 +10,7 @@ module {
     return isEq;
   };
 
-  public unc isEqualText(actual : Text, expected : Test, errMsg : Text) : Bool {
+  public func isEqualText(actual : Text, expected : Text, errMsg : Text) : Bool {
     let isEq = actual == expected;
     if (not isEq) {
       Debug.print("Expected Text: '" # debug_show (expected) # "', got: '" # debug_show (actual) # "'; error: " # errMsg);

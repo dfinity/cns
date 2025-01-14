@@ -1,6 +1,5 @@
 import NameRegistry "canister:name_registry";
 import IcpTldOperator "canister:tld_operator";
-import Debug "mo:base/Debug";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Test "../test_utils"
@@ -59,7 +58,7 @@ actor {
         records = ?[domainRecord];
       };
       let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
-      assert isTrue(registerResponse.success, asText(registerResponse.message));
+      assert Test.isTrue(registerResponse.success, asText(registerResponse.message));
 
       let lookupResponse = await IcpTldOperator.lookup(domain, recordType);
       let errMsg = "shouldRegisterAndLookupIcpDomain() failed for domain: " # domain # ", recordType: " # recordType # ", size of response.";
