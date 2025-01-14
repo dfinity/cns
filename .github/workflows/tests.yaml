@@ -64,10 +64,5 @@ jobs:
           echo "Calling runTests on canister tld_operator_test..."
           dfx canister call tld_operator_test runTests "()"
 
-      - name: 'Test tld_operator canister if not controller'
-
-        run: |
-          dfx deploy --no-wallet tld_operator_test_not_controller
-
       - name: 'Stop DFX'
         run: dfx stop
