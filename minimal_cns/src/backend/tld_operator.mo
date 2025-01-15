@@ -2,7 +2,6 @@ import NameRegistry "canister:name_registry";
 import Text "mo:base/Text";
 import Map "mo:base/OrderedMap";
 import Principal "mo:base/Principal";
-import Debug "mo:base/Debug";
 
 actor TldOperator {
   let myTld = ".icp";

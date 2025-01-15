@@ -21,11 +21,6 @@
       "type": "motoko",
       "dependencies": ["name_registry", "tld_operator"]
     },
-    "tld_operator_test_not_controller": {
-      "main": "minimal_cns/src/backend/tld_operator.test.mo",
-      "type": "motoko",
-      "dependencies": ["name_registry", "tld_operator"]
-    },
     "name_registry": {
       "type": "rust",
       "candid": "canisters/name-registry/spec.did",
