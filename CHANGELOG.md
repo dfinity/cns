@@ -8,4 +8,5 @@
 
 ### Fix
 
+- factor out test_utils, clean-up test code (#72)
 - Sanitize PR title by using ENV variable (#64)
