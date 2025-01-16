@@ -5,16 +5,23 @@ While it uses [the full CNS API](../canisters/name-registry/spec.did), it implem
 only a small part of the API, necessary to support basic CNS use cases.
 Currently, the following components are being worked on:
 
-- A minimal [CNS root canister](./src/backend/cns_root.mo), that supports only the `lookup`-operation
-  for a single TLD (`.icp`), returning an NC-entry for that TLD, and otherwise returns unsupported/error
-  (in particular, it does not support registration of new TLD operators yet). Having such a CNS root
+- A minimal [CNS root canister](./src/backend/cns_root.mo) that supports only the following:
+
+  - `register`-operation available only for canister controller, allowing registration of a TLD operator
+    for a single TLD (`.icp`).
+  - `lookup`-operation, available publicly, returning an NC-entry for `.icp`-domains,
+    provided previously via `register`-operation.
+
+  All other operations fail or return unsupported/error. Having such a CNS root
   initially is to ensure that the client libraries’ flows are correct from the very beginning,
   i.e. they won’t change once we add other TLDs.
 
-  ## Test instuctions
+- A minimal [TLD operator canister](./src/backend/tld_operator.mo) that supports only the following:
+  - `register`-operation available only for canister controller, allowing registration of CID-records
+    for `.icp`-domains.
+  - `lookup`-operation, available publicly, returning an CID-entry for `.icp`-domains,
+    provided previously via `register`-operation.
 
-  ```
-  dfx start --clean --background
-  dfx deploy cns_root_test
-  dfx canister call cns_root_test runTests "()"
-  ```
+## Test instuctions
+
+For local testing consult the processes defined in [tests.yaml](../.github/workflows/tests.yaml).
