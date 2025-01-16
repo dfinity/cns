@@ -1,79 +1,23 @@
-import NameRegistry "canister:name_registry";
 import Text "mo:base/Text";
 import Map "mo:base/OrderedMap";
+import Option "mo:base/Option";
 import Principal "mo:base/Principal";
+import Types "cns_types";
 
 actor TldOperator {
   let myTld = ".icp";
-  type DomainRecord = NameRegistry.DomainRecord;
-  type DomainLookup = NameRegistry.DomainLookup;
-
-  type OperationResult = {
-    success : Bool;
-    message : ?Text;
-  };
-
-  type RegisterResult = OperationResult;
-
-  type RegistrationControllerRole = {
-    #registrar;
-    #registrant;
-    #technical;
-    #administrative;
-  };
-
-  type RegistrationController = {
-    principal : Principal;
-    roles : [RegistrationControllerRole];
-  };
-
-  /*
-  // Types related to domain registration, but not used by `register`-endpoint.
-  type DomainRegistrationStatus = { #active; #inactive; #transfer_prohibited };
-  type RegistrationEventAction = {
-    #registration;
-    #locked;
-    #unlocked;
-    #expiration;
-    #reregistration;
-    #transfer;
-  };
-
-  type RegistrationEvent = {
-    action : RegistrationEventAction;
-    date : Text;
-  };
-  type DomainRegistrationData = {
-    name : Text;
-    status : [DomainRegistrationStatus];
-    events : [RegistrationEvent];
-    entities : [RegistrationController];
-    name_canister : ?Principal;
-  };
-
-  type RegistrationDataResult = {
-    certificate : Blob;
-    data : DomainRegistrationData;
-  };
-  */
-
-  type RegistrationRecords = {
-    controller : [RegistrationController];
-    records : ?[DomainRecord];
-  };
-
-  type DomainRecordsMap = Map.Map<Text, DomainRecord>;
+  type DomainRecordsMap = Map.Map<Text, Types.DomainRecord>;
   let answersWrapper = Map.Make<Text>(Text.compare);
   stable var lookupAnswersMap : DomainRecordsMap = answersWrapper.empty();
 
-  public shared query func lookup(domain : Text, recordType : Text) : async DomainLookup {
-    var answers : [DomainRecord] = [];
+  public shared query func lookup(domain : Text, recordType : Text) : async Types.DomainLookup {
+    var answers : [Types.DomainRecord] = [];
     let domainLowercase : Text = Text.toLowercase(domain);
 
     if (Text.endsWith(domainLowercase, #text myTld)) {
       switch (Text.toUppercase(recordType)) {
         case ("CID") {
-          let maybeAnswer : ?DomainRecord = answersWrapper.get(lookupAnswersMap, domainLowercase);
+          let maybeAnswer : ?Types.DomainRecord = answersWrapper.get(lookupAnswersMap, domainLowercase);
           answers := switch maybeAnswer {
             case null { [] };
             case (?answer) { [answer] };
@@ -90,17 +34,14 @@ actor TldOperator {
     };
   };
 
-  public shared ({ caller }) func register(domain : Text, records : RegistrationRecords) : async (RegisterResult) {
+  public shared ({ caller }) func register(domain : Text, records : Types.RegistrationRecords) : async (Types.RegisterResult) {
     if (not Principal.isController(caller)) {
       return {
         success = false;
         message = ?("Currently only a canister controller can register " # myTld # "-domains, caller: " # Principal.toText(caller));
       };
     };
-    let domainRecords = switch (records.records) {
-      case (null) { [] };
-      case (?records) { records };
-    };
+    let domainRecords = Option.get(records.records, []);
     // TODO: remove the restriction of acceping exactly one domain record.
     if (domainRecords.size() != 1) {
       return {
@@ -108,7 +49,7 @@ actor TldOperator {
         message = ?"Currently exactly one domain record must be specified.";
       };
     };
-    let record : DomainRecord = domainRecords[0];
+    let record : Types.DomainRecord = domainRecords[0];
     let domainLowercase : Text = Text.toLowercase(domain);
     if (not Text.endsWith(domainLowercase, #text myTld)) {
       return {
@@ -119,7 +60,7 @@ actor TldOperator {
     if (domainLowercase != Text.toLowercase(record.name)) {
       return {
         success = false;
-        message = ?("Inconsistent domain record, record.name: `" # domain # "` doesn't match domain: " # domainLowercase);
+        message = ?("Inconsistent domain record, record.name: `" # record.name # "` doesn't match domain: " # domainLowercase);
       };
     };
     // TODO: add more checks: validate domain name and all the fields of the domain record(s).
