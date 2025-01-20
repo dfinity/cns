@@ -1,17 +1,19 @@
-import NameRegistry "canister:name_registry";
 import IcpTldOperator "canister:tld_operator";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
-import Test "../test_utils"
+import Test "../test_utils";
+import Types "cns_types";
 
 actor {
-  type DomainRecord = NameRegistry.DomainRecord;
+  type DomainRecord = Types.DomainRecord;
 
   public func runTests() : async () {
     await shouldNotLookupNonregisteredIcpDomain();
     await shouldRegisterAndLookupIcpDomain();
     await shouldNotRegisterNonIcpDomain();
     await shouldNotRegisterIfInconsistentDomainRecord();
+    await shouldNotRegisterTldIfMissingDomainRecord();
+    await shouldNotRegisterTldIfMultipleDomainRecords();
   };
 
   public func runTestsIfNotController() : async () {
@@ -94,6 +96,7 @@ actor {
       let response = await IcpTldOperator.register(domain, registrationRecords);
       let errMsg = "shouldNotRegisterNonIcpDomain() failed for domain: " # domain;
       assert Test.isTrue(not response.success, errMsg);
+      assert Test.textContains(asText(response.message), "Unsupported TLD", errMsg);
     };
   };
 
@@ -143,6 +146,30 @@ actor {
       assert Test.isTrue(not response.success, errMsg);
       assert Test.textContains(asText(response.message), "only a canister controller can register", errMsg);
     };
+  };
+
+  func shouldNotRegisterTldIfMissingDomainRecord() : async () {
+    let response = await IcpTldOperator.register(".icp", { controller = []; records = null });
+    let errMsg = "shouldNotRegisterTldIfMissingDomainRecord() failed";
+    assert Test.isTrue(not response.success, errMsg);
+    assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);
+  };
+
+  func shouldNotRegisterTldIfMultipleDomainRecords() : async () {
+    let domainRecord : Types.DomainRecord = {
+      name = "example.icp.";
+      record_type = "CID";
+      ttl = 3600;
+      data = "aaa-aaaa";
+    };
+    let registrationRecords = {
+      controller = [];
+      records = ?[domainRecord, domainRecord];
+    };
+    let response = await IcpTldOperator.register(".icp", registrationRecords);
+    let errMsg = "shouldNotRegisterTldIfMultipleDomainRecords() failed for two DomainRecords";
+    assert Test.isTrue(not response.success, errMsg);
+    assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);
   };
 
 };

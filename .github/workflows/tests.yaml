@@ -45,8 +45,16 @@ jobs:
         run: dfx start --background
 
       - name: 'Test cns_root canister'
+        # NOTE: The functionality of cns_root depends on whether the caller is a controller or not,
+        #   so we proceed in two steps.  Initially the test canister (i.e. cns_root) is not a controller,
+        #   so we test the behaviour for non-controller callers.  Afterwards we make the test canister
+        #   a controller of cns_root, and test the behaviour for controller callers.
         run: |
           dfx deploy --no-wallet cns_root_test
+          echo "Calling runTestsIfNotController on canister cns_root_test ..."
+          dfx canister call cns_root_test runTestsIfNotController "()"
+          echo "Adding cns_root_test-canister as a controller of cns_root-canister..."
+          dfx canister update-settings cns_root --add-controller `dfx canister id cns_root_test`
           echo "Calling runTests on canister cns_root_test..."
           dfx canister call cns_root_test runTests "()"
 
