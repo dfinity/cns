@@ -14,9 +14,11 @@ pub struct ClientInit {
 #[init]
 fn init(init_arg: Option<ClientInit>) {
     if let Some(init) = init_arg {
-        cns_client::override_cns_root_for_testing(Principal::from_text(&init.cns_root_cid).expect(
-            &format!("Failed parsing init CNS root CID: {}", init.cns_root_cid),
-        ));
+        cns_client::override_cns_root_for_testing(
+            Principal::from_text(&init.cns_root_cid).unwrap_or_else(|_| {
+                panic!("Failed parsing init CNS root CID: {}", init.cns_root_cid)
+            }),
+        );
     };
 }
 
