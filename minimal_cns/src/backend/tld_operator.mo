@@ -5,7 +5,7 @@ import Principal "mo:base/Principal";
 import Types "cns_types";
 
 actor TldOperator {
-  let myTld = ".icp";
+  let myTld = ".icp.";
   type DomainRecordsMap = Map.Map<Text, Types.DomainRecord>;
   let answersWrapper = Map.Make<Text>(Text.compare);
   stable var lookupAnswersMap : DomainRecordsMap = answersWrapper.empty();

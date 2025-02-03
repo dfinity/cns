@@ -15,7 +15,7 @@ actor {
     await shouldRegisterAndLookupIcpTld();
     await shouldNotGetOtherTldOperator();
     await shouldNotRegisterTldIfDomainNotTld();
-    await shouldNotRegisterTldIfNotDotIcp();
+    await shouldNotRegisterTldIfNotDotIcpDot();
     await shouldNotRegisterTldIfMissingDomainRecord();
     await shouldNotRegisterTldIfMultipleDomainRecords();
   };
@@ -49,17 +49,17 @@ actor {
       controller = [];
       records = ?[domainRecord];
     };
-    let registerResponse = await CnsRoot.register(".icp", registrationRecords);
+    let registerResponse = await CnsRoot.register(".icp.", registrationRecords);
     assert Test.isTrue(registerResponse.success, asText(registerResponse.message));
   };
 
   func shouldGetIcpTldOperatorForNcIcpLookupsAfterRegistration() : async () {
     for (
       (domain, recordType) in [
-        (".icp", "NC"),
-        ("example.icp", "NC"),
-        ("another.ICP", "nc"),
-        ("one.more.Icp", "Nc"),
+        (".icp.", "NC"),
+        ("example.icp.", "NC"),
+        ("another.ICP.", "nc"),
+        ("one.more.Icp.", "Nc"),
       ].vals()
     ) {
       let response = await CnsRoot.lookup(domain, recordType);
@@ -78,12 +78,12 @@ actor {
   func shouldGetIcpTldOperatorForOtherIcpLookupsAfterRegistration() : async () {
     for (
       (domain, recordType) in [
-        (".icp", "CID"),
-        ("example.icp", "Cid"),
-        ("another.ICP", "cid"),
-        ("one.more.Icp", "CId"),
-        ("another.example.icp", "NS"),
-        ("yet.another.one.icp", "WeirdReordType"),
+        (".icp.", "CID"),
+        ("example.icp.", "Cid"),
+        ("another.ICP.", "cid"),
+        ("one.more.Icp.", "CId"),
+        ("another.example.icp.", "NS"),
+        ("yet.another.one.icp.", "WeirdReordType"),
       ].vals()
     ) {
       let response = await CnsRoot.lookup(domain, recordType);
@@ -102,11 +102,12 @@ actor {
   func shouldNotGetOtherTldOperator() : async () {
     for (
       (domain, recordType) in [
-        (".fun", "NC"),
-        ("example.com", "NC"),
-        ("another.dfn", "NS"),
+        (".fun.", "NC"),
+        ("example.com.", "NC"),
+        ("another.dfn.", "NS"),
         ("", "NC"),
-        ("one.more.dfn", "CID"),
+        (".", "CID"),
+        ("one.more.dfn.", "CID"),
       ].vals()
     ) {
       let response = await CnsRoot.lookup(domain, recordType);
@@ -120,15 +121,15 @@ actor {
   func shouldRegisterAndLookupIcpTld() : async () {
     for (
       (tld, recordType) in [
-        (".icp", "NC"),
-        (".ICP", "Nc"),
-        (".iCP", "nC"),
-        (".Icp", "nc"),
+        (".icp.", "NC"),
+        (".ICP.", "Nc"),
+        (".iCP.", "nC"),
+        (".Icp.", "nc"),
       ].vals()
     ) {
       let someData = "canister-id-for-" # tld # "-" # recordType;
       let domainRecord : Types.DomainRecord = {
-        name = tld # ".";
+        name = tld;
         record_type = recordType;
         ttl = 3600;
         data = someData;
@@ -154,14 +155,14 @@ actor {
   func shouldNotRegisterTldIfNotController() : async () {
     for (
       (tld) in [
-        (".icp"),
-        (".com"),
-        ("my_domain.icp"),
-        ("example.org"),
+        (".icp."),
+        (".com."),
+        ("my_domain.icp."),
+        ("example.org."),
       ].vals()
     ) {
       let domainRecord : Types.DomainRecord = {
-        name = tld # ".";
+        name = tld;
         record_type = "NC";
         ttl = 3600;
         data = "aaa-aaaa";
@@ -180,12 +181,12 @@ actor {
   func shouldNotRegisterTldIfDomainNotTld() : async () {
     for (
       (domain) in [
-        ("example.icp"),
-        ("longer.domain.com"),
+        ("example.icp."),
+        ("longer.domain.com."),
       ].vals()
     ) {
       let domainRecord : Types.DomainRecord = {
-        name = domain # ".";
+        name = domain;
         record_type = "NC";
         ttl = 3600;
         data = "aaa-aaaa";
@@ -201,12 +202,12 @@ actor {
     };
   };
 
-  func shouldNotRegisterTldIfNotDotIcp() : async () {
+  func shouldNotRegisterTldIfNotDotIcpDot() : async () {
     for (
       (tld) in [
-        (".fun"),
-        (".com"),
-        (".org"),
+        (".fun."),
+        (".com."),
+        (".org."),
       ].vals()
     ) {
       let domainRecord : Types.DomainRecord = {
@@ -220,14 +221,14 @@ actor {
         records = ?[domainRecord];
       };
       let response = await CnsRoot.register(tld, registrationRecords);
-      let errMsg = "shouldNotRegisterTldIfNotDotIcp() failed for TLD: " # tld;
+      let errMsg = "shouldNotRegisterTldIfNotDotIcpDot() failed for TLD: " # tld;
       assert Test.isTrue(not response.success, errMsg);
-      assert Test.textContains(asText(response.message), "only .icp-TLD is supported", errMsg);
+      assert Test.textContains(asText(response.message), "only .icp.-TLD is supported", errMsg);
     };
   };
 
   func shouldNotRegisterTldIfMissingDomainRecord() : async () {
-    let response = await CnsRoot.register(".icp", { controller = []; records = null });
+    let response = await CnsRoot.register(".icp.", { controller = []; records = null });
     let errMsg = "shouldNotRegisterTldIfMissingDomainRecord() failed";
     assert Test.isTrue(not response.success, errMsg);
     assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);
@@ -244,7 +245,7 @@ actor {
       controller = [];
       records = ?[domainRecord, domainRecord];
     };
-    let response = await CnsRoot.register(".icp", registrationRecords);
+    let response = await CnsRoot.register(".icp.", registrationRecords);
     let errMsg = "shouldNotRegisterTldIfMultipleDomainRecords() failed for two DomainRecords";
     assert Test.isTrue(not response.success, errMsg);
     assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);

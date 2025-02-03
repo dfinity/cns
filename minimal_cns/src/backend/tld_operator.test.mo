@@ -27,9 +27,9 @@ actor {
   func shouldNotLookupNonregisteredIcpDomain() : async () {
     for (
       (domain, recordType) in [
-        ("first.example.icp", "CID"),
-        ("another.example.ICP", "CID"),
-        ("other.domain.com", "CID"),
+        ("first.example.icp.", "CID"),
+        ("another.example.ICP.", "CID"),
+        ("other.domain.com.", "CID"),
       ].vals()
     ) {
       let response = await IcpTldOperator.lookup(domain, recordType);
@@ -43,10 +43,10 @@ actor {
   func shouldRegisterAndLookupIcpDomain() : async () {
     for (
       (domain, recordType) in [
-        ("my_domain.icp", "CID"),
-        ("example.icp", "Cid"),
-        ("another.ICP", "cid"),
-        ("one.more.Icp", "CId"),
+        ("my_domain.icp.", "CID"),
+        ("example.icp.", "Cid"),
+        ("another.ICP.", "cid"),
+        ("one.more.Icp.", "CId"),
       ].vals()
     ) {
       let domainRecord : DomainRecord = {
@@ -76,11 +76,11 @@ actor {
   func shouldNotRegisterNonIcpDomain() : async () {
     for (
       (domain) in [
-        (".fun"),
-        ("example.com"),
-        ("another.dfn"),
+        (".fun."),
+        ("example.com."),
+        ("another.dfn."),
         (""),
-        ("one.more.dfn"),
+        ("one.more.dfn."),
       ].vals()
     ) {
       let domainRecord : DomainRecord = {
@@ -103,8 +103,8 @@ actor {
   func shouldNotRegisterIfInconsistentDomainRecord() : async () {
     for (
       (domain, record_name) in [
-        ("some.name.icp", "other.domain.icp"),
-        ("valid.subdomain.icp", "subdomain.icp"),
+        ("some.name.icp.", "other.domain.icp."),
+        ("valid.subdomain.icp.", "subdomain.icp."),
       ].vals()
     ) {
       let domainRecord : DomainRecord = {
@@ -127,8 +127,8 @@ actor {
   func shouldNotRegisterDomainIfNotController() : async () {
     for (
       (domain) in [
-        ("my_domain.icp"),
-        ("example.icp"),
+        ("my_domain.icp."),
+        ("example.icp."),
       ].vals()
     ) {
       let domainRecord : DomainRecord = {
@@ -149,7 +149,7 @@ actor {
   };
 
   func shouldNotRegisterTldIfMissingDomainRecord() : async () {
-    let response = await IcpTldOperator.register(".icp", { controller = []; records = null });
+    let response = await IcpTldOperator.register(".icp.", { controller = []; records = null });
     let errMsg = "shouldNotRegisterTldIfMissingDomainRecord() failed";
     assert Test.isTrue(not response.success, errMsg);
     assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);
@@ -166,7 +166,7 @@ actor {
       controller = [];
       records = ?[domainRecord, domainRecord];
     };
-    let response = await IcpTldOperator.register(".icp", registrationRecords);
+    let response = await IcpTldOperator.register(".icp.", registrationRecords);
     let errMsg = "shouldNotRegisterTldIfMultipleDomainRecords() failed for two DomainRecords";
     assert Test.isTrue(not response.success, errMsg);
     assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);

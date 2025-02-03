@@ -26,8 +26,31 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v3
+        
       - name: 'Test cargo crates'
         run: cargo test
+
+      - name: Setup DFX
+        uses: dfinity/setup-dfx@main
+        with:
+          dfx-version: 'auto'
+    
+      - name: Install PocketIC server
+        uses: dfinity/pocketic@main
+        with: 
+          pocket-ic-server-version: "7.0.0"
+
+      - name: Confirm successful installation
+        run: "${POCKET_IC_BIN}" --version
+
+      - name: Build Cargo crates
+        run: cargo build --release
+
+      - name: Build canisters
+        run: dfx build --check
+
+      - name: Test Cargo crates
+        run: POCKET_IC_BIN=$(pwd)/pocket-ic cargo test --all-features
 
   motoko_tests:
     name: 'motoko-tests:required'

@@ -1,0 +1,17 @@
+type ClientInit = record {
+  cns_root_cid : text;
+};
+
+type RejectionCode = int;
+
+type CnsError = variant {
+  NotFound : text;
+  CallFailed : record { RejectionCode; text };
+  MalformedData : text;
+  Internal : text;
+};
+
+service : (opt ClientInit) -> {
+  "lookup_domain" : (domain : text) -> (variant { Ok : principal; Err : CnsError }) composite_query;
+  "register_domain" : (domain : text, cid_text : text) -> (variant { Ok; Err : CnsError });
+};

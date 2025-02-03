@@ -1,5 +1,5 @@
 [package]
-name = "cns_domain_registry"
+name = "test_client"
 version = "0.1.0"
 edition = "2021"
 authors = ["DFINITY Stiftung"]
@@ -7,7 +7,6 @@ license = "Apache-2.0"
 include = ["src", "Cargo.toml"]
 homepage = "https://github.com/dfinity/cns#readme"
 repository = "https://github.com/dfinity/cns"
-categories = ["configuration", "cryptography", "wasm"]
 keywords = [
   "internet-computer",
   "icp",
@@ -20,9 +19,9 @@ keywords = [
 
 [dependencies]
 candid.workspace = true
-ic-stable-structures.workspace = true
+ic-cdk.workspace = true
 serde.workspace = true
-thiserror.workspace = true
+cns_client.workspace = true
 
 [dev-dependencies]
 rstest = "0.18.1"

@@ -1,0 +1,23 @@
+[package]
+name = "cns_client"
+version = "0.1.0"
+description = "A client library for using CNS on the Internet Computer"
+readme = "README.md"
+include = ["src", "Cargo.toml", "CHANGELOG.md", "LICENSE", "README.md"]
+repository = "https://github.com/dfinity/cns"
+documentation = "https://docs.rs/cns-client"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+candid.workspace = true
+cns_domain_registry.workspace = true
+ic-cdk.workspace = true
+lazy_static.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+pocket-ic.workspace = true
+rstest.workspace = true
+assert_matches.workspace = true
+slog = "2.7"
