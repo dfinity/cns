@@ -33,15 +33,17 @@ fn cns_setup() -> CnsSetup {
     pic.add_cycles(cns_root, INIT_CYCLES);
     pic.add_cycles(tld_operator, INIT_CYCLES);
     pic.add_cycles(test_client, INIT_CYCLES);
-    println!("  cns_root CID: {}", cns_root.to_string());
-    println!("  tld_operator CID: {}", tld_operator.to_string());
-    println!("  test_client CID: {}", test_client.to_string());
+    println!("  cns_root CID: {}", cns_root);
+    println!("  tld_operator CID: {}", tld_operator);
+    println!("  test_client CID: {}", test_client);
 
-    let cns_root_wasm = fs::read(CNS_ROOT_WASM).expect(&format!(
-        "Wasm file not found at {}, current dir: {}, run 'dfx build'.",
-        CNS_ROOT_WASM,
-        std::env::current_dir().unwrap().display()
-    ));
+    let cns_root_wasm = fs::read(CNS_ROOT_WASM)..unwrap_or_else(|_| {
+        panic!(
+            "Wasm file not found at {}, current dir: {}, run 'dfx build'.",
+            CNS_ROOT_WASM,
+            std::env::current_dir().unwrap().display()
+        )
+    });
     let tld_operator_wasm =
         fs::read(TLD_OPERATOR_WASM).expect("Wasm file not found, run 'dfx build'.");
     let test_client_wasm =
@@ -107,7 +109,7 @@ impl CnsSetup {
             self.test_client,
             Principal::anonymous(),
             "lookup_domain",
-            encode_one(&domain).expect("failed encoding arg"),
+            encode_one(domain).expect("failed encoding arg"),
         );
         let Ok(WasmResult::Reply(reply)) = response else {
             panic!("call failed: {:?}", response);
@@ -120,7 +122,7 @@ impl CnsSetup {
 fn should_register_and_lookup() {
     let env = cns_setup();
     env.register_icp_nc();
-    for (domain, cid_text) in vec![
+    for (domain, cid_text) in [
         ("example.icp.", "aaaaa-aa"),
         ("nns_governance.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
         ("nns_registry.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
@@ -135,7 +137,7 @@ fn should_register_and_lookup() {
 #[test]
 fn should_not_register_and_lookup_if_missing_nc() {
     let env = cns_setup();
-    for (domain, cid_text) in vec![
+    for (domain, cid_text) in [
         ("example.com.", "aaaaa-aa"),
         ("nns_governance.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
         ("nns_registry.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
@@ -150,7 +152,7 @@ fn should_not_register_and_lookup_if_missing_nc() {
 #[test]
 fn should_not_register_and_lookup_if_not_icp_tld() {
     let env = cns_setup();
-    for (domain, cid_text) in vec![
+    for (domain, cid_text) in [
         ("example.com.", "aaaaa-aa"),
         ("nns_governance.org.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
         ("nns_registry.edu.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
