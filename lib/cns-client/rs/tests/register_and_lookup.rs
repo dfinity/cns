@@ -37,7 +37,7 @@ fn cns_setup() -> CnsSetup {
     println!("  tld_operator CID: {}", tld_operator);
     println!("  test_client CID: {}", test_client);
 
-    let cns_root_wasm = fs::read(CNS_ROOT_WASM)..unwrap_or_else(|_| {
+    let cns_root_wasm = fs::read(CNS_ROOT_WASM).unwrap_or_else(|_| {
         panic!(
             "Wasm file not found at {}, current dir: {}, run 'dfx build'.",
             CNS_ROOT_WASM,
