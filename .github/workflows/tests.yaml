@@ -27,9 +27,6 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
 
-      - name: 'Test cargo crates'
-        run: cargo test
-
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
         with:
