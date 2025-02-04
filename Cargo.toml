@@ -4,15 +4,15 @@ edition = "2021"
 workspace.resolver = "2"
 
 [workspace.dependencies]
-assert_matches = "1.5"
+assert_matches = "1"
 candid = "0.10"
 ic-cdk = "0.16"
-lazy_static = "1.4"
-ic-stable-structures = "0.5.6"
-serde = "1.0.181"
+lazy_static = "1"
+ic-stable-structures = "0.5"
+serde = "1"
 rstest = "0.24"
-thiserror = "1.0.44"
-pocket-ic = "6.0.0"
+thiserror = "1"
+pocket-ic = "6"
 
 cns_domain_registry = { path = "./canisters/name-registry"}
 cns_client = { path = "./lib/cns-client/rs" }
