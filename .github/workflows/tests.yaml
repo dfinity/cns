@@ -40,9 +40,6 @@ jobs:
       - name: Confirm successful installation
         run: ${POCKET_IC_BIN} --version
 
-      - name: Build Cargo crates
-        run: cargo build --release
-
       - name: Build canisters
         run: dfx build --check
 
