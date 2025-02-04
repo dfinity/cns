@@ -143,8 +143,7 @@ fn should_not_register_and_lookup_if_missing_nc() {
         ("nns_registry.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
     ] {
         let result = env.register_domain(domain, cid_text);
-        let result = result.unwrap();
-        // assert_matches!(result, Err(err) if (err.to_string().contains("No record for NC")));
+        assert_matches!(result, Err(err) if (err.to_string().contains("No record for NC")));
         let result = env.lookup_domain(domain);
         assert_matches!(result, Err(err) if (err.to_string().contains("No record for NC")));
     }
