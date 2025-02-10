@@ -204,21 +204,6 @@ name = "cns-root"
 version = "0.1.0"
 
 [[package]]
-name = "cns_client"
-version = "0.1.0"
-dependencies = [
- "assert_matches",
- "candid",
- "cns_domain_registry",
- "ic-cdk",
- "lazy_static",
- "pocket-ic",
- "rstest 0.24.0",
- "serde",
- "slog",
-]
-
-[[package]]
 name = "cns_domain_registry"
 version = "0.1.0"
 dependencies = [
@@ -707,6 +692,21 @@ name = "ic0"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8de254dd67bbd58073e23dc1c8553ba12fa1dc610a19de94ad2bbcd0460c067f"
+
+[[package]]
+name = "ic_cns_canister_client"
+version = "0.1.0"
+dependencies = [
+ "assert_matches",
+ "candid",
+ "cns_domain_registry",
+ "ic-cdk",
+ "lazy_static",
+ "pocket-ic",
+ "rstest 0.24.0",
+ "serde",
+ "slog",
+]
 
 [[package]]
 name = "ic_principal"
@@ -1880,8 +1880,8 @@ name = "test_client"
 version = "0.1.0"
 dependencies = [
  "candid",
- "cns_client",
  "ic-cdk",
+ "ic_cns_canister_client",
  "rstest 0.18.2",
  "serde",
 ]

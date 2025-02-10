@@ -1,5 +1,5 @@
 use candid::{encode_args, encode_one, Decode, Principal};
-use cns_client::{CnsError, DomainRecord, RegistrationRecords};
+use ic_cns_canister_client::{CnsError, DomainRecord, RegistrationRecords};
 use pocket_ic::{PocketIc, PocketIcBuilder, WasmResult};
 use std::fs;
 
