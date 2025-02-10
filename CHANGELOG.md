@@ -2,6 +2,7 @@
 
 ### Feat
 
+- start a Rust library for querying CNS (#76)
 - add register-endpoint to cns_root, extend tests (#74)
 - Add an initial implementation of a minimal TLD-operator (#70)
 - Start a minimal CNS implementation. (#66)
