@@ -1,5 +1,5 @@
 [workspace]
-members = ["canisters/name-registry", "canisters/operator", "canisters/root", "canisters/test-client", "lib/cns-client/rs"]
+members = ["canisters/name-registry", "canisters/operator", "canisters/root", "canisters/test-client", "lib/ic-cns-canister-client/rs"]
 edition = "2021"
 workspace.resolver = "2"
 
@@ -15,5 +15,5 @@ thiserror = "1"
 pocket-ic = "6"
 
 cns_domain_registry = { path = "./canisters/name-registry"}
-cns_client = { path = "./lib/cns-client/rs" }
+ic_cns_canister_client = { path = "./lib/ic-cns-canister-client/rs" }
 
