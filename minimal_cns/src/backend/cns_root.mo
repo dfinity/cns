@@ -6,7 +6,7 @@ import Text "mo:base/Text";
 import Types "cns_types";
 
 shared actor class () {
-  let icpTld = ".icp";
+  let icpTld = ".icp.";
 
   type DomainRecordsMap = Map.Map<Text, Types.DomainRecord>;
   let answersWrapper = Map.Make<Text>(Text.compare);
@@ -16,11 +16,14 @@ shared actor class () {
   func getTld(domain : Text) : Text {
     let parts = Text.split(domain, #char '.');
     let array = Iter.toArray(parts);
-    let lastPart = array[array.size() - 1];
-    return "." # lastPart;
+    if (array.size() >= 2) {
+      return "." # array[array.size() - 2] # ".";
+    } else {
+      return "..";
+    };
   };
 
-  public shared func lookup(domain : Text, recordType : Text) : async Types.DomainLookup {
+  public shared query func lookup(domain : Text, recordType : Text) : async Types.DomainLookup {
     var answers : [Types.DomainRecord] = [];
     var authorities : [Types.DomainRecord] = [];
 
@@ -64,7 +67,7 @@ shared actor class () {
     if (tld != domainLowercase) {
       return {
         success = false;
-        message = ?("The given domain " # domain # "is not a TLD, its TLD is " # tld);
+        message = ?("The given domain " # domain # " is not a TLD, its TLD is " # tld);
       };
     };
     if (tld != icpTld) {
@@ -82,7 +85,7 @@ shared actor class () {
       };
     };
     let record : Types.DomainRecord = domainRecords[0];
-    if (tld # "." != (Text.toLowercase(record.name))) {
+    if (tld != (Text.toLowercase(record.name))) {
       return {
         success = false;
         message = ?("Inconsistent domain record, record.name: `" # record.name # "` doesn't match TLD: " # tld);

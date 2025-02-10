@@ -1,9 +1,19 @@
 [workspace]
-resolver = "2"
+members = ["canisters/name-registry", "canisters/operator", "canisters/root", "canisters/test-client", "lib/cns-client/rs"]
+edition = "2021"
+workspace.resolver = "2"
 
-members = ["canisters/name-registry", "canisters/operator", "canisters/root"]
+[workspace.dependencies]
+assert_matches = "1"
+candid = "0.10"
+ic-cdk = "0.16"
+lazy_static = "1"
+ic-stable-structures = "0.5"
+serde = "1"
+rstest = "0.24"
+thiserror = "1"
+pocket-ic = "6"
 
-[profile.release]
-lto = true
-opt-level = 'z'
-codegen-units = 1
+cns_domain_registry = { path = "./canisters/name-registry"}
+cns_client = { path = "./lib/cns-client/rs" }
+

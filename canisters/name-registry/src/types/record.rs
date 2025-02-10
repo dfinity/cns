@@ -38,6 +38,26 @@ pub struct DomainRecord {
     pub data: String,
 }
 
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct DomainLookup {
+    // The list of answers that match the lookup, the answers section is the most important part of
+    // the lookup result as it contains the actual data that the client is looking for.
+    pub answers: Vec<DomainRecord>,
+    // Additionals are records that are not a direct match with the lookuped up record type but facilitate the process,
+    // e.g. returning the CID records from a NC lookup to prevent the client from having to perform another lookup.
+    pub additionals: Vec<DomainRecord>,
+    // Authorities contains records that point toward the authoritative naming canister/server for the domain.
+    pub authorities: Vec<DomainRecord>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct OperationResult {
+    pub success: bool,
+    pub message: Option<String>,
+}
+
+pub type RegisterResult = OperationResult;
+
 /// DomainRecordInput represents a zone record item input for creating, updating or facilitating optional search
 /// operations over the DomainRecord.
 #[derive(Clone, Debug, Default)]
