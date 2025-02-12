@@ -12,6 +12,15 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@dfinity/agent": "^2.3.0",
+    "@dfinity/candid": "^2.3.0",
+    "@dfinity/principal": "^2.3.0",
+    "@hadronous/pic": "~0.11.0",
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vite-plugin-checker": "^0.8.0",
+    "vitest": "^3.0.5",
     "prettier": "^3.4.2",
     "prettier-plugin-motoko": "^0.10.1"
   }

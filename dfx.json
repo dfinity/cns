@@ -4,7 +4,11 @@
     "cns_root": {
       "main": "minimal_cns/src/backend/cns_root.mo",
       "type": "motoko",
-      "dependencies": ["name_registry"]
+      "dependencies": ["name_registry"],
+      "declarations": {
+        "bindings": ["js", "ts"],
+        "output": "./src/declarations/cns-root"
+      }
     },
     "cns_root_test": {
       "main": "minimal_cns/src/backend/cns_root.test.mo",
@@ -14,7 +18,11 @@
     "tld_operator": {
       "main": "minimal_cns/src/backend/tld_operator.mo",
       "type": "motoko",
-      "dependencies": ["name_registry"]
+      "dependencies": ["name_registry"],
+      "declarations": {
+        "bindings": ["js", "ts"],
+        "output": "./src/declarations/tld-operator"
+      }
     },
     "tld_operator_test": {
       "main": "minimal_cns/src/backend/tld_operator.test.mo",
@@ -33,5 +41,10 @@
     }
   },
   "output_env_file": ".env",
-  "version": 1
+  "version": 1,
+  "networks": {
+    "local": {
+      "type": "ephemeral"
+    }
+  }
 }
