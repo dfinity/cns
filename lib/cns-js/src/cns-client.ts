@@ -34,7 +34,8 @@ export class CnsClient {
   }
 
   public async lookupCanisterId(domain: string): Promise<Principal> {
-    const existingCanisterId = this.#canisterIds.get(domain);
+    const normalizedDomain = normalizeDomain(domain);
+    const existingCanisterId = this.#canisterIds.get(normalizedDomain);
     if (isNotNil(existingCanisterId)) {
       return existingCanisterId;
     }
@@ -42,29 +43,38 @@ export class CnsClient {
     const namingCanister = await this.lookupNamingCanister(domain);
     const namingClient = this.getOperatorClient(namingCanister);
     const res = await namingClient.lookupDomain({
-      domain,
+      domain: normalizedDomain,
       recordType: RecordType.CID,
     });
 
-    const canisterId = getPrincipalAnswer(domain, res, RecordType.CID);
-    this.#canisterIds.set(domain, canisterId);
+    const canisterId = getPrincipalAnswer(
+      normalizedDomain,
+      res,
+      RecordType.CID,
+    );
+    this.#canisterIds.set(normalizedDomain, canisterId);
     return canisterId;
   }
 
   public async lookupNamingCanister(domain: string): Promise<Principal> {
-    const existingNamingCanister = this.#namingCanisters.get(domain);
+    const normalizedTld = normalizeTld(domain);
+    const existingNamingCanister = this.#namingCanisters.get(normalizedTld);
     if (isNotNil(existingNamingCanister)) {
       return existingNamingCanister;
     }
 
     const rootClient = this.getOperatorClient(this.#cnsRoot);
     const res = await rootClient.lookupDomain({
-      domain,
+      domain: normalizedTld,
       recordType: RecordType.NC,
     });
 
-    const namingCanister = getPrincipalAnswer(domain, res, RecordType.NC);
-    this.#namingCanisters.set(domain, namingCanister);
+    const namingCanister = getPrincipalAnswer(
+      normalizedTld,
+      res,
+      RecordType.NC,
+    );
+    this.#namingCanisters.set(normalizedTld, namingCanister);
     return namingCanister;
   }
 
@@ -82,6 +92,36 @@ export class CnsClient {
 
     return operatorClient;
   }
+}
+
+function normalizeDomain(domain: string): string {
+  const [parts, tld] = getDomainParts(domain);
+
+  if (parts.length === 0) {
+    throw new Error(`Invalid domain ${domain}`);
+  }
+
+  return `${parts.join('.')}.${tld}.`;
+}
+
+function normalizeTld(domain: string): string {
+  const [_parts, tld] = getDomainParts(domain);
+
+  return `.${tld}.`;
+}
+
+function getDomainParts(domain: string): [string[], string] {
+  const parts = domain
+    .toLowerCase()
+    .split('.')
+    .filter(part => part.length > 0);
+  const tld = parts.pop();
+
+  if (isNil(tld)) {
+    throw new Error(`Invalid TLD ${domain}`);
+  }
+
+  return [parts, tld];
 }
 
 function getPrincipalAnswer(
