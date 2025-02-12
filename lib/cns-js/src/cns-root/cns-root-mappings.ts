@@ -12,7 +12,7 @@ import {
   LookupDomainResponse,
   DomainRecord,
   RegistrationControllerRequest,
-  RegistrationRecordRequest
+  RegistrationRecordRequest,
 } from './cns-root-types';
 import { fromCandidOpt, toCandidOpt } from '../utils';
 
@@ -26,21 +26,27 @@ export function mapDomainLookupResponse(
   };
 }
 
-export function mapRegistrationRecordRequest(req: RegistrationRecordRequest): CanisterRegistrationRecords {
+export function mapRegistrationRecordRequest(
+  req: RegistrationRecordRequest,
+): CanisterRegistrationRecords {
   return {
     controller: req.controller.map(mapRegistrationControllerRequest),
     records: toCandidOpt(req.domainRecords?.map(mapDomainRecordRequest)),
   };
 }
 
-export function mapRegistrationControllerRequest(req: RegistrationControllerRequest): CanisterRegistrationController {
+export function mapRegistrationControllerRequest(
+  req: RegistrationControllerRequest,
+): CanisterRegistrationController {
   return {
     principal: Principal.from(req.principal),
     roles: req.roles.map(mapControllerRoleRequest),
   };
 }
 
-export function mapDomainRegistrationResponse(res: CanisterRegisterResult): void {
+export function mapDomainRegistrationResponse(
+  res: CanisterRegisterResult,
+): void {
   if (!res.success) {
     const errMsg = fromCandidOpt(res.message);
 
@@ -74,7 +80,9 @@ export function mapDomainRecordResponse(
   };
 }
 
-export function mapControllerRoleRequest(req: ControllerRole): CanisterControllerRole {
+export function mapControllerRoleRequest(
+  req: ControllerRole,
+): CanisterControllerRole {
   switch (req) {
     case ControllerRole.ADMINISTRATIVE:
       return { administrative: null };
