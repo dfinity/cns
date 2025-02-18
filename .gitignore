@@ -59,6 +59,7 @@ node_modules/
 ## generate output
 out
 dist
+declarations
 
 ## dfx
 .dfx/

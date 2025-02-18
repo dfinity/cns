@@ -1,0 +1,53 @@
+{
+  "name": "@dfinity/cns",
+  "version": "0.0.0",
+  "description": "A JavaScript client to interact with the Internet Computer Canister Naming Service (CNS)",
+  "author": "DFINITY Stiftung",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/dfinity/cns#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dfinity/cns.git",
+    "directory": "lib/cns-js"
+  },
+  "bugs": {
+    "url": "https://github.com/dfinity/cns/issues"
+  },
+  "keywords": [
+    "internet",
+    "computer",
+    "icp",
+    "dfinity",
+    "cns",
+    "canister",
+    "naming",
+    "service"
+  ],
+  "main": "./dist/cns.umd.js",
+  "module": "./dist/cns.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/cns.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/cns.umd.js"
+      }
+    }
+  },
+  "scripts": {
+    "prebuild": "dfx generate cns_root && dfx generate tld_operator",
+    "build": "vite build && tsc -p ./tsconfig.types.json",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage"
+  },
+  "peerDependencies": {
+    "@dfinity/agent": "^2.3.0",
+    "@dfinity/principal": "^2.3.0",
+    "@dfinity/candid": "^2.3.0"
+  }
+}
