@@ -14,7 +14,7 @@ repository = "https://github.com/dfinity/cns"
 candid.workspace = true
 ic-cdk.workspace = true
 serde.workspace = true
-cns_client.workspace = true
+ic_cns_canister_client.workspace = true
 
 [dev-dependencies]
 rstest = "0.18.1"
