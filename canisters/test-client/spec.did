@@ -12,6 +12,6 @@ type CnsError = variant {
 };
 
 service : (opt ClientInit) -> {
-  "lookup_domain" : (domain : text) -> (variant { Ok : principal; Err : CnsError }) composite_query;
+  "lookup_domain" : (domain : text) -> (variant { Ok : principal; Err : CnsError });
   "register_domain" : (domain : text, cid_text : text) -> (variant { Ok; Err : CnsError });
 };
