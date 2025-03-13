@@ -22,7 +22,7 @@ module {
   public func isEqualMetrics(actual : Metrics.MetricsData, expected : Metrics.MetricsData) : Bool {
     var isEq = actual == expected;
     if (not isEq) {
-      Debug.print("Expected Metrics: '" # debug_show (expected) # "', got: '" # debug_show (actual) );
+      Debug.print("Expected Metrics: '" # debug_show (expected) # "', got: '" # debug_show (actual));
     };
     return isEq;
   };
