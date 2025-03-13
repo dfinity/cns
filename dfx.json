@@ -1,10 +1,5 @@
 {
   "dfx": "0.24.3",
-  "defaults": {
-    "build": {
-      "packtool": "mops sources"
-    }
-  },
   "canisters": {
     "cns_root": {
       "main": "minimal_cns/src/backend/cns_root.mo",
