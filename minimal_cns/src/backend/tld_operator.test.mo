@@ -132,13 +132,13 @@ actor {
       case (#ok(data)) { data };
       case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
     };
-    let expectedeEmptyMetrics : Metrics.MetricsData = {
+    let expectedEmptyMetrics : Metrics.MetricsData = {
       logLength = 0;
       lookupCount = { fail = 0; success = 0 };
       registerCount = { fail = 0; success = 0 };
       sinceTimestamp = newMetricsData.sinceTimestamp; // cannot predict this field
     };
-    assert Test.isEqualMetrics(newMetricsData, expectedeEmptyMetrics);
+    assert Test.isEqualMetrics(newMetricsData, expectedEmptyMetrics);
   };
 
   func shouldNotRegisterNonIcpDomain() : async () {

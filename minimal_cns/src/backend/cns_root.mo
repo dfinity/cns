@@ -60,6 +60,8 @@ shared actor class () {
     };
   };
 
+  // In addition th the `RegisterResult` this helper returns the relevant record type,
+  // so that the caller can properly log the operation.
   func validateAndRegister(caller : Principal, domain : Text, records : Types.RegistrationRecords) : (Types.RegisterResult, Text) {
     if (not Principal.isController(caller)) {
       return (
