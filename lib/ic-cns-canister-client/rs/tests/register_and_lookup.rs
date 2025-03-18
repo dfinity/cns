@@ -105,7 +105,7 @@ impl CnsFixture {
     }
 
     fn lookup_domain(&self, domain: &str) -> Result<Principal, CnsError> {
-        let response = self.pic.query_call(
+        let response = self.pic.update_call(
             self.test_client,
             Principal::anonymous(),
             "lookup_domain",

@@ -1,5 +1,8 @@
+import Debug "mo:base/Debug";
 import IcpTldOperator "canister:tld_operator";
+import Metrics "metrics";
 import Option "mo:base/Option";
+import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Test "../test_utils";
 import Types "cns_types";
@@ -10,6 +13,7 @@ actor {
   public func runTests() : async () {
     await shouldNotLookupNonregisteredIcpDomain();
     await shouldRegisterAndLookupIcpDomain();
+    await shouldGetMetrics();
     await shouldNotRegisterNonIcpDomain();
     await shouldNotRegisterIfInconsistentDomainRecord();
     await shouldNotRegisterTldIfMissingDomainRecord();
@@ -18,6 +22,7 @@ actor {
 
   public func runTestsIfNotController() : async () {
     await shouldNotRegisterDomainIfNotController();
+    await shouldNotReturnOrPurgeMetricsIfNotController();
   };
 
   func asText(maybeText : ?Text) : Text {
@@ -71,6 +76,69 @@ actor {
       let responseDomainRecord = lookupResponse.answers[0];
       assert (responseDomainRecord == domainRecord);
     };
+  };
+
+  func shouldGetMetrics() : async () {
+    // Purge metrics to be independent of other tests
+    let purgeResult = await IcpTldOperator.purge_metrics();
+    Result.assertOk(purgeResult);
+
+    // Try to register and lookup domains; some domains will not succeed.
+    let testDomains = [
+      ("my_domain.icp.", "CID"),
+      ("example.icp.", "Cid"),
+      ("another.ICP.", "cid"),
+      ("one.more.Icp.", "CId"),
+      ("bad.domain.com.", "CID"),
+      ("another.bad.org.", "CID"),
+    ];
+    let badDomainCount : Nat = 2;
+    let goodDomainCount : Nat = testDomains.size() - badDomainCount;
+    for (
+      (domain, recordType) in testDomains.vals()
+    ) {
+      let domainRecord : DomainRecord = {
+        name = domain;
+        record_type = "CID";
+        ttl = 3600;
+        data = "aaa-aaaa";
+      };
+      let registrationRecords = {
+        controller = [];
+        records = ?[domainRecord];
+      };
+      let _ = await IcpTldOperator.register(domain, registrationRecords);
+      let _ = await IcpTldOperator.lookup(domain, recordType);
+    };
+
+    // Check the metrics.
+    let metricsData = switch (await IcpTldOperator.get_metrics("hour")) {
+      case (#ok(data)) { data };
+      case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
+    };
+    let expectedMetrics : Metrics.MetricsData = {
+      logLength = testDomains.size() * 2; // register and lookup operations
+      lookupCount = { fail = badDomainCount; success = goodDomainCount };
+      registerCount = { fail = badDomainCount; success = goodDomainCount };
+      sinceTimestamp = metricsData.sinceTimestamp; // cannot predict this field
+    };
+    assert Test.isEqualMetrics(metricsData, expectedMetrics);
+
+    // Purge metrics again, and check the outcome.
+    let anotherPurgeResult = await IcpTldOperator.purge_metrics();
+    Result.assertOk(anotherPurgeResult);
+
+    let newMetricsData = switch (await IcpTldOperator.get_metrics("hour")) {
+      case (#ok(data)) { data };
+      case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
+    };
+    let expectedEmptyMetrics : Metrics.MetricsData = {
+      logLength = 0;
+      lookupCount = { fail = 0; success = 0 };
+      registerCount = { fail = 0; success = 0 };
+      sinceTimestamp = newMetricsData.sinceTimestamp; // cannot predict this field
+    };
+    assert Test.isEqualMetrics(newMetricsData, expectedEmptyMetrics);
   };
 
   func shouldNotRegisterNonIcpDomain() : async () {
@@ -146,6 +214,18 @@ actor {
       assert Test.isTrue(not response.success, errMsg);
       assert Test.textContains(asText(response.message), "only a canister controller can register", errMsg);
     };
+  };
+
+  func shouldNotReturnOrPurgeMetricsIfNotController() : async () {
+    let metricsResult = await IcpTldOperator.get_metrics("hour");
+    var errMsg = "shouldNotReturnOrPurgeMetricsIfNotController() got unexpected result from get_metrics()-call";
+    assert Test.isTrue(Result.isErr(metricsResult), errMsg);
+    assert Test.textContains(debug_show (metricsResult), "only a controller can get metrics", errMsg);
+
+    let purgeResult = await IcpTldOperator.purge_metrics();
+    errMsg := "shouldNotReturnOrPurgeMetricsIfNotController() got unexpected result from purge_metrics()-call";
+    assert Test.isTrue(Result.isErr(purgeResult), errMsg);
+    assert Test.textContains(debug_show (purgeResult), "only a controller can purge metrics", errMsg);
   };
 
   func shouldNotRegisterTldIfMissingDomainRecord() : async () {

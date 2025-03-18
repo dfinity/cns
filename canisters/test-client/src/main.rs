@@ -3,7 +3,7 @@
 //! A CNS client for testing various functionalities of a CNS.
 
 use candid::{CandidType, Deserialize, Principal};
-use ic_cdk::{init, query, update};
+use ic_cdk::{init, update};
 use ic_cns_canister_client::CnsError;
 
 #[derive(CandidType, Deserialize)]
@@ -30,7 +30,7 @@ async fn register_domain(domain: String, cid_text: String) -> Result<(), CnsErro
     ic_cns_canister_client::register_domain(&domain, cid).await
 }
 
-#[query(composite = true)]
+#[update]
 async fn lookup_domain(domain: String) -> Result<Principal, CnsError> {
     ic_cns_canister_client::lookup_domain(&domain).await
 }
