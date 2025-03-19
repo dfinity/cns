@@ -150,7 +150,7 @@ shared actor class () {
     if (not Principal.isController(caller)) {
       return #err("Currently only a controller can get metrics");
     };
-    return #ok(metrics.getMetrics(period));
+    return #ok(metrics.getMetrics(period, [("ncRecordsCount", answersWrapper.size(lookupAnswersMap))]));
   };
 
   public shared ({ caller }) func purge_metrics() : async Result.Result<Nat, Text> {

@@ -1,3 +1,4 @@
+import Array "mo:base/Array";
 import CnsRoot "canister:cns_root";
 import Debug "mo:base/Debug";
 import Metrics "metrics";
@@ -5,6 +6,7 @@ import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
 import Result "mo:base/Result";
 import Test "../test_utils";
+import Text "mo:base/Text";
 import Types "cns_types";
 
 actor {
@@ -88,7 +90,7 @@ actor {
         ("another.ICP.", "cid"),
         ("one.more.Icp.", "CId"),
         ("another.example.icp.", "NS"),
-        ("yet.another.one.icp.", "WeirdReordType"),
+        ("yet.another.one.icp.", "WeirdRecordType"),
       ].vals()
     ) {
       let response = await CnsRoot.lookup(domain, recordType);
@@ -126,6 +128,8 @@ actor {
     let goodLookupCount : Nat = 8;
     let badRegisterCount : Nat = testDomains.size() - goodRegisterCount;
     let badLookupCount : Nat = testDomains.size() - goodLookupCount;
+    var extraLookupsCount : Nat = 0;
+    let extraGoodLookupsCount : Nat = 2; // only ".icp." and "example.icp.";
     for (
       (domain, recordType) in testDomains.vals()
     ) {
@@ -141,7 +145,13 @@ actor {
       };
       let _ = await CnsRoot.register(domain, registrationRecords);
       let _ = await CnsRoot.lookup(domain, recordType);
+      // Lookup some domains again to have different lookup counts.
+      if (recordType == "NC") {
+        let _ = await CnsRoot.lookup(domain, recordType);
+        extraLookupsCount += 1;
+      };
     };
+    let extraBadLookupsCount : Nat = extraLookupsCount - extraGoodLookupsCount;
 
     // Check the metrics.
     let metricsData = switch (await CnsRoot.get_metrics("hour")) {
@@ -149,9 +159,14 @@ actor {
       case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
     };
     let expectedMetrics : Metrics.MetricsData = {
-      logLength = testDomains.size() * 2; // register and lookup operations
-      lookupCount = { fail = badLookupCount; success = goodLookupCount };
+      logLength = testDomains.size() * 2 + extraLookupsCount; // register and lookup operations
+      lookupCount = {
+        fail = badLookupCount + extraBadLookupsCount;
+        success = goodLookupCount + extraGoodLookupsCount;
+      };
       registerCount = { fail = badRegisterCount; success = goodRegisterCount };
+      topLookups = [("example.icp.", 3), (".com.", 2), (".icp.", 2), (".org.", 2), ("another.icp.", 2), ("one.more.icp.", 2), ("my_domain.icp.", 1)];
+      extras = [("ncRecordsCount", 1)];
       sinceTimestamp = metricsData.sinceTimestamp; // cannot predict this field
     };
     assert Test.isEqualMetrics(metricsData, expectedMetrics);
@@ -168,6 +183,8 @@ actor {
       logLength = 0;
       lookupCount = { fail = 0; success = 0 };
       registerCount = { fail = 0; success = 0 };
+      topLookups = [];
+      extras = [("ncRecordsCount", 1)];
       sinceTimestamp = newMetricsData.sinceTimestamp; // cannot predict this field
     };
     assert Test.isEqualMetrics(newMetricsData, expectedeEmptyMetrics);

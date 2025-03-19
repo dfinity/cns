@@ -1,3 +1,4 @@
+import Array "mo:base/Array";
 import Debug "mo:base/Debug";
 import IcpTldOperator "canister:tld_operator";
 import Metrics "metrics";
@@ -94,6 +95,8 @@ actor {
     ];
     let badDomainCount : Nat = 2;
     let goodDomainCount : Nat = testDomains.size() - badDomainCount;
+    var extraLookupsCount : Nat = 0;
+    let extraGoodLookupsCount : Nat = 1; // only "my_domain.icp.";
     for (
       (domain, recordType) in testDomains.vals()
     ) {
@@ -109,17 +112,29 @@ actor {
       };
       let _ = await IcpTldOperator.register(domain, registrationRecords);
       let _ = await IcpTldOperator.lookup(domain, recordType);
+      // Lookup some domains again to have different lookup counts.
+      if (recordType == "CID") {
+        let _ = await IcpTldOperator.lookup(domain, recordType);
+        extraLookupsCount += 1;
+      };
     };
+    let extraBadLookupsCount : Nat = extraLookupsCount - extraGoodLookupsCount;
 
     // Check the metrics.
     let metricsData = switch (await IcpTldOperator.get_metrics("hour")) {
       case (#ok(data)) { data };
       case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
     };
+    let expectedLookupCounts = Array.map<(Text, Text), (Text, Nat)>(testDomains, func(e) { (Text.toLowercase(e.0), if (e.1 == "CID") { 2 } else { 1 }) });
     let expectedMetrics : Metrics.MetricsData = {
-      logLength = testDomains.size() * 2; // register and lookup operations
-      lookupCount = { fail = badDomainCount; success = goodDomainCount };
+      logLength = testDomains.size() * 2 + extraLookupsCount; // register and lookup operations
+      lookupCount = {
+        fail = badDomainCount + extraBadLookupsCount;
+        success = goodDomainCount + extraGoodLookupsCount;
+      };
       registerCount = { fail = badDomainCount; success = goodDomainCount };
+      extras = [("cidRecordsCount", 4)];
+      topLookups = Array.sort<(Text, Nat)>(expectedLookupCounts, Test.compareLookupCounts);
       sinceTimestamp = metricsData.sinceTimestamp; // cannot predict this field
     };
     assert Test.isEqualMetrics(metricsData, expectedMetrics);
@@ -136,6 +151,8 @@ actor {
       logLength = 0;
       lookupCount = { fail = 0; success = 0 };
       registerCount = { fail = 0; success = 0 };
+      extras = [("cidRecordsCount", 4)];
+      topLookups = [];
       sinceTimestamp = newMetricsData.sinceTimestamp; // cannot predict this field
     };
     assert Test.isEqualMetrics(newMetricsData, expectedEmptyMetrics);
