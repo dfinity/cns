@@ -41,4 +41,14 @@ module {
     };
     return actual;
   };
+
+  public func compareLookupCounts(a : (Text, Nat), b : (Text, Nat)) : {
+    #less;
+    #equal;
+    #greater;
+  } {
+    if (a.1 > b.1) { #less } else if (a.1 < b.1) { #greater } else {
+      Text.compare(a.0, b.0);
+    };
+  };
 };

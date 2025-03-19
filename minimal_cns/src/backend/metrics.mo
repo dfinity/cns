@@ -1,4 +1,6 @@
+import Array "mo:base/Array";
 import Int "mo:base/Int";
+import Iter "mo:base/Iter";
 import Map "mo:base/OrderedMap";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
@@ -22,12 +24,11 @@ module {
     isSuccess : Bool;
   };
 
-  // TODO: add more metrics:
-  //   - top-10 domains looked up (with counts)
-  //   - total number of DomainRecords
   public type MetricsData = {
     lookupCount : { success : Nat; fail : Nat };
     registerCount : { success : Nat; fail : Nat };
+    topLookups : [(Text, Nat)];
+    extras : [(Text, Nat)];
     sinceTimestamp : Int;
     logLength : Nat;
   };
@@ -83,7 +84,7 @@ module {
       store.size += 1;
     };
 
-    public func getMetrics(period : Text) : MetricsData {
+    public func getMetrics(period : Text, extras : [(Text, Nat)]) : MetricsData {
       let nsPerHour : Int = 3600 * 1000_000_000;
       let periodNs = switch (Text.toLowercase(period)) {
         case ("hour") {
@@ -99,7 +100,8 @@ module {
           nsPerHour; // default to 1h
         };
       };
-      return computeMetrics(Time.now() - periodNs);
+      let computedMetrics = computeMetrics(Time.now() - periodNs);
+      return { computedMetrics with extras = extras };
     };
 
     public func purge() : Nat {
@@ -115,6 +117,35 @@ module {
       var lookupFail : Nat = 0;
       var registerSuccess : Nat = 0;
       var registerFail : Nat = 0;
+
+      let textMap = Map.Make<Text>(Text.compare);
+      var domainLookups : Map.Map<Text, Nat> = textMap.empty<Nat>();
+
+      func countLookup(domainLowercase : Text) {
+        let currentCount = textMap.get(domainLookups, domainLowercase);
+        domainLookups := textMap.put(
+          domainLookups,
+          domainLowercase,
+          switch (currentCount) {
+            case null 1;
+            case (?count) count + 1;
+          },
+        );
+      };
+
+      func top10Lookups() : [(Text, Nat)] {
+        let lookupCounts = Iter.toArray(textMap.entries(domainLookups));
+        let sorted = Array.sort<(Text, Nat)>(
+          lookupCounts,
+          func(a, b) {
+            if (a.1 > b.1) { #less } else if (a.1 < b.1) { #greater } else {
+              Text.compare(a.0, b.0);
+            };
+          },
+        );
+        Array.subArray(sorted, 0, Nat.min(Array.size(sorted), 10));
+      };
+
       label timeLimit for ((_, e) in logWrapper.entriesRev(store.log)) {
         if (e.timestamp < sinceTimestamp) {
           break timeLimit;
@@ -126,6 +157,7 @@ module {
             } else {
               lookupFail += 1;
             };
+            countLookup(e.domain);
           };
           case (#registerOp) {
             if (e.isSuccess) {
@@ -143,6 +175,8 @@ module {
           success = registerSuccess;
           fail = registerFail;
         };
+        topLookups = top10Lookups();
+        extras = [];
         sinceTimestamp = sinceTimestamp;
         logLength = logWrapper.size(store.log);
       };
