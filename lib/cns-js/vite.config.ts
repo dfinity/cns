@@ -1,9 +1,7 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
-import checker from 'vite-plugin-checker';
 
 export default defineConfig({
-  plugins: [checker({ typescript: true })],
   build: {
     lib: {
       entry: resolve(__dirname, 'src', 'index.ts'),
@@ -26,5 +24,8 @@ export default defineConfig({
     root: 'tests',
     globalSetup: './tests/global-setup.ts',
     testTimeout: 30_000,
+    typecheck: {
+      tsconfig: './tsconfig.test.json',
+    },
   },
 });
