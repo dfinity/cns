@@ -84,10 +84,12 @@ jobs:
           dfx deploy --no-wallet tld_operator_test
           echo "Calling runTestsIfNotController on canister tld_operator_test ..."
           dfx canister call tld_operator_test runTestsIfNotController "()"
+          echo "Calling runTestsIfOtherCallerNotController on canister tld_operator_test_other_caller ..."
+          dfx canister call tld_operator_test_other_caller runTestsIfOtherCallerNotController "()"
           echo "Adding tld_operator_test-canister as a controller of tld_operator-canister..."
           dfx canister update-settings tld_operator --add-controller `dfx canister id tld_operator_test`
-          echo "Calling runTests on canister tld_operator_test..."
-          dfx canister call tld_operator_test runTests "()"
+          echo "Calling runTestsIfController on canister tld_operator_test..."
+          dfx canister call tld_operator_test runTestsIfController "()"
 
       - name: 'Stop DFX'
         run: dfx stop

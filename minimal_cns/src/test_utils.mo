@@ -1,6 +1,7 @@
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Metrics "backend/metrics";
+import Types "backend/cns_types";
 
 module {
   public func isEqualInt(actual : Int, expected : Int, errMsg : Text) : Bool {
@@ -27,6 +28,14 @@ module {
     return isEq;
   };
 
+  public func isEqualDomainRecord(actual : Types.DomainRecord, expected : Types.DomainRecord) : Bool {
+    var isEq = Types.normalizedDomainRecord(actual) == Types.normalizedDomainRecord(expected);
+    if (not isEq) {
+      Debug.print("Expected DomainRecord: '" # debug_show (expected) # "', got: '" # debug_show (actual));
+    };
+    return isEq;
+  };
+
   public func textContains(text : Text, subText : Text, errMsg : Text) : Bool {
     let contains = Text.contains(text, #text subText);
     if (not contains) {
@@ -40,6 +49,13 @@ module {
       Debug.print("Expected Bool to be true, error: " # errMsg);
     };
     return actual;
+  };
+
+  public func isFalse(actual : Bool, errMsg : Text) : Bool {
+    if (actual) {
+      Debug.print("Expected Bool to be false, error: " # errMsg);
+    };
+    return not actual;
   };
 
   public func compareLookupCounts(a : (Text, Nat), b : (Text, Nat)) : {

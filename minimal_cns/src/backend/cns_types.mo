@@ -11,6 +11,15 @@ module {
     message : ?Text;
   };
 
+  public func normalizedDomainRecord(record : DomainRecord) : DomainRecord {
+    return {
+      name = Text.toLowercase(record.name);
+      record_type = Text.toUppercase(record.record_type);
+      ttl = record.ttl;
+      data = record.data;
+    };
+  };
+
   public type RegisterResult = OperationResult;
 
   public type RegistrationControllerRole = {
