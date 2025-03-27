@@ -305,7 +305,7 @@ actor {
         ("example.test.icp.", "Cid", "em77e-bvlzu-aq"),
         ("another.test.ICP.", "cid", "un4fu-tqaaa-aaaab-qadjq-cai"),
         ("one.more.test.Icp.", "CId", "2vxsx-fae"),
-      ].vals(),
+      ].vals()
     ) {
       let expectedDomainRecord : DomainRecord = {
         name = domain;
