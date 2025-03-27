@@ -299,8 +299,8 @@ actor {
   // registering some test domains, but it should use a different caller then the registrant.
   func shouldNotOverwriteTestDomainIfNotRegistrantOrController() : async () {
     Debug.print("    test shouldNotOverwriteTestDomainIfNotRegistrantOrController...");
+    // The test data is a subset from shouldRegisterAndLookupIcpTestDomainIfNotController()
     for (
-      // The test data is a subset from shouldRegisterAndLookupIcpTestDomainIfNotController()
       (domain, recordType, canisterId) in [
         ("example.test.icp.", "Cid", "em77e-bvlzu-aq"),
         ("another.test.ICP.", "cid", "un4fu-tqaaa-aaaab-qadjq-cai"),
