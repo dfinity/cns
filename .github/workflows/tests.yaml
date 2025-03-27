@@ -93,3 +93,35 @@ jobs:
 
       - name: 'Stop DFX'
         run: dfx stop
+
+  js_tests:
+    name: js-tests:required
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: dfinity/ci-tools/actions/setup-pnpm@main
+
+      - name: Setup DFX
+        uses: dfinity/setup-dfx@main
+        with:
+          dfx-version: 'auto'
+
+      - name: Start DFX
+        run: dfx start --background
+
+      - name: Deploy canisters
+        run: |
+          dfx deploy --no-wallet cns_root
+          dfx deploy --no-wallet tld_operator
+
+      - name: Build library
+        run: pnpm run -F @dfinity/cns build
+
+      - name: Run tests
+        run: pnpm run -F @dfinity/cns test
+
+      - name: Stop DFX
+        run: dfx stop
