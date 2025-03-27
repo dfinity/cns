@@ -1,3 +1,4 @@
+import Debug "mo:base/Debug";
 import Map "mo:base/OrderedMap";
 import Metrics "metrics";
 import Option "mo:base/Option";
@@ -8,7 +9,7 @@ import Types "cns_types";
 
 actor TldOperator {
   let myTld = ".icp.";
-  type DomainRecordsMap = Map.Map<Text, Types.DomainRecord>;
+  type DomainRecordsMap = Map.Map<Text, Types.RegistrationRecords>;
   let answersWrapper = Map.Make<Text>(Text.compare);
   stable var lookupAnswersMap : DomainRecordsMap = answersWrapper.empty();
 
@@ -22,10 +23,13 @@ actor TldOperator {
     if (Text.endsWith(domainLowercase, #text myTld)) {
       switch (Text.toUppercase(recordType)) {
         case ("CID") {
-          let maybeAnswer : ?Types.DomainRecord = answersWrapper.get(lookupAnswersMap, domainLowercase);
-          answers := switch maybeAnswer {
-            case null { [] };
-            case (?answer) { [answer] };
+          let maybeRecords : ?Types.RegistrationRecords = answersWrapper.get(lookupAnswersMap, domainLowercase);
+          answers := switch (maybeRecords) {
+            case (null) { [] };
+            case (?records) {
+              let domainRecords = Option.get(records.records, []);
+              if (domainRecords.size() == 0) { [] } else { [domainRecords[0]] };
+            };
           };
         };
         case _ {};
@@ -39,66 +43,109 @@ actor TldOperator {
     };
   };
 
-  // In addition th the `RegisterResult` this helper returns the relevant record type,
-  // so that the caller can properly log the operation.
-  func validateAndRegister(caller : Principal, domain : Text, records : Types.RegistrationRecords) : (Types.RegisterResult, Text) {
-    if (not Principal.isController(caller)) {
-      return (
-        {
-          success = false;
-          message = ?("Currently only a canister controller can register " # myTld # "-domains, caller: " # Principal.toText(caller));
-        },
-        "",
-      );
-    };
+  // Validates the records, and if the domain already exisits, extracts the registrant.
+  // If validation fails, returns an error message.
+  func validateRegistrationRecords(domainLowercase : Text, records : Types.RegistrationRecords) : Result.Result<(Types.DomainRecord, ?Principal), Text> {
     let domainRecords = Option.get(records.records, []);
     // TODO: remove the restriction of acceping exactly one domain record.
     if (domainRecords.size() != 1) {
-      return (
-        {
-          success = false;
-          message = ?"Currently exactly one domain record must be specified.";
-        },
-        "",
-      );
+      return #err("Currently exactly one domain record must be specified.");
+    };
+    // TODO: remove the restriction of not setting the controller(s) explicitly.
+    if (records.controller.size() != 0) {
+      return #err("Currently no explicit controller setting is supported.");
     };
     let record : Types.DomainRecord = domainRecords[0];
-    let recordType = record.record_type;
-    let domainLowercase : Text = Text.toLowercase(domain);
+    let recordType = Text.toUppercase(record.record_type);
     if (not Text.endsWith(domainLowercase, #text myTld)) {
-      return (
-        {
-          success = false;
-          message = ?("Unsupported TLD in domain " # domain # ", expected TLD=" # myTld);
-        },
-        recordType,
-      );
+      return #err("Unsupported TLD in domain " # domainLowercase # ", expected TLD=" # myTld);
     };
     if (domainLowercase != Text.toLowercase(record.name)) {
-      return (
-        {
-          success = false;
-          message = ?("Inconsistent domain record, record.name: `" # record.name # "` doesn't match domain: " # domainLowercase);
-        },
-        recordType,
-      );
+      return #err("Inconsistent domain record, record.name: `" # record.name # "` doesn't match domain: " # domainLowercase);
     };
-    // TODO: add more checks: validate domain name and all the fields of the domain record(s).
+    if (recordType != "CID") {
+      return #err("Currently only CID-records can be registered");
+    };
+    // TODO: don't trap on invalid Principals.
+    let _ = Principal.fromText(record.data);
 
-    lookupAnswersMap := answersWrapper.put(lookupAnswersMap, domainLowercase, record);
+    let maybeRegistrant : ?Principal = switch (answersWrapper.get(lookupAnswersMap, domainLowercase)) {
+      case (null) { null };
+      case (?records) {
+        if (records.controller.size() == 0) {
+          Debug.trap("Internal error: missing registration controller for " # domainLowercase);
+        } else {
+          ?records.controller[0].principal;
+        };
+      };
+    };
+    return #ok(Types.normalizedDomainRecord(record), maybeRegistrant);
+  };
+
+  // In addition th the `RegisterResult` this helper returns the relevant record type,
+  // so that the caller can properly log the operation.
+  func validateAndRegister(caller : Principal, domainLowercase : Text, records : Types.RegistrationRecords) : (Types.RegisterResult, Text) {
+    let (domainRecord, maybeRegistrant) = switch (validateRegistrationRecords(domainLowercase, records)) {
+      case (#ok(record, maybePrincipal)) { (record, maybePrincipal) };
+      case (#err(msg)) {
+        return (
+          {
+            success = false;
+            message = ?(msg);
+          },
+          "",
+        );
+      };
+    };
+    if (not Principal.isController(caller)) {
+      // Only subdomains of .test.icp are allowed for non-controllers
+      if (not Text.endsWith(domainLowercase, #text(".test" # myTld))) {
+        return (
+          {
+            success = false;
+            message = ?("Currently only a canister controller can register non-test " # myTld # "-domains, domain: " # domainLowercase # ", caller: " # Principal.toText(caller));
+          },
+          "",
+        );
+      };
+      // If the domain was registered previously, the caller must match the existing registrant.
+      switch (maybeRegistrant) {
+        case (null) {};
+        case (?registrant) {
+          if (registrant != caller) {
+            return (
+              {
+                success = false;
+                message = ?("Caller " # Principal.toText(caller) # " does not match the registrant " # Principal.toText(registrant));
+              },
+              "",
+            );
+          };
+        };
+      };
+    };
+    let registrationRecord = {
+      controller = [{
+        principal = caller;
+        roles = [#registrant];
+      }];
+      records = ?[domainRecord];
+    };
+    lookupAnswersMap := answersWrapper.put(lookupAnswersMap, domainLowercase, registrationRecord);
 
     return (
       {
         success = true;
         message = null;
       },
-      recordType,
+      Text.toUppercase(domainRecord.record_type),
     );
   };
 
   public shared ({ caller }) func register(domain : Text, records : Types.RegistrationRecords) : async (Types.RegisterResult) {
-    let (result, recordType) = validateAndRegister(caller, domain, records);
-    metrics.addEntry(metrics.makeRegisterEntry(Text.toLowercase(domain), recordType, result.success));
+    let domainLowercase : Text = Text.toLowercase(domain);
+    let (result, recordType) = validateAndRegister(caller, domainLowercase, records);
+    metrics.addEntry(metrics.makeRegisterEntry(domainLowercase, recordType, result.success));
     return result;
   };
 

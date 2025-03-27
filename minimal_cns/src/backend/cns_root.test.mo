@@ -1,4 +1,3 @@
-import Array "mo:base/Array";
 import CnsRoot "canister:cns_root";
 import Debug "mo:base/Debug";
 import Metrics "metrics";

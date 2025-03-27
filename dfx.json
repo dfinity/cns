@@ -27,6 +27,15 @@
     "tld_operator_test": {
       "main": "minimal_cns/src/backend/tld_operator.test.mo",
       "type": "motoko",
+      "dependencies": [
+        "name_registry",
+        "tld_operator",
+        "tld_operator_test_other_caller"
+      ]
+    },
+    "tld_operator_test_other_caller": {
+      "main": "minimal_cns/src/backend/tld_operator.test.mo",
+      "type": "motoko",
       "dependencies": ["name_registry", "tld_operator"]
     },
     "name_registry": {
