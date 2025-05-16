@@ -1,12 +1,12 @@
 import CnsRoot "canister:cns_root";
 import Debug "mo:base/Debug";
-import Metrics "metrics";
+import Metrics "../../common/metrics";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
 import Result "mo:base/Result";
-import Test "../test_utils";
+import Test "../../common/test_utils";
 import Text "mo:base/Text";
-import Types "cns_types";
+import Types "../../common/cns_types";
 
 actor {
   public func runTests() : async () {

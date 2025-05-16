@@ -2,7 +2,7 @@
   "dfx": "0.24.3",
   "canisters": {
     "cns_root": {
-      "main": "minimal_cns/src/backend/cns_root.mo",
+      "main": "minimal_cns/canisters/cns_root/lib.mo",
       "type": "motoko",
       "dependencies": ["name_registry"],
       "declarations": {
@@ -11,12 +11,12 @@
       }
     },
     "cns_root_test": {
-      "main": "minimal_cns/src/backend/cns_root.test.mo",
+      "main": "minimal_cns/canisters/cns_root/cns_root.test.mo",
       "type": "motoko",
       "dependencies": ["cns_root"]
     },
     "tld_operator": {
-      "main": "minimal_cns/src/backend/tld_operator.mo",
+      "main": "minimal_cns/canisters/tld_operator/lib.mo",
       "type": "motoko",
       "dependencies": ["name_registry"],
       "declarations": {
@@ -25,7 +25,7 @@
       }
     },
     "tld_operator_test": {
-      "main": "minimal_cns/src/backend/tld_operator.test.mo",
+      "main": "minimal_cns/canisters/tld_operator/tld_operator.test.mo",
       "type": "motoko",
       "dependencies": [
         "name_registry",
@@ -34,7 +34,7 @@
       ]
     },
     "tld_operator_test_other_caller": {
-      "main": "minimal_cns/src/backend/tld_operator.test.mo",
+      "main": "minimal_cns/canisters/tld_operator/tld_operator.test.mo",
       "type": "motoko",
       "dependencies": ["name_registry", "tld_operator"]
     },
