@@ -1,5 +1,4 @@
 {
-  "dfx": "0.24.3",
   "canisters": {
     "cns_root": {
       "main": "minimal_cns/canisters/cns_root/lib.mo",
@@ -50,10 +49,12 @@
     }
   },
   "output_env_file": ".env",
-  "version": 1,
+  "dfx": "0.26.0",
   "networks": {
     "local": {
+      "bind": "127.0.0.1:8080",
       "type": "ephemeral"
     }
-  }
+  },
+  "version": 1
 }
