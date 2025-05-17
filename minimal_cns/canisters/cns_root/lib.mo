@@ -1,21 +1,20 @@
 import Iter "mo:base/Iter";
-import Map "mo:base/OrderedMap";
+import Map "mo:base/Map";
+import Text "mo:base/Text";
 import Metrics "../../common/metrics";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
-import Text "mo:base/Text";
 import Types "../../common/cns_types";
 
 shared actor class () {
   let icpTld = ".icp.";
 
   type DomainRecordsMap = Map.Map<Text, Types.DomainRecord>;
-  let answersWrapper = Map.Make<Text>(Text.compare);
-  stable var lookupAnswersMap : DomainRecordsMap = answersWrapper.empty();
-  stable var lookupAuthoritiesMap : DomainRecordsMap = answersWrapper.empty();
+  stable var lookupAnswersMap : DomainRecordsMap = Map.empty();
+  stable var lookupAuthoritiesMap : DomainRecordsMap = Map.empty();
 
-  stable var metricsStore : Metrics.Store = Metrics.newStore();
+  stable var metricsStore : Metrics.LogStore = Metrics.newStore();
   let metrics = Metrics.CnsMetrics(metricsStore);
 
   func getTld(domain : Text) : Text {
@@ -32,19 +31,19 @@ shared actor class () {
     var answers : [Types.DomainRecord] = [];
     var authorities : [Types.DomainRecord] = [];
 
-    let domainLowercase : Text = Text.toLowercase(domain);
+    let domainLowercase : Text = Text.toLower(domain);
     if (Text.endsWith(domainLowercase, #text icpTld)) {
       let tld = getTld(domainLowercase);
-      switch (Text.toUppercase(recordType)) {
+      switch (Text.toUpper(recordType)) {
         case ("NC") {
-          let maybeRecord : ?Types.DomainRecord = answersWrapper.get(lookupAnswersMap, tld);
+          let maybeRecord : ?Types.DomainRecord = Map.get(lookupAnswersMap, Text.compare, tld);
           answers := switch maybeRecord {
             case null { [] };
             case (?record) { [record] };
           };
         };
         case _ {
-          let maybeRecord : ?Types.DomainRecord = answersWrapper.get(lookupAuthoritiesMap, tld);
+          let maybeRecord : ?Types.DomainRecord = Map.get(lookupAuthoritiesMap, Text.compare, tld);
           authorities := switch maybeRecord {
             case null { [] };
             case (?record) { [record] };
@@ -72,7 +71,7 @@ shared actor class () {
         "",
       );
     };
-    let domainLowercase : Text = Text.toLowercase(domain);
+    let domainLowercase : Text = Text.toLower(domain);
     let tld = getTld(domainLowercase);
     if (tld != domainLowercase) {
       return (
@@ -105,7 +104,7 @@ shared actor class () {
     };
     let record : Types.DomainRecord = domainRecords[0];
     let recordType = record.record_type;
-    if (tld != (Text.toLowercase(record.name))) {
+    if (tld != (Text.toLower(record.name))) {
       return (
         {
           success = false;
@@ -116,10 +115,10 @@ shared actor class () {
     };
     // TODO: add more checks: validate domain name and all the fields of the domain record(s).
 
-    switch (Text.toUppercase(record.record_type)) {
+    switch (Text.toUpper(record.record_type)) {
       case ("NC") {
-        lookupAnswersMap := answersWrapper.put(lookupAnswersMap, tld, record);
-        lookupAuthoritiesMap := answersWrapper.put(lookupAuthoritiesMap, tld, record);
+        Map.add(lookupAnswersMap, Text.compare, tld, record);
+        Map.add(lookupAuthoritiesMap, Text.compare, tld, record);
         return (
           {
             success = true;
@@ -142,7 +141,7 @@ shared actor class () {
 
   public shared ({ caller }) func register(domain : Text, records : Types.RegistrationRecords) : async (Types.RegisterResult) {
     let (result, recordType) = validateAndRegister(caller, domain, records);
-    metrics.addEntry(metrics.makeRegisterEntry(Text.toLowercase(domain), recordType, result.success));
+    metrics.addEntry(metrics.makeRegisterEntry(Text.toLower(domain), recordType, result.success));
     return result;
   };
 
@@ -150,7 +149,7 @@ shared actor class () {
     if (not Principal.isController(caller)) {
       return #err("Currently only a controller can get metrics");
     };
-    return #ok(metrics.getMetrics(period, [("ncRecordsCount", answersWrapper.size(lookupAnswersMap))]));
+    return #ok(metrics.getMetrics(period, [("ncRecordsCount", Map.size(lookupAnswersMap))]));
   };
 
   public shared ({ caller }) func purge_metrics() : async Result.Result<Nat, Text> {
