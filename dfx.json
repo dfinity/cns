@@ -49,6 +49,11 @@
     }
   },
   "output_env_file": ".env",
+  "defaults": {
+    "build": {
+      "packtool": "mops sources"
+    }
+  },
   "dfx": "0.26.0",
   "networks": {
     "local": {
