@@ -1,11 +1,11 @@
 import Debug "mo:base/Debug";
 import Map "mo:base/OrderedMap";
-import Metrics "metrics";
+import Metrics "../../common/metrics";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
-import Types "cns_types";
+import Types "../../common/cns_types";
 
 actor TldOperator {
   let myTld = ".icp.";

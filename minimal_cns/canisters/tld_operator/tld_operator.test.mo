@@ -1,13 +1,13 @@
 import Array "mo:base/Array";
 import Debug "mo:base/Debug";
 import IcpTldOperator "canister:tld_operator";
-import Metrics "metrics";
+import Metrics "../../common/metrics";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
-import Test "../test_utils";
-import Types "cns_types";
+import Test "../../common/test_utils";
+import Types "../../common/cns_types";
 
 actor {
   type DomainRecord = Types.DomainRecord;

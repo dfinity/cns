@@ -1,7 +1,7 @@
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
-import Metrics "backend/metrics";
-import Types "backend/cns_types";
+import Metrics "metrics";
+import Types "cns_types";
 
 module {
   public func isEqualInt(actual : Int, expected : Int, errMsg : Text) : Bool {
