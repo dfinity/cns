@@ -1,29 +1,28 @@
-import Debug "mo:base/Debug";
-import Map "mo:base/OrderedMap";
+import Map "mo:base/Map";
 import Metrics "../../common/metrics";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
+import { trap } "mo:base/Runtime";
 import Text "mo:base/Text";
 import Types "../../common/cns_types";
 
 actor TldOperator {
   let myTld = ".icp.";
   type DomainRecordsMap = Map.Map<Text, Types.RegistrationRecords>;
-  let answersWrapper = Map.Make<Text>(Text.compare);
-  stable var lookupAnswersMap : DomainRecordsMap = answersWrapper.empty();
+  stable var lookupAnswersMap : DomainRecordsMap = Map.empty();
 
-  stable var metricsStore : Metrics.Store = Metrics.newStore();
+  stable var metricsStore : Metrics.LogStore = Metrics.newStore();
   let metrics = Metrics.CnsMetrics(metricsStore);
 
   public shared func lookup(domain : Text, recordType : Text) : async Types.DomainLookup {
     var answers : [Types.DomainRecord] = [];
-    let domainLowercase : Text = Text.toLowercase(domain);
+    let domainLowercase : Text = Text.toLower(domain);
 
     if (Text.endsWith(domainLowercase, #text myTld)) {
-      switch (Text.toUppercase(recordType)) {
+      switch (Text.toUpper(recordType)) {
         case ("CID") {
-          let maybeRecords : ?Types.RegistrationRecords = answersWrapper.get(lookupAnswersMap, domainLowercase);
+          let maybeRecords : ?Types.RegistrationRecords = Map.get(lookupAnswersMap, Text.compare, domainLowercase);
           answers := switch (maybeRecords) {
             case (null) { [] };
             case (?records) {
@@ -56,11 +55,11 @@ actor TldOperator {
       return #err("Currently no explicit controller setting is supported.");
     };
     let record : Types.DomainRecord = domainRecords[0];
-    let recordType = Text.toUppercase(record.record_type);
+    let recordType = Text.toUpper(record.record_type);
     if (not Text.endsWith(domainLowercase, #text myTld)) {
       return #err("Unsupported TLD in domain " # domainLowercase # ", expected TLD=" # myTld);
     };
-    if (domainLowercase != Text.toLowercase(record.name)) {
+    if (domainLowercase != Text.toLower(record.name)) {
       return #err("Inconsistent domain record, record.name: `" # record.name # "` doesn't match domain: " # domainLowercase);
     };
     if (recordType != "CID") {
@@ -69,11 +68,11 @@ actor TldOperator {
     // TODO: don't trap on invalid Principals.
     let _ = Principal.fromText(record.data);
 
-    let maybeRegistrant : ?Principal = switch (answersWrapper.get(lookupAnswersMap, domainLowercase)) {
+    let maybeRegistrant : ?Principal = switch (Map.get(lookupAnswersMap, Text.compare, domainLowercase)) {
       case (null) { null };
       case (?records) {
         if (records.controller.size() == 0) {
-          Debug.trap("Internal error: missing registration controller for " # domainLowercase);
+          trap("Internal error: missing registration controller for " # domainLowercase);
         } else {
           ?records.controller[0].principal;
         };
@@ -131,19 +130,19 @@ actor TldOperator {
       }];
       records = ?[domainRecord];
     };
-    lookupAnswersMap := answersWrapper.put(lookupAnswersMap, domainLowercase, registrationRecord);
+    Map.add(lookupAnswersMap, Text.compare, domainLowercase, registrationRecord);
 
     return (
       {
         success = true;
         message = null;
       },
-      Text.toUppercase(domainRecord.record_type),
+      Text.toUpper(domainRecord.record_type),
     );
   };
 
   public shared ({ caller }) func register(domain : Text, records : Types.RegistrationRecords) : async (Types.RegisterResult) {
-    let domainLowercase : Text = Text.toLowercase(domain);
+    let domainLowercase : Text = Text.toLower(domain);
     let (result, recordType) = validateAndRegister(caller, domainLowercase, records);
     metrics.addEntry(metrics.makeRegisterEntry(domainLowercase, recordType, result.success));
     return result;
@@ -153,7 +152,7 @@ actor TldOperator {
     if (not Principal.isController(caller)) {
       return #err("Currently only a controller can get metrics");
     };
-    return #ok(metrics.getMetrics(period, [("cidRecordsCount", answersWrapper.size(lookupAnswersMap))]));
+    return #ok(metrics.getMetrics(period, [("cidRecordsCount", Map.size(lookupAnswersMap))]));
   };
 
   public shared ({ caller }) func purge_metrics() : async Result.Result<Nat, Text> {

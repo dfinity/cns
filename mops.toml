@@ -1,0 +1,5 @@
+[dependencies]
+base = "https://github.com/dfinity/new-motoko-base#466058cdc93b5aa9b092b28d5528a7f5e94c0a42"
+
+[toolchain]
+moc = "0.14.11"

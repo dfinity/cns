@@ -1,5 +1,5 @@
 import CnsRoot "canister:cns_root";
-import Debug "mo:base/Debug";
+import { trap } "mo:base/Runtime"; 
 import Metrics "../../common/metrics";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
@@ -155,7 +155,7 @@ actor {
     // Check the metrics.
     let metricsData = switch (await CnsRoot.get_metrics("hour")) {
       case (#ok(data)) { data };
-      case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
+      case (#err(e)) { trap("failed get_metrics with error: " # e) };
     };
     let expectedMetrics : Metrics.MetricsData = {
       logLength = testDomains.size() * 2 + extraLookupsCount; // register and lookup operations
@@ -176,7 +176,7 @@ actor {
 
     let newMetricsData = switch (await CnsRoot.get_metrics("hour")) {
       case (#ok(data)) { data };
-      case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
+      case (#err(e)) { trap("failed get_metrics with error: " # e) };
     };
     let expectedeEmptyMetrics : Metrics.MetricsData = {
       logLength = 0;
