@@ -109,8 +109,6 @@ module {
       var lookupFail : Nat = 0;
       var registerSuccess : Nat = 0;
       var registerFail : Nat = 0;
-
-      //let textMap = Map.Make<Text>(Text.compare);
       var domainLookups : Map.Map<Text, Nat> = Map.empty();
 
       func countLookup(domainLowercase : Text) {
@@ -126,7 +124,6 @@ module {
         );
       };
 
-      // TODO: for the future, there's a more efficient way to sort this map
       func top10Lookups() : [(Text, Nat)] {
         let lookupCounts = Iter.toArray(Map.entries(domainLookups));
         let sorted = Array.sort<(Text, Nat)>(
