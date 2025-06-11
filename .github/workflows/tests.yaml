@@ -36,6 +36,9 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
 
+      - name: Install node modules
+        run: npm i 
+
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
         with:
@@ -61,6 +64,9 @@ jobs:
     steps:
       - name: 'Checkout code'
         uses: actions/checkout@v4
+
+      - name: Install node modules
+        run: npm i 
 
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
@@ -112,6 +118,9 @@ jobs:
 
       - name: Setup PNPM
         uses: dfinity/ci-tools/actions/setup-pnpm@main
+
+      - name: Install node modules
+        run: npm i 
 
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
