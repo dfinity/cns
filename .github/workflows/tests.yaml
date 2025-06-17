@@ -119,9 +119,6 @@ jobs:
       - name: Setup PNPM
         uses: dfinity/ci-tools/actions/setup-pnpm@main
 
-      - name: Setup PNPM
-        uses: dfinity/ci-tools/actions/setup-pnpm@main
-
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
         with:
