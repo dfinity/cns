@@ -75,7 +75,7 @@ module {
     };
 
     public func addEntry(entry : LogEntry) {
-      Map.add(store, Int.compare, entry.timestamp, entry);
+      Map.add(store, Int.compare, Map.size(store), entry);
     };
 
     public func getMetrics(period : Text, extras : [(Text, Nat)]) : MetricsData {
