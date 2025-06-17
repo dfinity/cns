@@ -96,6 +96,7 @@ jobs:
         #   so we test the behaviour for non-controller callers.  Afterwards we make the test canister
         #   a controller of tld_operator, and test the behaviour for controller callers.
         run: |
+          DFX_MOC_PATH="$(dfx cache show)/moc"
           dfx deploy --no-wallet tld_operator_test
           echo "Calling runTestsIfNotController on canister tld_operator_test ..."
           dfx canister call tld_operator_test runTestsIfNotController "()"
