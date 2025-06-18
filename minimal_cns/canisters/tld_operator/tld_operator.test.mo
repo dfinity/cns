@@ -5,6 +5,7 @@ import Metrics "../../common/metrics";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
+import { trap } "mo:base/Runtime";
 import Text "mo:base/Text";
 import Test "../../common/test_utils";
 import Types "../../common/cns_types";
@@ -147,9 +148,9 @@ actor {
     // Check the metrics.
     let metricsData = switch (await IcpTldOperator.get_metrics("hour")) {
       case (#ok(data)) { data };
-      case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
+      case (#err(e)) { trap("failed get_metrics with error: " # e) };
     };
-    let expectedLookupCounts = Array.map<(Text, Text), (Text, Nat)>(testDomains, func(e) { (Text.toLowercase(e.0), if (e.1 == "CID") { 2 } else { 1 }) });
+    let expectedLookupCounts = Array.map<(Text, Text), (Text, Nat)>(testDomains, func(e) { (Text.toLower(e.0), if (e.1 == "CID") { 2 } else { 1 }) });
     let expectedMetrics : Metrics.MetricsData = {
       logLength = testDomains.size() * 2 + extraLookupsCount; // register and lookup operations
       lookupCount = {
@@ -169,7 +170,7 @@ actor {
 
     let newMetricsData = switch (await IcpTldOperator.get_metrics("hour")) {
       case (#ok(data)) { data };
-      case (#err(e)) { Debug.trap("failed get_metrics with error: " # e) };
+      case (#err(e)) { trap("failed get_metrics with error: " # e) };
     };
     let expectedEmptyMetrics : Metrics.MetricsData = {
       logLength = 0;
@@ -421,7 +422,7 @@ actor {
       // expected
       return;
     };
-    Debug.trap("Registration with bad canister id did not trap");
+    trap("Registration with bad canister id did not trap");
   };
 
   func shouldNotRegisterTestDomainIfNotCid() : async () {
