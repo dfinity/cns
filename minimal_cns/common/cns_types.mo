@@ -13,8 +13,8 @@ module {
 
   public func normalizedDomainRecord(record : DomainRecord) : DomainRecord {
     return {
-      name = Text.toLowercase(record.name);
-      record_type = Text.toUppercase(record.record_type);
+      name = Text.toLower(record.name);
+      record_type = Text.toUpper(record.record_type);
       ttl = record.ttl;
       data = record.data;
     };

@@ -36,6 +36,9 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
 
+      - name: Setup PNPM
+        uses: dfinity/ci-tools/actions/setup-pnpm@main
+
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
         with:
@@ -61,6 +64,9 @@ jobs:
     steps:
       - name: 'Checkout code'
         uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: dfinity/ci-tools/actions/setup-pnpm@main
 
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
@@ -90,6 +96,7 @@ jobs:
         #   so we test the behaviour for non-controller callers.  Afterwards we make the test canister
         #   a controller of tld_operator, and test the behaviour for controller callers.
         run: |
+          DFX_MOC_PATH="$(dfx cache show)/moc"
           dfx deploy --no-wallet tld_operator_test
           echo "Calling runTestsIfNotController on canister tld_operator_test ..."
           dfx canister call tld_operator_test runTestsIfNotController "()"

@@ -1,7 +1,7 @@
 import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
-import Map "mo:base/OrderedMap";
+import Map "mo:base/Map";
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
@@ -35,18 +35,13 @@ module {
 
   public type LogStore = Map.Map<Int, LogEntry>;
 
-  public type Store = { var log : LogStore; var size : Nat };
-
-  public func newStore() : Store {
-    let logWrapper = Map.Make<Int>(Int.compare);
-    return { var log = logWrapper.empty(); var size = 0 };
+  public func newStore() : LogStore {
+    Map.empty<Int, LogEntry>();
   };
 
-  public class CnsMetrics(store : Store) = {
-    let logWrapper = Map.Make<Int>(Int.compare);
-
+  public class CnsMetrics(store : LogStore) = {
     func recordTypeFromText(recordType : Text) : RecordType {
-      switch (Text.toUppercase(recordType)) {
+      switch (Text.toUpper(recordType)) {
         case ("NC") {
           return #ncRecordType;
         };
@@ -80,13 +75,12 @@ module {
     };
 
     public func addEntry(entry : LogEntry) {
-      store.log := logWrapper.put(store.log, store.size, entry);
-      store.size += 1;
+      Map.add(store, Int.compare, Map.size(store), entry);
     };
 
     public func getMetrics(period : Text, extras : [(Text, Nat)]) : MetricsData {
       let nsPerHour : Int = 3600 * 1000_000_000;
-      let periodNs = switch (Text.toLowercase(period)) {
+      let periodNs = switch (Text.toLower(period)) {
         case ("hour") {
           nsPerHour;
         };
@@ -105,11 +99,9 @@ module {
     };
 
     public func purge() : Nat {
-      let originalSize = logWrapper.size(store.log);
-      store.log := logWrapper.empty();
-      store.size := 0;
+      let originalSize = Map.size(store);
+      Map.clear(store);
       return originalSize;
-
     };
 
     func computeMetrics(sinceTimestamp : Int) : MetricsData {
@@ -117,24 +109,23 @@ module {
       var lookupFail : Nat = 0;
       var registerSuccess : Nat = 0;
       var registerFail : Nat = 0;
-
-      let textMap = Map.Make<Text>(Text.compare);
-      var domainLookups : Map.Map<Text, Nat> = textMap.empty<Nat>();
+      var domainLookups : Map.Map<Text, Nat> = Map.empty();
 
       func countLookup(domainLowercase : Text) {
-        let currentCount = textMap.get(domainLookups, domainLowercase);
-        domainLookups := textMap.put(
+        let countWithIncrement = switch (Map.get(domainLookups, Text.compare, domainLowercase)) {
+          case null 1;
+          case (?count) count + 1;
+        };
+        Map.add(
           domainLookups,
+          Text.compare,
           domainLowercase,
-          switch (currentCount) {
-            case null 1;
-            case (?count) count + 1;
-          },
+          countWithIncrement,
         );
       };
 
       func top10Lookups() : [(Text, Nat)] {
-        let lookupCounts = Iter.toArray(textMap.entries(domainLookups));
+        let lookupCounts = Iter.toArray(Map.entries(domainLookups));
         let sorted = Array.sort<(Text, Nat)>(
           lookupCounts,
           func(a, b) {
@@ -143,10 +134,10 @@ module {
             };
           },
         );
-        Array.subArray(sorted, 0, Nat.min(Array.size(sorted), 10));
+        Array.sliceToArray(sorted, 0, Nat.min(Array.size(sorted), 10));
       };
 
-      label timeLimit for ((_, e) in logWrapper.entriesRev(store.log)) {
+      label timeLimit for ((_, e) in Map.reverseEntries(store)) {
         if (e.timestamp < sinceTimestamp) {
           break timeLimit;
         };
@@ -178,7 +169,7 @@ module {
         topLookups = top10Lookups();
         extras = [];
         sinceTimestamp = sinceTimestamp;
-        logLength = logWrapper.size(store.log);
+        logLength = Map.size(store);
       };
     };
   };
