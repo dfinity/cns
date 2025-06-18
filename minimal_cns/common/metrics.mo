@@ -120,7 +120,7 @@ module {
           domainLookups,
           Text.compare,
           domainLowercase,
-          countWithIncrement
+          countWithIncrement,
         );
       };
 
