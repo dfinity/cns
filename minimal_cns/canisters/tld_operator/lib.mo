@@ -1,11 +1,11 @@
 import Map "mo:base/Map";
 import Metrics "../../common/metrics";
-import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
-import { trap } "mo:base/Runtime";
 import Text "mo:base/Text";
 import Types "../../common/cns_types";
+import Queries "queries";
+import Mutations "mutations";
 
 actor TldOperator {
   let myTld = ".icp.";
@@ -16,149 +16,38 @@ actor TldOperator {
   let metrics = Metrics.CnsMetrics(metricsStore);
 
   public shared func lookup(domain : Text, recordType : Text) : async Types.DomainLookup {
-    var answers : [Types.DomainRecord] = [];
-    let domainLowercase : Text = Text.toLower(domain);
-
-    if (Text.endsWith(domainLowercase, #text myTld)) {
-      switch (Text.toUpper(recordType)) {
-        case ("CID") {
-          let maybeRecords : ?Types.RegistrationRecords = Map.get(lookupAnswersMap, Text.compare, domainLowercase);
-          answers := switch (maybeRecords) {
-            case (null) { [] };
-            case (?records) {
-              let domainRecords = Option.get(records.records, []);
-              if (domainRecords.size() == 0) { [] } else { [domainRecords[0]] };
-            };
-          };
-        };
-        case _ {};
-      };
-    };
-    metrics.addEntry(metrics.makeLookupEntry(domainLowercase, recordType, answers != []));
-    {
-      answers = answers;
-      additionals = [];
-      authorities = [];
-    };
-  };
-
-  // Validates the records, and if the domain already exisits, extracts the registrant.
-  // If validation fails, returns an error message.
-  func validateRegistrationRecords(domainLowercase : Text, records : Types.RegistrationRecords) : Result.Result<(Types.DomainRecord, ?Principal), Text> {
-    let domainRecords = Option.get(records.records, []);
-    // TODO: remove the restriction of acceping exactly one domain record.
-    if (domainRecords.size() != 1) {
-      return #err("Currently exactly one domain record must be specified.");
-    };
-    // TODO: remove the restriction of not setting the controller(s) explicitly.
-    if (records.controller.size() != 0) {
-      return #err("Currently no explicit controller setting is supported.");
-    };
-    let record : Types.DomainRecord = domainRecords[0];
-    let recordType = Text.toUpper(record.record_type);
-    if (not Text.endsWith(domainLowercase, #text myTld)) {
-      return #err("Unsupported TLD in domain " # domainLowercase # ", expected TLD=" # myTld);
-    };
-    if (domainLowercase != Text.toLower(record.name)) {
-      return #err("Inconsistent domain record, record.name: `" # record.name # "` doesn't match domain: " # domainLowercase);
-    };
-    if (recordType != "CID") {
-      return #err("Currently only CID-records can be registered");
-    };
-    // TODO: don't trap on invalid Principals.
-    let _ = Principal.fromText(record.data);
-
-    let maybeRegistrant : ?Principal = switch (Map.get(lookupAnswersMap, Text.compare, domainLowercase)) {
-      case (null) { null };
-      case (?records) {
-        if (records.controller.size() == 0) {
-          trap("Internal error: missing registration controller for " # domainLowercase);
-        } else {
-          ?records.controller[0].principal;
-        };
-      };
-    };
-    return #ok(Types.normalizedDomainRecord(record), maybeRegistrant);
-  };
-
-  // In addition th the `RegisterResult` this helper returns the relevant record type,
-  // so that the caller can properly log the operation.
-  func validateAndRegister(caller : Principal, domainLowercase : Text, records : Types.RegistrationRecords) : (Types.RegisterResult, Text) {
-    let (domainRecord, maybeRegistrant) = switch (validateRegistrationRecords(domainLowercase, records)) {
-      case (#ok(record, maybePrincipal)) { (record, maybePrincipal) };
-      case (#err(msg)) {
-        return (
-          {
-            success = false;
-            message = ?(msg);
-          },
-          "",
-        );
-      };
-    };
-    if (not Principal.isController(caller)) {
-      // Only subdomains of .test.icp are allowed for non-controllers
-      if (not Text.endsWith(domainLowercase, #text(".test" # myTld))) {
-        return (
-          {
-            success = false;
-            message = ?("Currently only a canister controller can register non-test " # myTld # "-domains, domain: " # domainLowercase # ", caller: " # Principal.toText(caller));
-          },
-          "",
-        );
-      };
-      // If the domain was registered previously, the caller must match the existing registrant.
-      switch (maybeRegistrant) {
-        case (null) {};
-        case (?registrant) {
-          if (registrant != caller) {
-            return (
-              {
-                success = false;
-                message = ?("Caller " # Principal.toText(caller) # " does not match the registrant " # Principal.toText(registrant));
-              },
-              "",
-            );
-          };
-        };
-      };
-    };
-    let registrationRecord = {
-      controller = [{
-        principal = caller;
-        roles = [#registrant];
-      }];
-      records = ?[domainRecord];
-    };
-    Map.add(lookupAnswersMap, Text.compare, domainLowercase, registrationRecord);
-
-    return (
-      {
-        success = true;
-        message = null;
-      },
-      Text.toUpper(domainRecord.record_type),
+    Queries.lookup(
+      myTld,
+      lookupAnswersMap,
+      metrics,
+      domain,
+      recordType,
     );
   };
 
   public shared ({ caller }) func register(domain : Text, records : Types.RegistrationRecords) : async (Types.RegisterResult) {
     let domainLowercase : Text = Text.toLower(domain);
-    let (result, recordType) = validateAndRegister(caller, domainLowercase, records);
+    let (result, recordType) = Mutations.validateAndRegister(
+      caller,
+      myTld,
+      lookupAnswersMap,
+      domainLowercase,
+      records
+    );
     metrics.addEntry(metrics.makeRegisterEntry(domainLowercase, recordType, result.success));
-    return result;
+
+    result;
   };
 
   public shared query ({ caller }) func get_metrics(period : Text) : async Result.Result<Metrics.MetricsData, Text> {
-    if (not Principal.isController(caller)) {
-      return #err("Currently only a controller can get metrics");
-    };
-    return #ok(metrics.getMetrics(period, [("cidRecordsCount", Map.size(lookupAnswersMap))]));
+    if (not Principal.isController(caller)) return #err("Currently only a controller can get metrics");
+
+    #ok(metrics.getMetrics(period, [("cidRecordsCount", Map.size(lookupAnswersMap))]));
   };
 
   public shared ({ caller }) func purge_metrics() : async Result.Result<Nat, Text> {
-    if (not Principal.isController(caller)) {
-      return #err("Currently only a controller can purge metrics");
-    };
-    return #ok(metrics.purge());
+    if (not Principal.isController(caller)) return #err("Currently only a controller can purge metrics");
+
+    #ok(metrics.purge());
   };
 };
