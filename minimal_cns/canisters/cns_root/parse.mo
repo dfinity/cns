@@ -10,4 +10,4 @@ module {
     let tldText = array[array.size() - 2];
     "." # tldText # ".";
   };
-}
+};

@@ -1,5 +1,5 @@
 import Types "../../common/cns_types";
-import { getTldFromDomain }"parse";
+import { getTldFromDomain } "parse";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Map "mo:base/Map";
@@ -14,7 +14,7 @@ module {
     domain : Text,
     lookupAnswersMap : Map.Map<Text, Types.DomainRecord>,
     lookupAuthoritiesMap : Map.Map<Text, Types.DomainRecord>,
-    records : Types.RegistrationRecords
+    records : Types.RegistrationRecords,
   ) : (Types.RegisterResult, Text) {
     if (not Principal.isController(caller)) {
       return (
@@ -93,4 +93,4 @@ module {
       };
     };
   };
-}
+};

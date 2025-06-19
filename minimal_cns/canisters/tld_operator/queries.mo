@@ -10,7 +10,7 @@ module {
     lookupAnswersMap : Map.Map<Text, Types.RegistrationRecords>,
     metrics : MetricsTypes.CnsMetrics,
     domain : Text,
-    recordType : Text
+    recordType : Text,
   ) : Types.DomainLookup {
     var answers : [Types.DomainRecord] = [];
     let domainLowercase : Text = Text.toLower(domain);
@@ -37,5 +37,5 @@ module {
       additionals = [];
       authorities = [];
     };
-  }
-}
+  };
+};

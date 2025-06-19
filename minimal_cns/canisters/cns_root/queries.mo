@@ -11,8 +11,8 @@ module {
     lookupAuthoritiesMap : Map.Map<Text, Types.DomainRecord>,
     metrics : MetricsTypes.CnsMetrics,
     domain : Text,
-    recordType : Text
-  ) : Types.DomainLookup{
+    recordType : Text,
+  ) : Types.DomainLookup {
     var answers : [Types.DomainRecord] = [];
     var authorities : [Types.DomainRecord] = [];
 
@@ -44,4 +44,4 @@ module {
       authorities = authorities;
     };
   };
-}
+};

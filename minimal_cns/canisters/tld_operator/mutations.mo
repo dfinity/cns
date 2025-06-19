@@ -14,7 +14,7 @@ module {
     myTld : Text,
     lookupAnswersMap : Map.Map<Text, Types.RegistrationRecords>,
     domainLowercase : Text,
-    records : Types.RegistrationRecords
+    records : Types.RegistrationRecords,
   ) : (Types.RegisterResult, Text) {
     let (domainRecord, maybeRegistrant) = switch (validateRegistrationRecords(myTld, lookupAnswersMap, domainLowercase, records)) {
       case (#ok(record, maybePrincipal)) { (record, maybePrincipal) };
@@ -80,7 +80,7 @@ module {
     myTld : Text,
     lookupAnswersMap : Map.Map<Text, Types.RegistrationRecords>,
     domainLowercase : Text,
-    records : Types.RegistrationRecords
+    records : Types.RegistrationRecords,
   ) : Result.Result<(Types.DomainRecord, ?Principal), Text> {
     let domainRecords = Option.get(records.records, []);
     // TODO: remove the restriction of acceping exactly one domain record.
@@ -118,5 +118,4 @@ module {
 
     #ok(Types.normalizedDomainRecord(record), maybeRegistrant);
   };
-}
-
+};

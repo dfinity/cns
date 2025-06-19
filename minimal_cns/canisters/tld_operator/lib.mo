@@ -32,7 +32,7 @@ actor TldOperator {
       myTld,
       lookupAnswersMap,
       domainLowercase,
-      records
+      records,
     );
     metrics.addEntry(metrics.makeRegisterEntry(domainLowercase, recordType, result.success));
 

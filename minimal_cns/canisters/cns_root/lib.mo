@@ -25,7 +25,7 @@ shared actor class () {
       metrics,
       domain,
       recordType,
-    ); 
+    );
   };
 
   public shared ({ caller }) func register(domain : Text, records : Types.RegistrationRecords) : async (Types.RegisterResult) {
