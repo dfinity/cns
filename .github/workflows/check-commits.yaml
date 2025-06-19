@@ -12,6 +12,15 @@ on:
     types: [checks_requested]
     branches:
       - main
+  push:
+    branches:
+      - main
+      # For external contributions, the suggested flow is as follows:
+      #   1. Contributor creates a fork and enables GH Actions on it
+      #   2. Contributor develops in a fork, and pushes the changes to a branch named with prefix `dev-gh-`.
+      #      The push triggers the tests on the contributor's fork on a Github Runner
+      #   3. Once the code in a branch is ready and passes the tests, the contributor creates a PR on the main repo.
+      - 'dev-gh-*'
 
 jobs:
   check_pr_title:
