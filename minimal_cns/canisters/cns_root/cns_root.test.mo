@@ -52,7 +52,7 @@ actor {
       data = dummyIcpTldCanisterId;
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[domainRecord];
     };
     let registerResponse = await CnsRoot.register(".icp.", registrationRecords);
@@ -139,7 +139,7 @@ actor {
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let _ = await CnsRoot.register(domain, registrationRecords);
@@ -225,7 +225,7 @@ actor {
         data = someData;
       };
       let registrationRecords = {
-        controller = [];
+        controllers =[];
         records = ?[domainRecord];
       };
       let registerResponse = await CnsRoot.register(tld, registrationRecords);
@@ -258,7 +258,7 @@ actor {
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers =[];
         records = ?[domainRecord];
       };
       let response = await CnsRoot.register(tld, registrationRecords);
@@ -294,7 +294,7 @@ actor {
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers =[];
         records = ?[domainRecord];
       };
       let response = await CnsRoot.register(domain, registrationRecords);
@@ -319,7 +319,7 @@ actor {
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers =[];
         records = ?[domainRecord];
       };
       let response = await CnsRoot.register(tld, registrationRecords);
@@ -330,7 +330,7 @@ actor {
   };
 
   func shouldNotRegisterTldIfMissingDomainRecord() : async () {
-    let response = await CnsRoot.register(".icp.", { controller = []; records = null });
+    let response = await CnsRoot.register(".icp.", { controllers =[]; records = null });
     let errMsg = "shouldNotRegisterTldIfMissingDomainRecord() failed";
     assert Test.isTrue(not response.success, errMsg);
     assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);
@@ -344,7 +344,7 @@ actor {
       data = "aaa-aaaa";
     };
     let registrationRecords = {
-      controller = [];
+      controllers =[];
       records = ?[domainRecord, domainRecord];
     };
     let response = await CnsRoot.register(".icp.", registrationRecords);

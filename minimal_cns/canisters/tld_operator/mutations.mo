@@ -118,4 +118,5 @@ module {
 
     #ok(Types.normalizedDomainRecord(record), maybeRegistrant);
   };
-};
+}
+

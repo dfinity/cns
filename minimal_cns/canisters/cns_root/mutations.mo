@@ -1,5 +1,5 @@
 import Types "../../common/cns_types";
-import { getTldFromDomain } "parse";
+import { getTldFromDomain }"parse";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Map "mo:base/Map";
@@ -93,4 +93,4 @@ module {
       };
     };
   };
-};
+}
