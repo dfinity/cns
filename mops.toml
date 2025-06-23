@@ -1,5 +1,6 @@
 [dependencies]
 base = "https://github.com/dfinity/new-motoko-base#466058cdc93b5aa9b092b28d5528a7f5e94c0a42"
+stable-buffer = "https://github.com/canscale/StableBuffer#acdde6bb5b939227997cebdbb8919d2e6da8691c@acdde6bb5b939227997cebdbb8919d2e6da8691c"
 
 [toolchain]
 moc = "0.14.11"

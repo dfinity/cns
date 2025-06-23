@@ -37,10 +37,10 @@ function addNcRecord(tld: string, data: string): string {
     dfx canister call cns_root register '(
       "${tld}",
       record {
-        controller = vec {};
+        controllers = vec {};
         records = opt vec {
           record {
-            ttl = 1_000 : nat32;
+            ttl = 1_000 : nat;
             record_type = "NC";
             data = "${data}";
             name = "${tld}";
@@ -56,10 +56,10 @@ function addCidRecord(domain: string, data: string): string {
     dfx canister call tld_operator register '(
       "${domain}",
       record {
-        controller = vec {};
+        controllers = vec {};
         records = opt vec {
           record {
-            ttl = 1_000 : nat32;
+            ttl = 1_000 : nat;
             record_type = "CID";
             data = "${data}";
             name = "${domain}";

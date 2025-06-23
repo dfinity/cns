@@ -1,7 +1,7 @@
 import { Principal } from '@dfinity/principal';
 import {
   DomainRecord as CanisterDomainRecord,
-  DomainLookup as CanisterDomainLookup,
+  LookupResponse as CanisterDomainLookup,
   RegistrationControllerRole as CanisterControllerRole,
   RegistrationRecords as CanisterRegistrationRecords,
   RegistrationController as CanisterRegistrationController,
@@ -30,7 +30,7 @@ export function mapRegistrationRecordRequest(
   req: RegistrationRecordRequest,
 ): CanisterRegistrationRecords {
   return {
-    controller: req.controller.map(mapRegistrationControllerRequest),
+    controllers: req.controller.map(mapRegistrationControllerRequest),
     records: toCandidOpt(req.domainRecords?.map(mapDomainRecordRequest)),
   };
 }

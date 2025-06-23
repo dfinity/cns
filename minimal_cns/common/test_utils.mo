@@ -1,7 +1,8 @@
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Metrics "metrics";
-import Types "cns_types";
+import Domain "data/domain/lib";
+import DomainTypes "data/domain/Types";
 
 module {
   public func isEqualInt(actual : Int, expected : Int, errMsg : Text) : Bool {
@@ -28,8 +29,8 @@ module {
     return isEq;
   };
 
-  public func isEqualDomainRecord(actual : Types.DomainRecord, expected : Types.DomainRecord) : Bool {
-    var isEq = Types.normalizedDomainRecord(actual) == Types.normalizedDomainRecord(expected);
+  public func isEqualDomainRecord(actual : DomainTypes.DomainRecord, expected : DomainTypes.DomainRecord) : Bool {
+    var isEq = Domain.normalizedDomainRecord(actual) == Domain.normalizedDomainRecord(expected);
     if (not isEq) {
       Debug.print("Expected DomainRecord: '" # debug_show (expected) # "', got: '" # debug_show (actual));
     };

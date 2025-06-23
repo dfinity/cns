@@ -27,7 +27,7 @@ export interface RegistrationControllerRequest {
 }
 
 export interface DomainRecord {
-  ttl: number;
+  ttl: bigint;
   recordType: string;
   data: string;
   name: string;
