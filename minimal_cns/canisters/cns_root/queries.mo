@@ -1,34 +1,35 @@
-import Types "../../common/cns_types";
+import APITypes "../../common/api_types";
+import DomainTypes "../../common/data/domain/Types";
+import Domain "../../common/data/domain";
 import MetricsTypes "../../common/metrics";
-import Map "mo:base/Map";
 import Text "mo:base/Text";
 import { getTldFromDomain } "parse";
 
 module {
   public func lookup(
     rootTld : Text,
-    lookupAnswersMap : Map.Map<Text, Types.DomainRecord>,
-    lookupAuthoritiesMap : Map.Map<Text, Types.DomainRecord>,
+    lookupAnswersMap : DomainTypes.DomainRecordsStore,
+    lookupAuthoritiesMap : DomainTypes.DomainRecordsStore,
     metrics : MetricsTypes.CnsMetrics,
     domain : Text,
     recordType : Text,
-  ) : Types.DomainLookup {
-    var answers : [Types.DomainRecord] = [];
-    var authorities : [Types.DomainRecord] = [];
+  ) : APITypes.LookupResponse {
+    var answers : [DomainTypes.DomainRecord] = [];
+    var authorities : [DomainTypes.DomainRecord] = [];
 
     let domainLowercase : Text = Text.toLower(domain);
     if (Text.endsWith(domainLowercase, #text rootTld)) {
       let tld = getTldFromDomain(domainLowercase);
       switch (Text.toUpper(recordType)) {
         case ("NC") {
-          let maybeRecord : ?Types.DomainRecord = Map.get(lookupAnswersMap, Text.compare, tld);
+          let maybeRecord : ?DomainTypes.DomainRecord = Domain.DomainRecordsStore.getByDomain(lookupAnswersMap, tld); 
           answers := switch maybeRecord {
             case null { [] };
             case (?record) { [record] };
           };
         };
         case _ {
-          let maybeRecord : ?Types.DomainRecord = Map.get(lookupAuthoritiesMap, Text.compare, tld);
+          let maybeRecord : ?DomainTypes.DomainRecord = Domain.DomainRecordsStore.getByDomain(lookupAuthoritiesMap, tld); 
           authorities := switch maybeRecord {
             case null { [] };
             case (?record) { [record] };

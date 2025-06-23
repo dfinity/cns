@@ -1,5 +1,6 @@
-import Types "../../common/cns_types";
-import Map "mo:base/Map";
+import APITypes "../../common/api_types";
+import Domain "../../common/data/domain";
+import DomainTypes "../../common/data/domain/Types";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
@@ -12,10 +13,10 @@ module {
   public func validateAndRegister(
     caller : Principal,
     myTld : Text,
-    lookupAnswersMap : Map.Map<Text, Types.RegistrationRecords>,
+    lookupAnswersMap : DomainTypes.RegistrationRecordsStore,
     domainLowercase : Text,
-    records : Types.RegistrationRecords,
-  ) : (Types.RegisterResult, Text) {
+    records : DomainTypes.RegistrationRecords,
+  ) : (APITypes.RegisterResult, Text) {
     let (domainRecord, maybeRegistrant) = switch (validateRegistrationRecords(myTld, lookupAnswersMap, domainLowercase, records)) {
       case (#ok(record, maybePrincipal)) { (record, maybePrincipal) };
       case (#err(msg)) {
@@ -56,14 +57,15 @@ module {
         };
       };
     };
-    let registrationRecord = {
-      controller = [{
+    let registrationRecord : DomainTypes.RegistrationRecords = {
+      controllers = [{
         principal = caller;
         roles = [#registrant];
       }];
       records = ?[domainRecord];
     };
-    Map.add(lookupAnswersMap, Text.compare, domainLowercase, registrationRecord);
+    // TODO: fill in the correct principals list here?
+    Domain.RegistrationRecordsStore.add(lookupAnswersMap, domainLowercase, registrationRecord, []);
 
     (
       {
@@ -78,20 +80,25 @@ module {
   // If validation fails, returns an error message.
   func validateRegistrationRecords(
     myTld : Text,
-    lookupAnswersMap : Map.Map<Text, Types.RegistrationRecords>,
+    lookupAnswersMap : DomainTypes.RegistrationRecordsStore,
     domainLowercase : Text,
+<<<<<<< HEAD
     records : Types.RegistrationRecords,
   ) : Result.Result<(Types.DomainRecord, ?Principal), Text> {
+=======
+    records : DomainTypes.RegistrationRecords
+  ) : Result.Result<(DomainTypes.DomainRecord, ?Principal), Text> {
+>>>>>>> aac9a06 (move data types to common, pull away from API types to avoid recursive deps, add a principals index on the registration records data store)
     let domainRecords = Option.get(records.records, []);
     // TODO: remove the restriction of acceping exactly one domain record.
     if (domainRecords.size() != 1) {
       return #err("Currently exactly one domain record must be specified.");
     };
     // TODO: remove the restriction of not setting the controller(s) explicitly.
-    if (records.controller.size() != 0) {
+    if (records.controllers.size() != 0) {
       return #err("Currently no explicit controller setting is supported.");
     };
-    let record : Types.DomainRecord = domainRecords[0];
+    let record : DomainTypes.DomainRecord = domainRecords[0];
     let recordType = Text.toUpper(record.record_type);
     if (not Text.endsWith(domainLowercase, #text myTld)) {
       return #err("Unsupported TLD in domain " # domainLowercase # ", expected TLD=" # myTld);
@@ -105,18 +112,18 @@ module {
     // TODO: don't trap on invalid Principals.
     let _ = Principal.fromText(record.data);
 
-    let maybeRegistrant : ?Principal = switch (Map.get(lookupAnswersMap, Text.compare, domainLowercase)) {
+    let maybeRegistrant : ?Principal = switch (Domain.RegistrationRecordsStore.getByDomain(lookupAnswersMap, domainLowercase)) {
       case (null) { null };
-      case (?records) {
-        if (records.controller.size() == 0) {
+      case (?{ records }) {
+        if (records.controllers.size() == 0) {
           trap("Internal error: missing registration controller for " # domainLowercase);
         } else {
-          ?records.controller[0].principal;
+          ?records.controllers[0].principal;
         };
       };
     };
 
-    #ok(Types.normalizedDomainRecord(record), maybeRegistrant);
+    #ok(Domain.normalizedDomainRecord(record), maybeRegistrant);
   };
 }
 

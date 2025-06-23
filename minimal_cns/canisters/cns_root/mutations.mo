@@ -1,8 +1,9 @@
-import Types "../../common/cns_types";
+import APITypes "../../common/api_types";
+import DomainTypes "../../common/data/domain/Types";
+import Domain "../../common/data/domain";
 import { getTldFromDomain }"parse";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
-import Map "mo:base/Map";
 import Text "mo:base/Text";
 
 module {
@@ -12,10 +13,10 @@ module {
     caller : Principal,
     rootTld : Text,
     domain : Text,
-    lookupAnswersMap : Map.Map<Text, Types.DomainRecord>,
-    lookupAuthoritiesMap : Map.Map<Text, Types.DomainRecord>,
-    records : Types.RegistrationRecords,
-  ) : (Types.RegisterResult, Text) {
+    lookupAnswersMap : DomainTypes.DomainRecordsStore,
+    lookupAuthoritiesMap : DomainTypes.DomainRecordsStore,
+    records : DomainTypes.RegistrationRecords,
+  ) : (APITypes.RegisterResult, Text) {
     if (not Principal.isController(caller)) {
       return (
         {
@@ -56,7 +57,7 @@ module {
         "",
       );
     };
-    let record : Types.DomainRecord = domainRecords[0];
+    let record : DomainTypes.DomainRecord = domainRecords[0];
     let recordType = record.record_type;
     if (tld != (Text.toLower(record.name))) {
       return (
@@ -71,8 +72,8 @@ module {
 
     switch (Text.toUpper(record.record_type)) {
       case ("NC") {
-        Map.add(lookupAnswersMap, Text.compare, tld, record);
-        Map.add(lookupAuthoritiesMap, Text.compare, tld, record);
+        Domain.DomainRecordsStore.add(lookupAnswersMap, tld, record);
+        Domain.DomainRecordsStore.add(lookupAuthoritiesMap, tld, record);
 
         (
           {

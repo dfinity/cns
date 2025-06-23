@@ -73,7 +73,7 @@ impl CnsFixture {
 
     fn register_icp_nc(&self) {
         let registration_records = RegistrationRecords {
-            controller: vec![],
+            controllers: vec![],
             records: Some(vec![DomainRecord {
                 name: ".icp.".to_string(),
                 record_type: "NC".to_string(),

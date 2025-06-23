@@ -1,31 +1,28 @@
-import Map "mo:base/Map";
 import Metrics "../../common/metrics";
 import Principal "mo:base/Principal";
-import Result "mo:base/Result";
 import Text "mo:base/Text";
-import Types "../../common/cns_types";
+import APITypes "../../common/api_types";
+import DomainTypes "../../common/data/domain/Types";
 import Queries "queries";
 import Mutations "mutations";
+import Domain "../../common/data/domain";
 
 actor TldOperator {
   let myTld = ".icp.";
-  type DomainRecordsMap = Map.Map<Text, Types.RegistrationRecords>;
-  stable var lookupAnswersMap : DomainRecordsMap = Map.empty();
-
+  stable var lookupAnswersMap = Domain.RegistrationRecordsStore.init();
   stable var metricsStore : Metrics.LogStore = Metrics.newStore();
-  let metrics = Metrics.CnsMetrics(metricsStore);
 
-  public shared func lookup(domain : Text, recordType : Text) : async Types.DomainLookup {
+  public shared func lookup(domain : Text, recordType : Text) : async APITypes.LookupResponse {
     Queries.lookup(
       myTld,
       lookupAnswersMap,
-      metrics,
+      Metrics.CnsMetrics(metricsStore),
       domain,
       recordType,
     );
   };
 
-  public shared ({ caller }) func register(domain : Text, records : Types.RegistrationRecords) : async (Types.RegisterResult) {
+  public shared ({ caller }) func register(domain : Text, records : DomainTypes.RegistrationRecords) : async APITypes.RegisterResult {
     let domainLowercase : Text = Text.toLower(domain);
     let (result, recordType) = Mutations.validateAndRegister(
       caller,
@@ -34,20 +31,23 @@ actor TldOperator {
       domainLowercase,
       records,
     );
+    let metrics = Metrics.CnsMetrics(metricsStore);
     metrics.addEntry(metrics.makeRegisterEntry(domainLowercase, recordType, result.success));
 
     result;
   };
 
-  public shared query ({ caller }) func get_metrics(period : Text) : async Result.Result<Metrics.MetricsData, Text> {
+  public shared query ({ caller }) func get_metrics(period : Text) : async APITypes.GetMetricsResult {
     if (not Principal.isController(caller)) return #err("Currently only a controller can get metrics");
 
-    #ok(metrics.getMetrics(period, [("cidRecordsCount", Map.size(lookupAnswersMap))]));
+    let metrics = Metrics.CnsMetrics(metricsStore);
+    #ok(metrics.getMetrics(period, [("cidRecordsCount", Domain.RegistrationRecordsStore.size(lookupAnswersMap))]));
   };
 
-  public shared ({ caller }) func purge_metrics() : async Result.Result<Nat, Text> {
+  public shared ({ caller }) func purge_metrics() : async APITypes.PurgeMetricsResult {
     if (not Principal.isController(caller)) return #err("Currently only a controller can purge metrics");
 
+    let metrics = Metrics.CnsMetrics(metricsStore);
     #ok(metrics.purge());
   };
 };

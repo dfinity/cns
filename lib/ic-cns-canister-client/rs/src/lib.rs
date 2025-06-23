@@ -69,7 +69,7 @@ pub struct RegistrationController {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct RegistrationRecords {
-    pub controller: Vec<RegistrationController>,
+    pub controllers: Vec<RegistrationController>,
     pub records: Option<Vec<DomainRecord>>,
 }
 
@@ -112,7 +112,7 @@ pub async fn register_domain(domain: &str, cid: CanisterId) -> Result<(), CnsErr
         data: cid.to_string(),
     };
     let registration_records = RegistrationRecords {
-        controller: vec![],
+        controllers: vec![],
         records: Some(vec![record]),
     };
     let (register,): (RegisterResult,) = call(
