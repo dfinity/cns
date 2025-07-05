@@ -1,5 +1,6 @@
-use candid::{encode_args, encode_one, Decode, Principal};
-use ic_cns_canister_client::{CnsError, DomainRecord, RegistrationRecords};
+use candid::{encode_args, encode_one, Decode, Principal, Nat};
+use ic_cns_canister_client::{CnsError, DomainLookup, DomainRecord, RegistrationRecords};
+pub use cns_domain_registry::types::RegisterResult;
 use pocket_ic::{PocketIc, PocketIcBuilder, WasmResult};
 use std::fs;
 
@@ -77,7 +78,7 @@ impl CnsFixture {
             records: Some(vec![DomainRecord {
                 name: ".icp.".to_string(),
                 record_type: "NC".to_string(),
-                ttl: 3600,
+                ttl: Nat::from(3600u32),
                 data: self.tld_operator.to_string(),
             }]),
         };

@@ -1,4 +1,4 @@
-import APITypes "../../common/api_types";
+import ApiTypes "../../common/api_types";
 import DomainTypes "../../common/data/domain/Types";
 import Domain "../../common/data/domain";
 import { getTldFromDomain }"parse";
@@ -16,7 +16,7 @@ module {
     lookupAnswersMap : DomainTypes.DomainRecordsStore,
     lookupAuthoritiesMap : DomainTypes.DomainRecordsStore,
     records : DomainTypes.RegistrationRecords,
-  ) : (APITypes.RegisterResult, Text) {
+  ) : (ApiTypes.RegisterResult, Text) {
     if (not Principal.isController(caller)) {
       return (
         {

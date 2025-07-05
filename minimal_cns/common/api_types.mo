@@ -9,7 +9,7 @@ module {
   };
   public type RegisterResult = OperationResult;
 
-  public type LookupResponse = {
+  public type DomainLookup = {
     answers : [DomainTypes.DomainRecord];
     additionals : [DomainTypes.DomainRecord];
     authorities : [DomainTypes.DomainRecord];

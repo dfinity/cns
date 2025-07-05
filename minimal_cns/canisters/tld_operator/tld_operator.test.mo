@@ -8,7 +8,7 @@ import Result "mo:base/Result";
 import { trap } "mo:base/Runtime";
 import Text "mo:base/Text";
 import Test "../../common/test_utils";
-import APITypes "../../common/api_types";
+import ApiTypes "../../common/api_types";
 import DomainTypes "../../common/data/domain/Types";
 
 actor {
@@ -395,12 +395,12 @@ actor {
     assert Test.isTrue(registerResponse.success, "Registration of " # domain # " failed unexpectedly with error" # debug_show (registerResponse.message));
 
     // Lookup the new record.
-    let newLookupResponse = await IcpTldOperator.lookup(domain, "CID");
-    assert Test.isEqualInt(newLookupResponse.answers.size(), 1, errMsg # "answers");
-    assert Test.isEqualInt(newLookupResponse.additionals.size(), 0, errMsg # "additionals");
-    assert Test.isEqualInt(newLookupResponse.authorities.size(), 0, errMsg # "authorities");
+    let newDomainLookup = await IcpTldOperator.lookup(domain, "CID");
+    assert Test.isEqualInt(newDomainLookup.answers.size(), 1, errMsg # "answers");
+    assert Test.isEqualInt(newDomainLookup.additionals.size(), 0, errMsg # "additionals");
+    assert Test.isEqualInt(newDomainLookup.authorities.size(), 0, errMsg # "authorities");
 
-    let newResponseDomainRecord = newLookupResponse.answers[0];
+    let newResponseDomainRecord = newDomainLookup.answers[0];
     assert Test.isEqualDomainRecord(newResponseDomainRecord, newDomainRecord);
   };
 

@@ -13,7 +13,7 @@ module {
     metrics : MetricsTypes.CnsMetrics,
     domain : Text,
     recordType : Text,
-  ) : APITypes.LookupResponse {
+  ) : APITypes.DomainLookup {
     var answers : [DomainTypes.DomainRecord] = [];
     var authorities : [DomainTypes.DomainRecord] = [];
 

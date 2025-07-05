@@ -69,37 +69,6 @@ module {
   };
 
   // CNS Root Domain Record Store
-  // Map of tlds to domain record
-  public type DomainRecordsStore = Map.Map<Text, DomainRecord>;
-
-
-  /* Comments brought over a from previous commit (do we still need this?):
-  // Types related to domain registration, but not used by `register`-endpoint.
-  type DomainRegistrationStatus = { #active; #inactive; #transfer_prohibited };
-  type RegistrationEventAction = {
-    #registration;
-    #locked;
-    #unlocked;
-    #expiration;
-    #reregistration;
-    #transfer;
-  };
-
-  type RegistrationEvent = {
-    action : RegistrationEventAction;
-    date : Text;
-  };
-  type DomainRegistrationData = {
-    name : Text;
-    status : [DomainRegistrationStatus];
-    events : [RegistrationEvent];
-    entities : [RegistrationController];
-    name_canister : ?Principal;
-  };
-
-  type RegistrationDataResult = {
-    certificate : Blob;
-    data : DomainRegistrationData;
-  };
-  */
+  // Map of domain names to domain records.
+  public type DomainRecordsStore = Map.Map<Domain, DomainRecord>;
 }

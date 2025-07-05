@@ -1,4 +1,4 @@
-import APITypes "../../common/api_types";
+import ApiTypes "../../common/api_types";
 import DomainTypes "../../common/data/domain/Types";
 import Domain "../../common/data/domain";
 import MetricsTypes "../../common/metrics";
@@ -12,7 +12,7 @@ module {
     metrics : MetricsTypes.CnsMetrics,
     domain : Text,
     recordType : Text,
-  ) : APITypes.LookupResponse {
+  ) : ApiTypes.DomainLookup {
     var answers : [DomainTypes.DomainRecord] = [];
     let domainLowercase : Text = Text.toLower(domain);
 

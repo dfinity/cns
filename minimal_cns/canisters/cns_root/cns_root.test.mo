@@ -1,7 +1,6 @@
 import CnsRoot "canister:cns_root";
 import { trap } "mo:base/Runtime";
 import Metrics "../../common/metrics";
-import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
 import Result "mo:base/Result";
 import Test "../../common/test_utils";

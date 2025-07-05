@@ -1,7 +1,7 @@
 import { Principal } from '@dfinity/principal';
 import {
   DomainRecord as CanisterDomainRecord,
-  LookupResponse as CanisterDomainLookup,
+  DomainLookup as CanisterDomainLookup,
   RegistrationControllerRole as CanisterControllerRole,
   RegistrationRecords as CanisterRegistrationRecords,
   RegistrationController as CanisterRegistrationController,
