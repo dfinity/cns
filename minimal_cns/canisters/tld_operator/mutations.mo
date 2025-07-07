@@ -127,5 +127,4 @@ module {
 
     #ok(Domain.normalizedDomainRecord(record), maybeRegistrant);
   };
-}
-
+};

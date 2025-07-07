@@ -1,4 +1,4 @@
-use candid::{CandidType, Deserialize, Principal, Nat};
+use candid::{CandidType, Deserialize, Nat, Principal};
 pub use cns_domain_registry::types::RegisterResult;
 use ic_cdk::api::call::{call, RejectionCode};
 use lazy_static::lazy_static;

@@ -1,7 +1,7 @@
 import ApiTypes "../../common/api_types";
 import DomainTypes "../../common/data/domain/Types";
 import Domain "../../common/data/domain";
-import { getTldFromDomain }"parse";
+import { getTldFromDomain } "parse";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
@@ -94,4 +94,4 @@ module {
       };
     };
   };
-}
+};

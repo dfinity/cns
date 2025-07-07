@@ -16,5 +16,5 @@ module {
   };
 
   public type GetMetricsResult = Result.Result<Metrics.MetricsData, Text>;
-  public type PurgeMetricsResult = Result.Result<Nat, Text>
+  public type PurgeMetricsResult = Result.Result<Nat, Text>;
 };

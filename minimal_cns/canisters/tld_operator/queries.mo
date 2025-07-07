@@ -38,5 +38,5 @@ module {
       additionals = [];
       authorities = [];
     };
-  }
-}
+  };
+};

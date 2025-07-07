@@ -71,4 +71,4 @@ module {
   // CNS Root Domain Record Store
   // Map of domain names to domain records.
   public type DomainRecordsStore = Map.Map<Domain, DomainRecord>;
-}
+};

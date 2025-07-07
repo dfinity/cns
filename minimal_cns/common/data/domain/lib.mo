@@ -15,7 +15,7 @@ module {
 
     public func getByDomain(
       store : Types.DomainRecordsStore,
-      domain : Types.Domain
+      domain : Types.Domain,
     ) : ?Types.DomainRecord {
       Map.get(store, Text.compare, domain);
     };
@@ -23,7 +23,7 @@ module {
     public func add(
       store : Types.DomainRecordsStore,
       domain : Types.Domain,
-      record : Types.DomainRecord
+      record : Types.DomainRecord,
     ) : () {
       Map.add(store, Text.compare, domain, record);
     };
@@ -43,7 +43,7 @@ module {
 
     public func getByDomain(
       store : Types.RegistrationRecordsStore,
-      domain : Types.Domain
+      domain : Types.Domain,
     ) : ?Types.RegistrationRecordsWithPrincipals {
       Map.get(store.domainToRecordsMap, Text.compare, domain);
     };
@@ -79,4 +79,4 @@ module {
       data = record.data;
     };
   };
-}
+};

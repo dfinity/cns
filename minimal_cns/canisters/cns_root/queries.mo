@@ -22,14 +22,14 @@ module {
       let tld = getTldFromDomain(domainLowercase);
       switch (Text.toUpper(recordType)) {
         case ("NC") {
-          let maybeRecord : ?DomainTypes.DomainRecord = Domain.DomainRecordsStore.getByDomain(lookupAnswersMap, tld); 
+          let maybeRecord : ?DomainTypes.DomainRecord = Domain.DomainRecordsStore.getByDomain(lookupAnswersMap, tld);
           answers := switch maybeRecord {
             case null { [] };
             case (?record) { [record] };
           };
         };
         case _ {
-          let maybeRecord : ?DomainTypes.DomainRecord = Domain.DomainRecordsStore.getByDomain(lookupAuthoritiesMap, tld); 
+          let maybeRecord : ?DomainTypes.DomainRecord = Domain.DomainRecordsStore.getByDomain(lookupAuthoritiesMap, tld);
           authorities := switch maybeRecord {
             case null { [] };
             case (?record) { [record] };
@@ -45,4 +45,4 @@ module {
       authorities = authorities;
     };
   };
-}
+};
