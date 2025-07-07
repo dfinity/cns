@@ -124,7 +124,7 @@ fn should_register_and_lookup() {
     let env = CnsFixture::init();
     env.register_icp_nc();
     for (domain, cid_text) in [
-        ("example.icp.", "aaaaa-aa"),
+        ("example.icp.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
         ("nns_governance.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
         ("nns_registry.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
     ] {
@@ -139,7 +139,7 @@ fn should_register_and_lookup() {
 fn should_not_register_and_lookup_if_missing_nc() {
     let env = CnsFixture::init();
     for (domain, cid_text) in [
-        ("example.com.", "aaaaa-aa"),
+        ("example.com.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
         ("nns_governance.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
         ("nns_registry.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
     ] {
@@ -154,7 +154,7 @@ fn should_not_register_and_lookup_if_missing_nc() {
 fn should_not_register_and_lookup_if_not_icp_tld() {
     let env = CnsFixture::init();
     for (domain, cid_text) in [
-        ("example.com.", "aaaaa-aa"),
+        ("example.com.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
         ("nns_governance.org.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
         ("nns_registry.edu.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
     ] {

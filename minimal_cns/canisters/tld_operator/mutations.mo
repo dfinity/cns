@@ -1,12 +1,12 @@
 import ApiTypes "../../common/api_types";
 import Domain "../../common/data/domain";
 import DomainTypes "../../common/data/domain/Types";
+import Array "mo:base/Array";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
 import Option "mo:base/Option";
 import { trap } "mo:base/Runtime";
-import { print } "mo:base/Debug";
 
 module {
   // In addition th the `RegisterResult` this helper returns the relevant record type,
@@ -32,47 +32,22 @@ module {
     };
 
     if (not Principal.isController(caller)) {
-      print("principal is not a controller: " # Principal.toText(caller));
-      print("domainLowercase: " # domainLowercase);
-      // Only subdomains of .test.icp are allowed for non-controllers
-      if (not Text.endsWith(domainLowercase, #text(".test" # myTld))) {
-        print("domain does not end with .test.icp, returning error");
-        return (
-          {
-            success = false;
-            message = ?("Currently only a canister controller can register non-test " # myTld # "-domains, domain: " # domainLowercase # ", caller: " # Principal.toText(caller));
-          },
-          "",
-        );
-      };
-      print("ends with .test.icp, continuing");
-      // If the domain was registered previously, the caller must match the existing registrant.
-      switch (maybeRegistrant) {
-        case (null) {};
-        case (?registrant) {
-          if (registrant != caller) {
-            print("registrant does not match caller, returning error");
-            return (
-              {
-                success = false;
-                message = ?("Caller " # Principal.toText(caller) # " does not match the registrant " # Principal.toText(registrant));
-              },
-              "",
-            );
-          };
-        };
+      switch (canRegisterResult(caller, myTld, domainLowercase, maybeRegistrant)) {
+        case (#ok) {};
+        case (#err(msg)) { return ({ success = false; message = ?(msg) }, "") };
       };
     };
-    print("caller is a controller or matches the registrant, continuing");
-    let registrationRecord : DomainTypes.RegistrationRecords = {
+
+    // Currently, only adding exactly one domain record is supported. (see checks in `validateRegistrationRecords`).
+    let newRegistrationRecord : DomainTypes.NewRegistrationDomainRecord = {
       controllers = [{
         principal = caller;
         roles = [#registrant];
       }];
-      records = ?[domainRecord];
+      record = domainRecord;
     };
-    // TODO: fill in the correct principals list here?
-    Domain.RegistrationRecordsStore.add(lookupAnswersMap, domainLowercase, registrationRecord, []);
+
+    Domain.RegistrationRecordsStore.add(lookupAnswersMap, domainLowercase, newRegistrationRecord);
 
     (
       {
@@ -81,6 +56,28 @@ module {
       },
       Text.toUpper(domainRecord.record_type),
     );
+  };
+
+  func canRegisterResult(
+    caller : Principal,
+    myTld : Text,
+    domain : Text,
+    maybeRegistrant : ?Principal,
+  ) : Result.Result<(), Text> {
+    if (not Text.endsWith(domain, #text(".test" # myTld))) {
+      return #err("Currently only a canister controller can register non-test " # myTld # "-domains, domain: " # domain # ", caller: " # Principal.toText(caller));
+    };
+    // If the domain was registered previously, the caller must match the existing registrant.
+    switch (maybeRegistrant) {
+      case (null) {};
+      case (?registrant) {
+        if (registrant != caller) {
+          return #err("Caller " # Principal.toText(caller) # " does not match the registrant " # Principal.toText(registrant));
+        };
+      };
+    };
+
+    #ok;
   };
 
   // Validates the records, and if the domain already exisits, extracts the registrant.
@@ -108,23 +105,58 @@ module {
     if (domainLowercase != Text.toLower(record.name)) {
       return #err("Inconsistent domain record, record.name: `" # record.name # "` doesn't match domain: " # domainLowercase);
     };
-    if (recordType != "CID") {
-      return #err("Currently only CID-records can be registered");
+
+    switch (validateRecord(record)) {
+      case (#ok) {};
+      case (#err(msg)) { return #err(msg) };
     };
+
     // TODO: don't trap on invalid Principals.
     let _ = Principal.fromText(record.data);
 
     let maybeRegistrant : ?Principal = switch (Domain.RegistrationRecordsStore.getByDomain(lookupAnswersMap, domainLowercase)) {
       case (null) { null };
-      case (?{ records }) {
-        if (records.controllers.size() == 0) {
+      case (?{ controllers }) {
+        if (controllers.size() == 0) {
           trap("Internal error: missing registration controller for " # domainLowercase);
         } else {
-          ?records.controllers[0].principal;
+          ?controllers[0].principal;
         };
       };
     };
 
     #ok(Domain.normalizedDomainRecord(record), maybeRegistrant);
+  };
+
+  func isRecordTypeSupported(recordType : Text) : Bool {
+    Array.any<Text>(
+      ["CID", "SID"],
+      func(supportedType) { supportedType == recordType },
+    );
+  };
+
+  func validateRecord(
+    record : DomainTypes.DomainRecord
+  ) : Result.Result<(), Text> {
+    let recordType = Text.toUpper(record.record_type);
+    if (not isRecordTypeSupported(recordType)) {
+      return #err("Currently only CID and SID records can be registered");
+    };
+
+    if (recordType == "CID") {
+      let canisterPrincipal = Principal.fromText(record.data);
+      if (not Principal.isCanister(canisterPrincipal)) {
+        return #err("CID record data is not a valid canister principal");
+      };
+    };
+
+    if (recordType == "SID") {
+      let servicePrincipal = Principal.fromText(record.data);
+      if (not Principal.isSelfAuthenticating(servicePrincipal)) {
+        return #err("SID record data is not a valid service principal");
+      };
+    };
+
+    #ok;
   };
 };

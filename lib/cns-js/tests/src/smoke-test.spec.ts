@@ -13,7 +13,7 @@ describe('Smoke test', () => {
   const cnsRoot = inject('CNS_ROOT');
   const dfxUrl = inject('DFX_URL');
 
-  const domainCanister = Principal.fromUint8Array(new Uint8Array([42]));
+  const domainCanister = Principal.fromText('r7inp-6aaaa-aaaaa-aaabq-cai');
 
   it('should lookup .test.icp NC and CID records', async () => {
     console.debug(addNcRecord(rawTld, tldOperator));

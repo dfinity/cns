@@ -8,7 +8,6 @@ import Result "mo:base/Result";
 import { trap } "mo:base/Runtime";
 import Text "mo:base/Text";
 import Test "../../common/test_utils";
-import ApiTypes "../../common/api_types";
 import DomainTypes "../../common/data/domain/Types";
 
 actor {
@@ -84,7 +83,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -130,7 +129,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -199,7 +198,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -224,7 +223,7 @@ actor {
         name = record_name;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -249,7 +248,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -266,11 +265,11 @@ actor {
     Debug.print("    test shouldRegisterAndLookupIcpTestDomainIfNotController...");
     for (
       (domain, recordType, canisterId) in [
-        ("my_domain.test.icp.", "CID", "aaaaa-aa"),
-        ("example.test.icp.", "Cid", "em77e-bvlzu-aq"),
-        ("another.test.ICP.", "cid", "un4fu-tqaaa-aaaab-qadjq-cai"),
-        ("one.more.test.Icp.", "CId", "2vxsx-fae"),
-        ("my_domain.test.icp.", "CID", "2vxsx-fae"), // overwrite previous mapping
+        ("my_domain.test.icp.", "CID", "r7inp-6aaaa-aaaaa-aaabq-cai"),
+        ("example.test.icp.", "Cid", "rno2w-sqaaa-aaaaa-aaacq-cai"),
+        ("another.test.ICP.", "cid", "mqygn-kiaaa-aaaar-qaadq-cai"),
+        ("one.more.test.Icp.", "CId", "n5wcd-faaaa-aaaar-qaaea-cai"),
+        ("my_domain.test.icp.", "CID", "n5wcd-faaaa-aaaar-qaaea-cai"), // overwrite previous mapping
       ].vals()
     ) {
       let domainRecord : DomainRecord = {
@@ -285,7 +284,6 @@ actor {
       };
       let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
       assert Test.isTrue(registerResponse.success, asText(registerResponse.message));
-
       let lookupResponse = await IcpTldOperator.lookup(domain, recordType);
       let errMsg = "shouldRegisterAndLookupIcpTestDomainIfNotController() failed for domain: " # domain # ", recordType: " # recordType # ", size of response.";
       assert Test.isEqualInt(lookupResponse.answers.size(), 1, errMsg # "answers");
@@ -304,9 +302,9 @@ actor {
     // The test data is a subset from shouldRegisterAndLookupIcpTestDomainIfNotController()
     for (
       (domain, recordType, canisterId) in [
-        ("example.test.icp.", "Cid", "em77e-bvlzu-aq"),
-        ("another.test.ICP.", "cid", "un4fu-tqaaa-aaaab-qadjq-cai"),
-        ("one.more.test.Icp.", "CId", "2vxsx-fae"),
+        ("example.test.icp.", "Cid", "rno2w-sqaaa-aaaaa-aaacq-cai"),
+        ("another.test.ICP.", "cid", "mqygn-kiaaa-aaaar-qaadq-cai"),
+        ("one.more.test.Icp.", "CId", "n5wcd-faaaa-aaaar-qaaea-cai"),
       ].vals()
     ) {
       let expectedDomainRecord : DomainRecord = {
@@ -319,7 +317,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa"; // try to override an existing mapping
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai"; // try to override an existing mapping
       };
       let registrationRecords = {
         controllers = [];
@@ -343,7 +341,7 @@ actor {
   func shouldRegisterTestDomainOtherCallerRegistrant() : async () {
     Debug.print("    test shouldRegisterTestDomainOtherCallerRegistrant...");
     let domain = "to-be-overriden.test.icp.";
-    let canisterId = "2vxsx-fae";
+    let canisterId = "n5wcd-faaaa-aaaar-qaaea-cai";
     let record : DomainRecord = {
       name = domain;
       record_type = "CID";
@@ -361,7 +359,7 @@ actor {
   func shouldOverwriteTestDomainIfController() : async () {
     Debug.print("    test shouldOverwriteTestDomainIfController...");
     let domain = "to-be-overriden.test.icp.";
-    let canisterId = "2vxsx-fae";
+    let canisterId = "n5wcd-faaaa-aaaar-qaaea-cai";
     let expectedDomainRecord : DomainRecord = {
       name = domain;
       record_type = "CID";
@@ -384,7 +382,7 @@ actor {
       name = domain;
       record_type = "CID";
       ttl = 600; // different ttl
-      data = "aaaaa-aa"; // different canister id
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai"; // different canister id
     };
     let registrationRecords = {
       controllers = [];
@@ -433,7 +431,7 @@ actor {
       name = domain;
       record_type = "NS";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];
@@ -441,7 +439,7 @@ actor {
     };
     let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
     assert Test.isFalse(registerResponse.success, "Registration of " # domain # " succeeded unexpectedly");
-    assert Test.textContains(asText(registerResponse.message), "only CID-records can be registered", "Registration of " # domain # " failed for a wrong reason");
+    assert Test.textContains(asText(registerResponse.message), "only CID and SID records can be registered", "Registration of " # domain # " failed for a wrong reason");
   };
 
   func shouldNotRegisterTestDomainIfExplicitController() : async () {
@@ -451,11 +449,11 @@ actor {
       name = domain;
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords : DomainTypes.RegistrationRecords = {
       controllers = [{
-        principal = Principal.fromText("aaaaa-aa");
+        principal = Principal.fromText("r7inp-6aaaa-aaaaa-aaabq-cai");
         roles : [DomainTypes.RegistrationControllerRole] = [#registrant];
       }];
       records = ?[record];
@@ -472,7 +470,7 @@ actor {
       name = "other.domain.test.icp.";
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];
@@ -490,7 +488,7 @@ actor {
       name = domain;
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];
@@ -529,7 +527,7 @@ actor {
       name = "example.icp.";
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];
