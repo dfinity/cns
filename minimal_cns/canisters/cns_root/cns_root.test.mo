@@ -1,12 +1,11 @@
 import CnsRoot "canister:cns_root";
 import { trap } "mo:base/Runtime";
 import Metrics "../../common/metrics";
-import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
 import Result "mo:base/Result";
 import Test "../../common/test_utils";
 import Text "mo:base/Text";
-import Types "../../common/cns_types";
+import DomainTypes "../../common/data/domain/Types";
 
 actor {
   public func runTests() : async () {
@@ -45,14 +44,14 @@ actor {
   };
 
   func shouldRegisterIcpTldOperator() : async () {
-    let domainRecord : Types.DomainRecord = {
+    let domainRecord : DomainTypes.DomainRecord = {
       name = ".icp.";
       record_type = "NC";
       ttl = 3600;
       data = dummyIcpTldCanisterId;
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[domainRecord];
     };
     let registerResponse = await CnsRoot.register(".icp.", registrationRecords);
@@ -76,7 +75,7 @@ actor {
       let domainRecord = response.answers[0];
       assert Test.isEqualText(domainRecord.name, ".icp.", errMsg # "field: DomainRecord.name");
       assert Test.isEqualText(domainRecord.record_type, "NC", errMsg # "field: DomainRecord.record_type");
-      assert Test.isEqualInt(Nat32.toNat(domainRecord.ttl), 3600, errMsg # "field: DomainRecord.ttl");
+      assert Test.isEqualInt(domainRecord.ttl, 3600, errMsg # "field: DomainRecord.ttl");
       assert Test.isEqualText(domainRecord.data, dummyIcpTldCanisterId, errMsg # "field: DomainRecord.data");
     };
   };
@@ -100,7 +99,7 @@ actor {
       let domainRecord = response.authorities[0];
       assert Test.isEqualText(domainRecord.name, ".icp.", errMsg # "field: DomainRecord.name");
       assert Test.isEqualText(domainRecord.record_type, "NC", errMsg # "field: DomainRecord.record_type");
-      assert Test.isEqualInt(Nat32.toNat(domainRecord.ttl), 3600, errMsg # "field: DomainRecord.ttl");
+      assert Test.isEqualInt(domainRecord.ttl, 3600, errMsg # "field: DomainRecord.ttl");
       assert Test.isEqualText(domainRecord.data, dummyIcpTldCanisterId, errMsg # "field: DomainRecord.data");
     };
   };
@@ -132,14 +131,14 @@ actor {
     for (
       (domain, recordType) in testDomains.vals()
     ) {
-      let domainRecord : Types.DomainRecord = {
+      let domainRecord : DomainTypes.DomainRecord = {
         name = domain;
         record_type = recordType;
         ttl = 3600;
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let _ = await CnsRoot.register(domain, registrationRecords);
@@ -218,14 +217,14 @@ actor {
       ].vals()
     ) {
       let someData = "canister-id-for-" # tld # "-" # recordType;
-      let domainRecord : Types.DomainRecord = {
+      let domainRecord : DomainTypes.DomainRecord = {
         name = tld;
         record_type = recordType;
         ttl = 3600;
         data = someData;
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let registerResponse = await CnsRoot.register(tld, registrationRecords);
@@ -251,14 +250,14 @@ actor {
         ("example.org."),
       ].vals()
     ) {
-      let domainRecord : Types.DomainRecord = {
+      let domainRecord : DomainTypes.DomainRecord = {
         name = tld;
         record_type = "NC";
         ttl = 3600;
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let response = await CnsRoot.register(tld, registrationRecords);
@@ -287,14 +286,14 @@ actor {
         ("longer.domain.com."),
       ].vals()
     ) {
-      let domainRecord : Types.DomainRecord = {
+      let domainRecord : DomainTypes.DomainRecord = {
         name = domain;
         record_type = "NC";
         ttl = 3600;
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let response = await CnsRoot.register(domain, registrationRecords);
@@ -312,14 +311,14 @@ actor {
         (".org."),
       ].vals()
     ) {
-      let domainRecord : Types.DomainRecord = {
+      let domainRecord : DomainTypes.DomainRecord = {
         name = tld # ".";
         record_type = "NC";
         ttl = 3600;
         data = "aaa-aaaa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let response = await CnsRoot.register(tld, registrationRecords);
@@ -330,21 +329,21 @@ actor {
   };
 
   func shouldNotRegisterTldIfMissingDomainRecord() : async () {
-    let response = await CnsRoot.register(".icp.", { controller = []; records = null });
+    let response = await CnsRoot.register(".icp.", { controllers = []; records = null });
     let errMsg = "shouldNotRegisterTldIfMissingDomainRecord() failed";
     assert Test.isTrue(not response.success, errMsg);
     assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);
   };
 
   func shouldNotRegisterTldIfMultipleDomainRecords() : async () {
-    let domainRecord : Types.DomainRecord = {
+    let domainRecord : DomainTypes.DomainRecord = {
       name = ".icp.";
       record_type = "NC";
       ttl = 3600;
       data = "aaa-aaaa";
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[domainRecord, domainRecord];
     };
     let response = await CnsRoot.register(".icp.", registrationRecords);

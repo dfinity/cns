@@ -8,10 +8,11 @@ import Result "mo:base/Result";
 import { trap } "mo:base/Runtime";
 import Text "mo:base/Text";
 import Test "../../common/test_utils";
-import Types "../../common/cns_types";
+import ApiTypes "../../common/api_types";
+import DomainTypes "../../common/data/domain/Types";
 
 actor {
-  type DomainRecord = Types.DomainRecord;
+  type DomainRecord = DomainTypes.DomainRecord;
 
   public func runTestsIfController() : async () {
     Debug.print("--- starting runTestsIfController...");
@@ -86,7 +87,7 @@ actor {
         data = "aaaaa-aa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
@@ -132,7 +133,7 @@ actor {
         data = "aaaaa-aa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let _ = await IcpTldOperator.register(domain, registrationRecords);
@@ -201,7 +202,7 @@ actor {
         data = "aaaaa-aa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let response = await IcpTldOperator.register(domain, registrationRecords);
@@ -226,7 +227,7 @@ actor {
         data = "aaaaa-aa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let response = await IcpTldOperator.register(domain, registrationRecords);
@@ -251,7 +252,7 @@ actor {
         data = "aaaaa-aa";
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let response = await IcpTldOperator.register(domain, registrationRecords);
@@ -279,7 +280,7 @@ actor {
         data = canisterId;
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[domainRecord];
       };
       let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
@@ -321,7 +322,7 @@ actor {
         data = "aaaaa-aa"; // try to override an existing mapping
       };
       let registrationRecords = {
-        controller = [];
+        controllers = [];
         records = ?[newDomainRecord];
       };
       let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
@@ -350,7 +351,7 @@ actor {
       data = canisterId;
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[record];
     };
     let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
@@ -386,7 +387,7 @@ actor {
       data = "aaaaa-aa"; // different canister id
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[newDomainRecord];
     };
 
@@ -394,12 +395,12 @@ actor {
     assert Test.isTrue(registerResponse.success, "Registration of " # domain # " failed unexpectedly with error" # debug_show (registerResponse.message));
 
     // Lookup the new record.
-    let newLookupResponse = await IcpTldOperator.lookup(domain, "CID");
-    assert Test.isEqualInt(newLookupResponse.answers.size(), 1, errMsg # "answers");
-    assert Test.isEqualInt(newLookupResponse.additionals.size(), 0, errMsg # "additionals");
-    assert Test.isEqualInt(newLookupResponse.authorities.size(), 0, errMsg # "authorities");
+    let newDomainLookup = await IcpTldOperator.lookup(domain, "CID");
+    assert Test.isEqualInt(newDomainLookup.answers.size(), 1, errMsg # "answers");
+    assert Test.isEqualInt(newDomainLookup.additionals.size(), 0, errMsg # "additionals");
+    assert Test.isEqualInt(newDomainLookup.authorities.size(), 0, errMsg # "authorities");
 
-    let newResponseDomainRecord = newLookupResponse.answers[0];
+    let newResponseDomainRecord = newDomainLookup.answers[0];
     assert Test.isEqualDomainRecord(newResponseDomainRecord, newDomainRecord);
   };
 
@@ -413,7 +414,7 @@ actor {
       data = "bad-canister-id";
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[record];
     };
     try {
@@ -435,7 +436,7 @@ actor {
       data = "aaaaa-aa";
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[record];
     };
     let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
@@ -452,10 +453,10 @@ actor {
       ttl = 3600;
       data = "aaaaa-aa";
     };
-    let registrationRecords : Types.RegistrationRecords = {
-      controller = [{
+    let registrationRecords : DomainTypes.RegistrationRecords = {
+      controllers = [{
         principal = Principal.fromText("aaaaa-aa");
-        roles : [Types.RegistrationControllerRole] = [#registrant];
+        roles : [DomainTypes.RegistrationControllerRole] = [#registrant];
       }];
       records = ?[record];
     };
@@ -474,7 +475,7 @@ actor {
       data = "aaaaa-aa";
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[record];
     };
     let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
@@ -492,7 +493,7 @@ actor {
       data = "aaaaa-aa";
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[record];
     };
     let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
@@ -515,7 +516,7 @@ actor {
   };
 
   func shouldNotRegisterIfMissingDomainRecord() : async () {
-    let response = await IcpTldOperator.register(".icp.", { controller = []; records = null });
+    let response = await IcpTldOperator.register(".icp.", { controllers = []; records = null });
     let errMsg = "shouldNotRegisterIfMissingDomainRecord() failed";
     assert Test.isTrue(not response.success, errMsg);
     assert Test.textContains(asText(response.message), "exactly one domain record", errMsg);
@@ -524,14 +525,14 @@ actor {
   func shouldNotRegisterIfMultipleDomainRecords() : async () {
     Debug.print("    test shouldNotRegisterIfMultipleDomainRecords...");
 
-    let domainRecord : Types.DomainRecord = {
+    let domainRecord : DomainTypes.DomainRecord = {
       name = "example.icp.";
       record_type = "CID";
       ttl = 3600;
       data = "aaaaa-aa";
     };
     let registrationRecords = {
-      controller = [];
+      controllers = [];
       records = ?[domainRecord, domainRecord];
     };
     let response = await IcpTldOperator.register(".icp.", registrationRecords);

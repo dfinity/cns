@@ -30,7 +30,7 @@ export function mapRegistrationRecordRequest(
   req: RegistrationRecordRequest,
 ): CanisterRegistrationRecords {
   return {
-    controller: req.controller.map(mapRegistrationControllerRequest),
+    controllers: req.controller.map(mapRegistrationControllerRequest),
     records: toCandidOpt(req.domainRecords?.map(mapDomainRecordRequest)),
   };
 }
