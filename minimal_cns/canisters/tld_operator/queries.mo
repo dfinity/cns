@@ -22,7 +22,8 @@ module {
   ) : ApiTypes.DomainLookup {
     let domainLowercase : Text = Text.toLower(domain);
 
-    if (not Text.endsWith(domainLowercase, #text(myTld))) {
+    // If the lookup domain does not end with this TLD operator's TLD, return an empty lookup
+    if (not doesDomainEndInTLD(myTld, domainLowercase)) {
       metrics.addEntry(metrics.makeLookupEntry(domainLowercase, recordType, false));
       return EMPTY_DOMAIN_LOOKUP;
     };
@@ -95,5 +96,9 @@ module {
       additionals = [];
       authorities = [];
     };
+  };
+
+  func doesDomainEndInTLD(myTld : Text, domainLowercase : Text) : Bool {
+    Text.endsWith(domainLowercase, #text(myTld));
   };
 };
