@@ -68,8 +68,8 @@ module {
     // split the domain into parts, based on "."
     let parts = Iter.toArray(Text.split(domain, #char '.'));
     // expect there to be exactly 3 parts: <principal>, reverse, <tld>
-    // TODO: Is this assumption correct?
-    if (parts.size() != 3) {
+    // The 4th part is the 3rd period at the end (so parts[3] is the empty string)
+    if (parts.size() != 4) {
       return { answers = []; additionals = []; authorities = [] };
     };
 

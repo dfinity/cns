@@ -2,6 +2,8 @@ import ApiTypes "../../common/api_types";
 import Domain "../../common/data/domain";
 import DomainTypes "../../common/data/domain/Types";
 import Array "mo:base/Array";
+import Char "mo:base/Char";
+import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
@@ -32,7 +34,7 @@ module {
     };
 
     if (not Principal.isController(caller)) {
-      switch (canRegisterResult(caller, myTld, domainLowercase, maybeRegistrant)) {
+      switch (canRegisterResult(caller, myTld, domainLowercase, domainRecord.record_type, maybeRegistrant)) {
         case (#ok) {};
         case (#err(msg)) { return ({ success = false; message = ?(msg) }, "") };
       };
@@ -58,12 +60,18 @@ module {
     );
   };
 
+  // Registration authorization checks for if the caller is not a controller of the CNS service canister
   func canRegisterResult(
     caller : Principal,
     myTld : Text,
     domain : Text,
+    recordType : Text,
     maybeRegistrant : ?Principal,
   ) : Result.Result<(), Text> {
+    // Only allow CNS service controllers to register SID/other records to start
+    if (recordType != "CID") {
+      return #err("Not authorized to register non-CID records");
+    };
     if (not Text.endsWith(domain, #text(".test" # myTld))) {
       return #err("Currently only a canister controller can register non-test " # myTld # "-domains, domain: " # domain # ", caller: " # Principal.toText(caller));
     };
@@ -98,7 +106,16 @@ module {
       return #err("Currently no explicit controller setting is supported.");
     };
     let record : DomainTypes.DomainRecord = domainRecords[0];
-    let recordType = Text.toUpper(record.record_type);
+    // Prevent record stuffing - initial limits (can be changed later) to ensure that the name,
+    // record_type, and data fields are limited to 100 characters
+    if (
+      record.name.size() > 100 or
+      record.record_type.size() > 100 or
+      record.data.size() > 100
+    ) {
+      return #err("Domain record name, record_type, and data fields must be limited to 100 characters");
+    };
+
     if (not Text.endsWith(domainLowercase, #text myTld)) {
       return #err("Unsupported TLD in domain " # domainLowercase # ", expected TLD=" # myTld);
     };
@@ -106,7 +123,7 @@ module {
       return #err("Inconsistent domain record, record.name: `" # record.name # "` doesn't match domain: " # domainLowercase);
     };
 
-    switch (validateRecord(record)) {
+    switch (validateRecord({ record with record_type = Text.toUpper(record.record_type) })) {
       case (#ok) {};
       case (#err(msg)) { return #err(msg) };
     };
@@ -144,16 +161,69 @@ module {
     };
 
     if (recordType == "CID") {
-      let canisterPrincipal = Principal.fromText(record.data);
-      if (not Principal.isCanister(canisterPrincipal)) {
-        return #err("CID record data is not a valid canister principal");
+      switch (validateCanisterRecord(record)) {
+        case (#ok) {};
+        case (#err(msg)) { return #err(msg) };
       };
     };
 
     if (recordType == "SID") {
-      let servicePrincipal = Principal.fromText(record.data);
-      if (not Principal.isSelfAuthenticating(servicePrincipal)) {
-        return #err("SID record data is not a valid service principal");
+      switch (validateSubnetRecord(record)) {
+        case (#ok) {};
+        case (#err(msg)) { return #err(msg) };
+      };
+    };
+
+    #ok;
+  };
+
+  func validateCanisterRecord(
+    record : DomainTypes.DomainRecord
+  ) : Result.Result<(), Text> {
+    let canisterPrincipal = Principal.fromText(record.data);
+    if (not Principal.isCanister(canisterPrincipal)) {
+      return #err("CID record data is not a valid canister principal");
+    };
+
+    #ok;
+  };
+
+  // Subnet domain names follow the format `{subnet_type}-(optional {subnet_specialization})-{incrementing counter id}.subnet.icp.`
+  func validateSubnetRecord(
+    record : DomainTypes.DomainRecord
+  ) : Result.Result<(), Text> {
+    let servicePrincipal = Principal.fromText(record.data);
+    if (not Principal.isSelfAuthenticating(servicePrincipal)) {
+      return #err("SID record data is not a valid service principal");
+    };
+
+    // The subnet name must end with `.subnet.icp.`
+    if (not Text.endsWith(record.name, #text(".subnet.icp."))) {
+      return #err("Subnet record name must end with `.subnet.icp.`");
+    };
+
+    let parts = Iter.toArray(Text.split(record.name, #text(".")));
+    if (parts.size() != 4) {
+      return #err("Subnet record name has improper format");
+    };
+
+    let prefix = parts[0];
+
+    let prefixParts = Iter.toArray(Text.split(prefix, #char '-'));
+    if (prefixParts.size() < 2 or prefixParts.size() > 3) {
+      return #err("Subnet record name has improper prefix format");
+    };
+
+    let subnetType = prefixParts[0];
+    if (subnetType != "sys" and subnetType != "app") {
+      return #err("Subnet record has unsupported subnet type");
+    };
+    // TODO: validate subnet specialization if it exists
+
+    let counterId = prefixParts[prefixParts.size() - 1];
+    for (char in counterId.chars()) {
+      if (not Char.isDigit(char)) {
+        return #err("Subnet record counter id is not numeric");
       };
     };
 

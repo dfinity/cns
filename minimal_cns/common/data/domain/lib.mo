@@ -3,7 +3,6 @@ import Array "mo:base/Array";
 import Map "mo:base/Map";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
-import StableBuffer "mo:stable-buffer/StableBuffer";
 
 module {
   public module DomainRecordsStore {
