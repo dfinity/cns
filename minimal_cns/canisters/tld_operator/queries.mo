@@ -21,6 +21,7 @@ module {
     recordType : Text,
   ) : ApiTypes.DomainLookup {
     let domainLowercase : Text = Text.toLower(domain);
+
     if (not Text.endsWith(domainLowercase, #text(myTld))) {
       metrics.addEntry(metrics.makeLookupEntry(domainLowercase, recordType, false));
       return EMPTY_DOMAIN_LOOKUP;
@@ -38,12 +39,12 @@ module {
     response;
   };
 
-  public func forwardLookup(
+  func forwardLookup(
     domainRecordsStore : DomainTypes.RegistrationRecordsStore,
-    domain : Text,
+    domainLowercase : Text,
   ) : ApiTypes.DomainLookup {
     // look up the domain record by the domain
-    let maybeRecords = Domain.RegistrationRecordsStore.getByDomain(domainRecordsStore, domain);
+    let maybeRecords = Domain.RegistrationRecordsStore.getByDomain(domainRecordsStore, domainLowercase);
     let answers = switch (maybeRecords) {
       case null { [] };
       case (?{ records }) {
@@ -61,12 +62,12 @@ module {
 
   // Reverse lookups have the format <principal>.reverse.<tld>
   // In this case, we expect the <principal> to be a valid principal.
-  public func reverseLookup(
+  func reverseLookup(
     domainRecordsStore : DomainTypes.RegistrationRecordsStore,
-    domain : Text,
+    domainLowercase : Text,
   ) : ApiTypes.DomainLookup {
     // split the domain into parts, based on "."
-    let parts = Iter.toArray(Text.split(domain, #char '.'));
+    let parts = Iter.toArray(Text.split(domainLowercase, #char '.'));
     // expect there to be exactly 3 parts: <principal>, reverse, <tld>
     // The 4th part is the 3rd period at the end (so parts[3] is the empty string)
     if (parts.size() != 4) {
@@ -84,7 +85,7 @@ module {
     };
 
     // look up the PTR domain record of the principal
-    let answers = switch (Domain.RegistrationRecordsStore.getPtrRecord(domainRecordsStore, domain, principal)) {
+    let answers = switch (Domain.RegistrationRecordsStore.getPtrRecord(domainRecordsStore, domainLowercase, principal)) {
       case null { [] };
       case (?record) { [record] };
     };
