@@ -8,7 +8,6 @@ import Result "mo:base/Result";
 import { trap } "mo:base/Runtime";
 import Text "mo:base/Text";
 import Test "../../common/test_utils";
-import ApiTypes "../../common/api_types";
 import DomainTypes "../../common/data/domain/Types";
 
 actor {
@@ -19,6 +18,7 @@ actor {
     await shouldNotLookupNonregisteredIcpDomain();
     await shouldRegisterAndLookupIcpDomainIfController();
     await shouldGetMetrics();
+    await shouldRegisterAndLookupSidIfController();
     await shouldNotRegisterNonIcpDomain();
     await shouldNotRegisterIfInconsistentDomainRecord();
     await shouldNotRegisterIfMissingDomainRecord();
@@ -29,6 +29,12 @@ actor {
     await shouldNotRegisterTestDomainIfInconsistentDomainRecord();
     await shouldNotRegisterTestDomainIfNotDotIcp();
     await shouldOverwriteTestDomainIfController();
+  };
+
+  public func runPTRTestsIfController() : async () {
+    Debug.print("--- starting runPTRTestsIfController...");
+    await shouldRegisterPtrAutomaticallyWithCid();
+    await shouldRegisterPtrAutomaticallyWithSid();
   };
 
   public func runTestsIfNotController() : async () {
@@ -84,7 +90,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -102,6 +108,32 @@ actor {
       let responseDomainRecord = lookupResponse.answers[0];
       assert Test.isEqualDomainRecord(responseDomainRecord, domainRecord);
     };
+  };
+
+  func shouldRegisterAndLookupSidIfController() : async () {
+    Debug.print("    test shouldRegisterAndLookupSidIfController...");
+    let domain = "sys-1.subnet.icp.";
+    let subnetId = "tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe";
+    let domainRecord : DomainRecord = {
+      name = domain;
+      record_type = "SID";
+      ttl = 3600;
+      data = subnetId;
+    };
+    let registrationRecords = {
+      controllers = [];
+      records = ?[domainRecord];
+    };
+    let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
+    assert Test.isTrue(registerResponse.success, "Registration of " # domain # " failed unexpectedly with error" # debug_show (registerResponse.message));
+    let lookupResponse = await IcpTldOperator.lookup(domain, "SID");
+    assert Test.isEqualInt(lookupResponse.answers.size(), 1, "shouldRegisterAndLookupSidIfController() failed for domain: " # domain # ", size of answers");
+    assert Test.isEqualInt(lookupResponse.additionals.size(), 0, "shouldRegisterAndLookupSidIfController() failed for domain: " # domain # ", size of additionals");
+    assert Test.isEqualInt(lookupResponse.authorities.size(), 0, "shouldRegisterAndLookupSidIfController() failed for domain: " # domain # ", size of authorities");
+    let responseDomainRecord = lookupResponse.answers[0];
+    assert Test.isEqualText(responseDomainRecord.name, domain, "shouldRegisterAndLookupSidIfController() failed for domain: " # domain # ", name mismatch");
+    assert Test.isEqualText(responseDomainRecord.record_type, "SID", "shouldRegisterAndLookupSidIfController() failed for domain: " # domain # ", record_type mismatch");
+    assert Test.isEqualText(responseDomainRecord.data, subnetId, "shouldRegisterAndLookupSidIfController() failed for domain: " # domain # ", data mismatch");
   };
 
   func shouldGetMetrics() : async () {
@@ -130,7 +162,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -151,7 +183,7 @@ actor {
       case (#ok(data)) { data };
       case (#err(e)) { trap("failed get_metrics with error: " # e) };
     };
-    let expectedLookupCounts = Array.map<(Text, Text), (Text, Nat)>(testDomains, func(e) { (Text.toLower(e.0), if (e.1 == "CID") { 2 } else { 1 }) });
+    let expectedLookupCounts = Array.map<(Text, Text), (Text, Nat)>(testDomains, func(e) { (Text.toLower(e.0), if (e.1 == "CID" or e.1 == "SID") { 2 } else { 1 }) });
     let expectedMetrics : Metrics.MetricsData = {
       logLength = testDomains.size() * 2 + extraLookupsCount; // register and lookup operations
       lookupCount = {
@@ -199,7 +231,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -224,7 +256,7 @@ actor {
         name = record_name;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -249,7 +281,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa";
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai";
       };
       let registrationRecords = {
         controllers = [];
@@ -266,11 +298,11 @@ actor {
     Debug.print("    test shouldRegisterAndLookupIcpTestDomainIfNotController...");
     for (
       (domain, recordType, canisterId) in [
-        ("my_domain.test.icp.", "CID", "aaaaa-aa"),
-        ("example.test.icp.", "Cid", "em77e-bvlzu-aq"),
-        ("another.test.ICP.", "cid", "un4fu-tqaaa-aaaab-qadjq-cai"),
-        ("one.more.test.Icp.", "CId", "2vxsx-fae"),
-        ("my_domain.test.icp.", "CID", "2vxsx-fae"), // overwrite previous mapping
+        ("my_domain.test.icp.", "CID", "r7inp-6aaaa-aaaaa-aaabq-cai"),
+        ("example.test.icp.", "Cid", "rno2w-sqaaa-aaaaa-aaacq-cai"),
+        ("another.test.ICP.", "cid", "mqygn-kiaaa-aaaar-qaadq-cai"),
+        ("one.more.test.Icp.", "CId", "n5wcd-faaaa-aaaar-qaaea-cai"),
+        ("my_domain.test.icp.", "CID", "n5wcd-faaaa-aaaar-qaaea-cai"), // overwrite previous mapping
       ].vals()
     ) {
       let domainRecord : DomainRecord = {
@@ -285,7 +317,6 @@ actor {
       };
       let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
       assert Test.isTrue(registerResponse.success, asText(registerResponse.message));
-
       let lookupResponse = await IcpTldOperator.lookup(domain, recordType);
       let errMsg = "shouldRegisterAndLookupIcpTestDomainIfNotController() failed for domain: " # domain # ", recordType: " # recordType # ", size of response.";
       assert Test.isEqualInt(lookupResponse.answers.size(), 1, errMsg # "answers");
@@ -304,9 +335,9 @@ actor {
     // The test data is a subset from shouldRegisterAndLookupIcpTestDomainIfNotController()
     for (
       (domain, recordType, canisterId) in [
-        ("example.test.icp.", "Cid", "em77e-bvlzu-aq"),
-        ("another.test.ICP.", "cid", "un4fu-tqaaa-aaaab-qadjq-cai"),
-        ("one.more.test.Icp.", "CId", "2vxsx-fae"),
+        ("example.test.icp.", "Cid", "rno2w-sqaaa-aaaaa-aaacq-cai"),
+        ("another.test.ICP.", "cid", "mqygn-kiaaa-aaaar-qaadq-cai"),
+        ("one.more.test.Icp.", "CId", "n5wcd-faaaa-aaaar-qaaea-cai"),
       ].vals()
     ) {
       let expectedDomainRecord : DomainRecord = {
@@ -319,7 +350,7 @@ actor {
         name = domain;
         record_type = "CID";
         ttl = 3600;
-        data = "aaaaa-aa"; // try to override an existing mapping
+        data = "r7inp-6aaaa-aaaaa-aaabq-cai"; // try to override an existing mapping
       };
       let registrationRecords = {
         controllers = [];
@@ -343,7 +374,7 @@ actor {
   func shouldRegisterTestDomainOtherCallerRegistrant() : async () {
     Debug.print("    test shouldRegisterTestDomainOtherCallerRegistrant...");
     let domain = "to-be-overriden.test.icp.";
-    let canisterId = "2vxsx-fae";
+    let canisterId = "n5wcd-faaaa-aaaar-qaaea-cai";
     let record : DomainRecord = {
       name = domain;
       record_type = "CID";
@@ -361,7 +392,7 @@ actor {
   func shouldOverwriteTestDomainIfController() : async () {
     Debug.print("    test shouldOverwriteTestDomainIfController...");
     let domain = "to-be-overriden.test.icp.";
-    let canisterId = "2vxsx-fae";
+    let canisterId = "n5wcd-faaaa-aaaar-qaaea-cai";
     let expectedDomainRecord : DomainRecord = {
       name = domain;
       record_type = "CID";
@@ -371,6 +402,7 @@ actor {
 
     // Lookup previous registration.
     let lookupResponse = await IcpTldOperator.lookup(domain, "CID");
+    Debug.print("Lookup response: " # debug_show (lookupResponse));
     let errMsg = "shouldRegisterTestDomainOtherCaller() failed for domain: " # domain # ", size of response.";
     assert Test.isEqualInt(lookupResponse.answers.size(), 1, errMsg # "answers");
     assert Test.isEqualInt(lookupResponse.additionals.size(), 0, errMsg # "additionals");
@@ -384,7 +416,7 @@ actor {
       name = domain;
       record_type = "CID";
       ttl = 600; // different ttl
-      data = "aaaaa-aa"; // different canister id
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai"; // different canister id
     };
     let registrationRecords = {
       controllers = [];
@@ -402,6 +434,66 @@ actor {
 
     let newResponseDomainRecord = newDomainLookup.answers[0];
     assert Test.isEqualDomainRecord(newResponseDomainRecord, newDomainRecord);
+  };
+
+  func shouldRegisterPtrAutomaticallyWithCid() : async () {
+    Debug.print("    test shoulRegisterPTRAutomaticallyWithCID...");
+    let domain = "example.test.icp.";
+    let canisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
+    let record : DomainRecord = {
+      name = domain;
+      record_type = "CID";
+      ttl = 3600;
+      data = canisterId;
+    };
+    let registrationRecords = {
+      controllers = [];
+      records = ?[record];
+    };
+    let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
+    assert Test.isTrue(registerResponse.success, "Registration of " # domain # " failed unexpectedly with error" # debug_show (registerResponse.message));
+
+    // Check that the PTR record was created automatically.
+    let ptrDomain = "r7inp-6aaaa-aaaaa-aaabq-cai.reverse.icp.";
+    let ptrLookupResponse = await IcpTldOperator.lookup(ptrDomain, "PTR");
+    assert Test.isEqualInt(ptrLookupResponse.answers.size(), 1, "shoulRegisterPTRAutomaticallyWithCID() failed for PTR lookup, size of answers");
+    assert Test.isEqualInt(ptrLookupResponse.additionals.size(), 0, "shoulRegisterPTRAutomaticallyWithCID() failed for PTR lookup, size of additionals");
+    assert Test.isEqualInt(ptrLookupResponse.authorities.size(), 0, "shoulRegisterPTRAutomaticallyWithCID() failed for PTR lookup, size of authorities");
+
+    let ptrRecord = ptrLookupResponse.answers[0];
+    assert Test.isEqualText(ptrRecord.name, ptrDomain, "shoulRegisterPTRAutomaticallyWithCID() failed for PTR lookup, name mismatch");
+    assert Test.isEqualText(ptrRecord.record_type, "PTR", "shoulRegisterPTRAutomaticallyWithCID() failed for PTR lookup, record_type mismatch");
+    assert Test.isEqualText(ptrRecord.data, domain, "shoulRegisterPTRAutomaticallyWithCID() failed for PTR lookup, data mismatch");
+  };
+
+  func shouldRegisterPtrAutomaticallyWithSid() : async () {
+    Debug.print("    test shoulRegisterPTRAutomaticallyWithSID...");
+    let domain = "app-fid-1.subnet.icp.";
+    let subnetId = "pzp6e-ekpqk-3c5x7-2h6so-njoeq-mt45d-h3h6c-q3mxf-vpeq5-fk5o7-yae";
+    let record : DomainRecord = {
+      name = domain;
+      record_type = "SID";
+      ttl = 3600;
+      data = subnetId;
+    };
+    let registrationRecords = {
+      controllers = [];
+      records = ?[record];
+    };
+    let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
+    assert Test.isTrue(registerResponse.success, "Registration of " # domain # " failed unexpectedly with error" # debug_show (registerResponse.message));
+
+    // Check that the PTR record was created automatically.
+    let ptrDomain = subnetId # ".reverse.icp.";
+    let ptrLookupResponse = await IcpTldOperator.lookup(ptrDomain, "PTR");
+    assert Test.isEqualInt(ptrLookupResponse.answers.size(), 1, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, size of answers");
+    assert Test.isEqualInt(ptrLookupResponse.additionals.size(), 0, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, size of additionals");
+    assert Test.isEqualInt(ptrLookupResponse.authorities.size(), 0, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, size of authorities");
+
+    let ptrRecord = ptrLookupResponse.answers[0];
+    assert Test.isEqualText(ptrRecord.name, ptrDomain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, name mismatch");
+    assert Test.isEqualText(ptrRecord.record_type, "PTR", "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, record_type mismatch");
+    assert Test.isEqualText(ptrRecord.data, domain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, data mismatch");
   };
 
   func shouldNotRegisterTestDomainIfBadCanisterId() : async () {
@@ -433,7 +525,7 @@ actor {
       name = domain;
       record_type = "NS";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];
@@ -441,7 +533,7 @@ actor {
     };
     let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
     assert Test.isFalse(registerResponse.success, "Registration of " # domain # " succeeded unexpectedly");
-    assert Test.textContains(asText(registerResponse.message), "only CID-records can be registered", "Registration of " # domain # " failed for a wrong reason");
+    assert Test.textContains(asText(registerResponse.message), "only CID and SID records can be registered", "Registration of " # domain # " failed for a wrong reason");
   };
 
   func shouldNotRegisterTestDomainIfExplicitController() : async () {
@@ -451,11 +543,11 @@ actor {
       name = domain;
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords : DomainTypes.RegistrationRecords = {
       controllers = [{
-        principal = Principal.fromText("aaaaa-aa");
+        principal = Principal.fromText("r7inp-6aaaa-aaaaa-aaabq-cai");
         roles : [DomainTypes.RegistrationControllerRole] = [#registrant];
       }];
       records = ?[record];
@@ -472,7 +564,7 @@ actor {
       name = "other.domain.test.icp.";
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];
@@ -490,7 +582,7 @@ actor {
       name = domain;
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];
@@ -529,7 +621,7 @@ actor {
       name = "example.icp.";
       record_type = "CID";
       ttl = 3600;
-      data = "aaaaa-aa";
+      data = "r7inp-6aaaa-aaaaa-aaabq-cai";
     };
     let registrationRecords = {
       controllers = [];

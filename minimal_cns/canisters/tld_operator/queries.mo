@@ -4,8 +4,15 @@ import Domain "../../common/data/domain";
 import MetricsTypes "../../common/metrics";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
+import Iter "mo:base/Iter";
+import Principal "mo:base/Principal";
 
 module {
+  let EMPTY_DOMAIN_LOOKUP : ApiTypes.DomainLookup = {
+    answers = [];
+    additionals = [];
+    authorities = [];
+  };
   public func lookup(
     myTld : Text,
     lookupAnswersMap : DomainTypes.RegistrationRecordsStore,
@@ -13,30 +20,85 @@ module {
     domain : Text,
     recordType : Text,
   ) : ApiTypes.DomainLookup {
-    var answers : [DomainTypes.DomainRecord] = [];
     let domainLowercase : Text = Text.toLower(domain);
 
-    if (Text.endsWith(domainLowercase, #text myTld)) {
-      switch (Text.toUpper(recordType)) {
-        case ("CID") {
-          let maybeRecords : ?DomainTypes.RegistrationRecordsWithPrincipals = Domain.RegistrationRecordsStore.getByDomain(lookupAnswersMap, domainLowercase);
-          answers := switch (maybeRecords) {
-            case (null) { [] };
-            case (?{ records }) {
-              let domainRecords = Option.get(records.records, []);
-              if (domainRecords.size() == 0) { [] } else { [domainRecords[0]] };
-            };
-          };
-        };
-        case _ {};
+    // If the lookup domain does not end with this TLD operator's TLD, return an empty lookup
+    if (not doesDomainEndInTLD(myTld, domainLowercase)) {
+      metrics.addEntry(metrics.makeLookupEntry(domainLowercase, recordType, false));
+      return EMPTY_DOMAIN_LOOKUP;
+    };
+
+    let response = switch (Text.toUpper(recordType)) {
+      case ("CID" or "SID") { forwardLookup(lookupAnswersMap, domainLowercase) };
+      case ("PTR") { reverseLookup(lookupAnswersMap, domainLowercase) };
+      // Unsupported record types return an empty lookup
+      case _ { EMPTY_DOMAIN_LOOKUP };
+    };
+
+    metrics.addEntry(metrics.makeLookupEntry(domainLowercase, recordType, response.answers != []));
+
+    response;
+  };
+
+  func forwardLookup(
+    domainRecordsStore : DomainTypes.RegistrationRecordsStore,
+    domainLowercase : Text,
+  ) : ApiTypes.DomainLookup {
+    // look up the domain record by the domain
+    let maybeRecords = Domain.RegistrationRecordsStore.getByDomain(domainRecordsStore, domainLowercase);
+    let answers = switch (maybeRecords) {
+      case null { [] };
+      case (?{ records }) {
+        let domainRecords = Option.get(records, []);
+        if (domainRecords.size() == 0) { [] } else { [domainRecords[0]] };
       };
     };
-    metrics.addEntry(metrics.makeLookupEntry(domainLowercase, recordType, answers != []));
 
     {
-      answers = answers;
+      answers;
       additionals = [];
       authorities = [];
     };
+  };
+
+  // Reverse lookups have the format <principal>.reverse.<tld>
+  // In this case, we expect the <principal> to be a valid principal.
+  func reverseLookup(
+    domainRecordsStore : DomainTypes.RegistrationRecordsStore,
+    domainLowercase : Text,
+  ) : ApiTypes.DomainLookup {
+    // split the domain into parts, based on "."
+    let parts = Iter.toArray(Text.split(domainLowercase, #char '.'));
+    // expect there to be exactly 3 parts: <principal>, reverse, <tld>
+    // The 4th part is the 3rd period at the end (so parts[3] is the empty string)
+    if (parts.size() != 4) {
+      return { answers = []; additionals = []; authorities = [] };
+    };
+
+    let principalText = parts[0];
+    // check if the first part is a valid principal - will trap if not
+    // TODO: perform this check without trapping
+    let principal = Principal.fromText(principalText);
+
+    // check if the second part is "reverse"
+    if (parts[1] != "reverse") {
+      return { answers = []; additionals = []; authorities = [] };
+    };
+
+    // look up the PTR domain record of the principal
+    let answers = switch (Domain.RegistrationRecordsStore.getPtrRecord(domainRecordsStore, domainLowercase, principal)) {
+      case null { [] };
+      case (?record) { [record] };
+    };
+
+    {
+      answers;
+      additionals = [];
+      authorities = [];
+    };
+  };
+
+  func doesDomainEndInTLD(myTld : Text, domainLowercase : Text) : Bool {
+    Text.endsWith(domainLowercase, #text(myTld));
   };
 };

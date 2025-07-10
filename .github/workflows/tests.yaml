@@ -106,6 +106,7 @@ jobs:
           dfx canister update-settings tld_operator --add-controller `dfx canister id tld_operator_test`
           echo "Calling runTestsIfController on canister tld_operator_test..."
           dfx canister call tld_operator_test runTestsIfController "()"
+          dfx canister call tld_operator_test runPTRTestsIfController "()"
 
       - name: 'Stop DFX'
         run: dfx stop

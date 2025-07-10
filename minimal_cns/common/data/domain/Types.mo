@@ -46,19 +46,17 @@ module {
     roles : [RegistrationControllerRole];
   };
 
+  public type NewRegistrationDomainRecord = {
+    controllers : [RegistrationController];
+    record : DomainRecord;
+  };
+
   public type RegistrationRecords = {
     controllers : [RegistrationController];
     records : ?[DomainRecord];
   };
 
-  public type RegistrationRecordsWithPrincipals = {
-    // The registration records for a domain.
-    records : RegistrationRecords;
-    // The list of principals that point to that domain.
-    principals : StableBuffer.StableBuffer<Principal>;
-  };
-
-  public type RegistrationRecordsMap = Map.Map<Domain, RegistrationRecordsWithPrincipals>;
+  public type RegistrationRecordsMap = Map.Map<Domain, RegistrationRecords>;
   public type PrincipalToDomainIndex = Map.Map<Principal, Domain>;
 
   public type RegistrationRecordsStore = {
