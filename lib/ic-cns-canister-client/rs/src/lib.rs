@@ -63,7 +63,7 @@ pub enum RegistrationControllerRole {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct RegistrationController {
-    pub principal: Principal,
+    pub controller_id: Principal,
     pub roles: Vec<RegistrationControllerRole>,
 }
 

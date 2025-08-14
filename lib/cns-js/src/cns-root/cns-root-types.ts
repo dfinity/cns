@@ -22,7 +22,7 @@ export interface RegistrationRecordRequest {
 }
 
 export interface RegistrationControllerRequest {
-  principal: string | Principal;
+  controller_id: string | Principal;
   roles: ControllerRole[];
 }
 

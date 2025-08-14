@@ -24,10 +24,7 @@
     "tld_operator_test": {
       "main": "minimal_cns/canisters/tld_operator/tld_operator.test.mo",
       "type": "motoko",
-      "dependencies": [
-        "tld_operator",
-        "tld_operator_test_other_caller"
-      ]
+      "dependencies": ["tld_operator", "tld_operator_test_other_caller"]
     },
     "tld_operator_test_other_caller": {
       "main": "minimal_cns/canisters/tld_operator/tld_operator.test.mo",
