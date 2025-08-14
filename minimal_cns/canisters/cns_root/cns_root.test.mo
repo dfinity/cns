@@ -7,7 +7,7 @@ import Test "../../common/test_utils";
 import Text "mo:base/Text";
 import DomainTypes "../../common/data/domain/Types";
 
-actor {
+persistent actor {
   public func runTests() : async () {
     // The order of tests matters.
     await shouldNotGetIcpTldOperatorBeforeRegistration();
@@ -33,7 +33,7 @@ actor {
     return Option.get(maybeText, "");
   };
 
-  let dummyIcpTldCanisterId = "qoctq-giaaa-aaaaa-aaaea-cai";
+  transient let dummyIcpTldCanisterId = "qoctq-giaaa-aaaaa-aaaea-cai";
 
   func shouldNotGetIcpTldOperatorBeforeRegistration() : async () {
     let response = await CnsRoot.lookup(".icp", "NC");
