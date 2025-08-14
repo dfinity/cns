@@ -7,21 +7,20 @@ import Domain "../../common/data/domain";
 import Queries "queries";
 import Mutations "mutations";
 
-shared actor class () {
-  let icpTld = ".icp.";
+persistent actor class () {
+  transient let icpTld = ".icp.";
 
-  stable var lookupAnswersMap = Domain.DomainRecordsStore.init();
-  stable var lookupAuthoritiesMap = Domain.DomainRecordsStore.init();
+  var lookupAnswersMap = Domain.DomainRecordsStore.init();
+  var lookupAuthoritiesMap = Domain.DomainRecordsStore.init();
 
-  stable var metricsStore : Metrics.LogStore = Metrics.newStore();
-  let metrics = Metrics.CnsMetrics(metricsStore);
+  var metricsStore : Metrics.LogStore = Metrics.newStore();
 
   public shared func lookup(domain : Text, recordType : Text) : async ApiTypes.DomainLookup {
     Queries.lookup(
       icpTld,
       lookupAnswersMap,
       lookupAuthoritiesMap,
-      metrics,
+      Metrics.CnsMetrics(metricsStore),
       domain,
       recordType,
     );
@@ -36,6 +35,7 @@ shared actor class () {
       lookupAuthoritiesMap,
       records,
     );
+    let metrics = Metrics.CnsMetrics(metricsStore);
     metrics.addEntry(metrics.makeRegisterEntry(Text.toLower(domain), recordType, result.success));
 
     result;
@@ -45,6 +45,7 @@ shared actor class () {
     if (not Principal.isController(caller)) {
       return #err("Currently only a controller can get metrics");
     };
+    let metrics = Metrics.CnsMetrics(metricsStore);
     return #ok(metrics.getMetrics(period, [("ncRecordsCount", Domain.DomainRecordsStore.size(lookupAnswersMap))]));
   };
 
@@ -52,6 +53,7 @@ shared actor class () {
     if (not Principal.isController(caller)) {
       return #err("Currently only a controller can purge metrics");
     };
+    let metrics = Metrics.CnsMetrics(metricsStore);
     return #ok(metrics.purge());
   };
 };

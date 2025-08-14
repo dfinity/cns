@@ -42,7 +42,7 @@ module {
   };
 
   public type RegistrationController = {
-    principal : Principal;
+    controller_id : Principal;
     roles : [RegistrationControllerRole];
   };
 

@@ -1,6 +1,6 @@
 use candid::{encode_args, encode_one, Decode, Nat, Principal};
 pub use cns_domain_registry::types::RegisterResult;
-use ic_cns_canister_client::{CnsError, DomainLookup, DomainRecord, RegistrationRecords};
+use ic_cns_canister_client::{CnsError, DomainRecord, RegistrationRecords};
 use pocket_ic::{PocketIc, PocketIcBuilder, WasmResult};
 use std::fs;
 

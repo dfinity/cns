@@ -39,7 +39,7 @@ export function mapRegistrationControllerRequest(
   req: RegistrationControllerRequest,
 ): CanisterRegistrationController {
   return {
-    principal: Principal.from(req.principal),
+    controller_id: Principal.from(req.controller_id),
     roles: req.roles.map(mapControllerRoleRequest),
   };
 }

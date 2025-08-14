@@ -10,7 +10,7 @@ import Text "mo:base/Text";
 import Test "../../common/test_utils";
 import DomainTypes "../../common/data/domain/Types";
 
-actor {
+persistent actor {
   type DomainRecord = DomainTypes.DomainRecord;
 
   public func runTestsIfController() : async () {
@@ -191,7 +191,7 @@ actor {
         success = goodDomainCount + extraGoodLookupsCount;
       };
       registerCount = { fail = badDomainCount; success = goodDomainCount };
-      extras = [("cidRecordsCount", 9)]; // 4 registered in this test, and 5 test domains registered previously.
+      extras = [("icpRecordsCount", 9)]; // 4 registered in this test, and 5 test domains registered previously.
       topLookups = Array.sort<(Text, Nat)>(expectedLookupCounts, Test.compareLookupCounts);
       sinceTimestamp = metricsData.sinceTimestamp; // cannot predict this field
     };
@@ -209,7 +209,7 @@ actor {
       logLength = 0;
       lookupCount = { fail = 0; success = 0 };
       registerCount = { fail = 0; success = 0 };
-      extras = [("cidRecordsCount", 9)];
+      extras = [("icpRecordsCount", 9)];
       topLookups = [];
       sinceTimestamp = newMetricsData.sinceTimestamp; // cannot predict this field
     };
@@ -547,7 +547,7 @@ actor {
     };
     let registrationRecords : DomainTypes.RegistrationRecords = {
       controllers = [{
-        principal = Principal.fromText("r7inp-6aaaa-aaaaa-aaabq-cai");
+        controller_id = Principal.fromText("r7inp-6aaaa-aaaaa-aaabq-cai");
         roles : [DomainTypes.RegistrationControllerRole] = [#registrant];
       }];
       records = ?[record];

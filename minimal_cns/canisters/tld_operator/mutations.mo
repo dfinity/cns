@@ -43,7 +43,7 @@ module {
     // Currently, only adding exactly one domain record is supported. (see checks in `validateRegistrationRecords`).
     let newRegistrationRecord : DomainTypes.NewRegistrationDomainRecord = {
       controllers = [{
-        principal = caller;
+        controller_id = caller;
         roles = [#registrant];
       }];
       record = domainRecord;
@@ -137,7 +137,7 @@ module {
         if (controllers.size() == 0) {
           trap("Internal error: missing registration controller for " # domainLowercase);
         } else {
-          ?controllers[0].principal;
+          ?controllers[0].controller_id;
         };
       };
     };

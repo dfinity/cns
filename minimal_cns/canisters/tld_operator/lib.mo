@@ -7,10 +7,10 @@ import Queries "queries";
 import Mutations "mutations";
 import Domain "../../common/data/domain";
 
-actor TldOperator {
-  let myTld = ".icp.";
-  stable var lookupAnswersMap = Domain.RegistrationRecordsStore.init();
-  stable var metricsStore : Metrics.LogStore = Metrics.newStore();
+persistent actor TldOperator {
+  transient let myTld = ".icp.";
+  var lookupAnswersMap = Domain.RegistrationRecordsStore.init();
+  var metricsStore : Metrics.LogStore = Metrics.newStore();
 
   public shared func lookup(domain : Text, recordType : Text) : async ApiTypes.DomainLookup {
     Queries.lookup(
@@ -41,7 +41,7 @@ actor TldOperator {
     if (not Principal.isController(caller)) return #err("Currently only a controller can get metrics");
 
     let metrics = Metrics.CnsMetrics(metricsStore);
-    #ok(metrics.getMetrics(period, [("cidRecordsCount", Domain.RegistrationRecordsStore.size(lookupAnswersMap))]));
+    #ok(metrics.getMetrics(period, [("icpRecordsCount", Domain.RegistrationRecordsStore.size(lookupAnswersMap))]));
   };
 
   public shared ({ caller }) func purge_metrics() : async ApiTypes.PurgeMetricsResult {

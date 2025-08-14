@@ -3,7 +3,6 @@
     "cns_root": {
       "main": "minimal_cns/canisters/cns_root/lib.mo",
       "type": "motoko",
-      "dependencies": ["name_registry"],
       "declarations": {
         "bindings": ["js", "ts"],
         "output": "./src/declarations/cns-root"
@@ -17,7 +16,6 @@
     "tld_operator": {
       "main": "minimal_cns/canisters/tld_operator/lib.mo",
       "type": "motoko",
-      "dependencies": ["name_registry"],
       "declarations": {
         "bindings": ["js", "ts"],
         "output": "./src/declarations/tld-operator"
@@ -26,16 +24,12 @@
     "tld_operator_test": {
       "main": "minimal_cns/canisters/tld_operator/tld_operator.test.mo",
       "type": "motoko",
-      "dependencies": [
-        "name_registry",
-        "tld_operator",
-        "tld_operator_test_other_caller"
-      ]
+      "dependencies": ["tld_operator", "tld_operator_test_other_caller"]
     },
     "tld_operator_test_other_caller": {
       "main": "minimal_cns/canisters/tld_operator/tld_operator.test.mo",
       "type": "motoko",
-      "dependencies": ["name_registry", "tld_operator"]
+      "dependencies": ["tld_operator"]
     },
     "name_registry": {
       "type": "rust",
