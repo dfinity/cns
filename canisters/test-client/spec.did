@@ -13,5 +13,8 @@ type CnsError = variant {
 
 service : (opt ClientInit) -> {
   "lookup_domain" : (domain : text) -> (variant { Ok : principal; Err : CnsError });
+  "lookup_subnet" : (subnet_name : text) -> (variant { Ok : principal; Err : CnsError });
   "register_domain" : (domain : text, cid_text : text) -> (variant { Ok; Err : CnsError });
+  "domain_for_canister" : (cid_text : text) -> (variant { Ok : text; Err : CnsError });
+  "name_for_subnet" : (sid_text : text) -> (variant { Ok : text; Err : CnsError });
 };
