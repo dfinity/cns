@@ -35,7 +35,6 @@ async fn lookup_domain(domain: String) -> Result<Principal, CnsError> {
     ic_cns_canister_client::lookup_domain(&domain).await
 }
 
-
 #[update]
 async fn lookup_subnet(subnet_name: String) -> Result<Principal, CnsError> {
     ic_cns_canister_client::lookup_subnet(&subnet_name).await

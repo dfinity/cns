@@ -178,7 +178,6 @@ fn should_register_and_lookup_domains() {
         assert_matches!(result, Ok(cid) if (cid.to_string() == cid_text));
         let result = env.domain_for_canister(cid_text);
         assert_matches!(result, Ok(d) if (domain == d));
-
     }
 }
 
@@ -234,7 +233,9 @@ fn should_not_register_and_lookup_if_not_icp_tld() {
 fn should_not_register_non_test_domains_if_not_controller() {
     let env = CnsFixture::init();
     env.register_icp_nc();
-    env.pic.set_controllers(env.tld_operator, None, vec![]).expect("Failed removing test_client as controller");
+    env.pic
+        .set_controllers(env.tld_operator, None, vec![])
+        .expect("Failed removing test_client as controller");
     for (domain, cid_text) in [
         ("example.icp.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
         ("nns_governance.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
@@ -251,7 +252,9 @@ fn should_not_register_non_test_domains_if_not_controller() {
 fn should_register_test_domains_if_not_controller() {
     let env = CnsFixture::init();
     env.register_icp_nc();
-    env.pic.set_controllers(env.tld_operator, None, vec![]).expect("Failed removing test_client as controller");
+    env.pic
+        .set_controllers(env.tld_operator, None, vec![])
+        .expect("Failed removing test_client as controller");
     for (domain, cid_text) in [
         ("example.test.icp.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
         ("nns_governance.test.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),

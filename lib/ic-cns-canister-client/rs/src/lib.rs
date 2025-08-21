@@ -74,7 +74,10 @@ pub struct RegistrationRecords {
     pub records: Option<Vec<DomainRecord>>,
 }
 
-fn get_principal_id_from_records(records: &[DomainRecord], context: &str) -> Result<CanisterId, CnsError> {
+fn get_principal_id_from_records(
+    records: &[DomainRecord],
+    context: &str,
+) -> Result<CanisterId, CnsError> {
     if !records.is_empty() {
         if let Ok(id) = Principal::from_text(&records[0].data) {
             return Ok(id);
@@ -99,8 +102,12 @@ async fn lookup_nc(domain: &str) -> Result<CanisterId, CnsError> {
 
 async fn get_ptr_records(id: Principal) -> Result<Vec<DomainRecord>, CnsError> {
     let nc_cid = lookup_nc(".icp.").await?;
-    let (lookup,): (DomainLookup,) =
-        call(nc_cid, "lookup", (format!("{}.reverse.icp.", id), "PTR".to_string())).await?;
+    let (lookup,): (DomainLookup,) = call(
+        nc_cid,
+        "lookup",
+        (format!("{}.reverse.icp.", id), "PTR".to_string()),
+    )
+    .await?;
     Ok(lookup.answers)
 }
 
@@ -109,7 +116,10 @@ pub async fn domain_for_canister(canister_id: CanisterId) -> Result<String, CnsE
     if let Some(record) = ptr_records.first() {
         return Ok(record.data.clone());
     }
-    Err(CnsError::NotFound(format!("No domain found for canister {}", canister_id)))
+    Err(CnsError::NotFound(format!(
+        "No domain found for canister {}",
+        canister_id
+    )))
 }
 
 pub async fn name_for_subnet(subnet_id: SubnetId) -> Result<String, CnsError> {
@@ -117,7 +127,10 @@ pub async fn name_for_subnet(subnet_id: SubnetId) -> Result<String, CnsError> {
     if let Some(record) = ptr_records.first() {
         return Ok(record.data.clone());
     }
-    Err(CnsError::NotFound(format!("No name found for subnet {}", subnet_id)))
+    Err(CnsError::NotFound(format!(
+        "No name found for subnet {}",
+        subnet_id
+    )))
 }
 
 pub async fn lookup_domain(domain: &str) -> Result<CanisterId, CnsError> {
@@ -129,8 +142,12 @@ pub async fn lookup_domain(domain: &str) -> Result<CanisterId, CnsError> {
 
 pub async fn lookup_subnet(subnet_name: &str) -> Result<SubnetId, CnsError> {
     let nc_cid = lookup_nc(subnet_name).await?;
-    let (lookup,): (DomainLookup,) =
-        call(nc_cid, "lookup", (subnet_name.to_string(), "SID".to_string())).await?;
+    let (lookup,): (DomainLookup,) = call(
+        nc_cid,
+        "lookup",
+        (subnet_name.to_string(), "SID".to_string()),
+    )
+    .await?;
     get_principal_id_from_records(&lookup.answers, &format!("SID lookup for {}", subnet_name))
 }
 
