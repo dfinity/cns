@@ -35,4 +35,26 @@ async fn lookup_domain(domain: String) -> Result<Principal, CnsError> {
     ic_cns_canister_client::lookup_domain(&domain).await
 }
 
+
+#[update]
+async fn lookup_subnet(subnet_name: String) -> Result<Principal, CnsError> {
+    ic_cns_canister_client::lookup_subnet(&subnet_name).await
+}
+
+#[update]
+async fn domain_for_canister(cid_text: String) -> Result<String, CnsError> {
+    let cid = Principal::from_text(&cid_text)
+        .map_err(|e| format!("Failed parsing principal {}: {}", cid_text, e))
+        .unwrap();
+    ic_cns_canister_client::domain_for_canister(cid).await
+}
+
+#[update]
+async fn name_for_subnet(sid_text: String) -> Result<String, CnsError> {
+    let sid = Principal::from_text(&sid_text)
+        .map_err(|e| format!("Failed parsing principal {}: {}", sid_text, e))
+        .unwrap();
+    ic_cns_canister_client::name_for_subnet(sid).await
+}
+
 fn main() {}

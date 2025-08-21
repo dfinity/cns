@@ -5,8 +5,9 @@ use lazy_static::lazy_static;
 use std::sync::{Arc, Mutex};
 
 type CanisterId = Principal;
+type SubnetId = Principal;
 
-const CNS_ROOT_MAINNET: &str = "rdmx6-jaaaa-aaaaa-aaadq-cai";
+const CNS_ROOT_MAINNET: &str = "rupqg-4qaaa-aaaad-qhosa-cai";
 
 lazy_static! {
     pub static ref CNS_ROOT_CID: Arc<Mutex<Principal>> = Arc::new(Mutex::new(
@@ -73,7 +74,7 @@ pub struct RegistrationRecords {
     pub records: Option<Vec<DomainRecord>>,
 }
 
-fn get_cid_from_records(records: &[DomainRecord], context: &str) -> Result<CanisterId, CnsError> {
+fn get_principal_id_from_records(records: &[DomainRecord], context: &str) -> Result<CanisterId, CnsError> {
     if !records.is_empty() {
         if let Ok(id) = Principal::from_text(&records[0].data) {
             return Ok(id);
@@ -93,14 +94,44 @@ async fn lookup_nc(domain: &str) -> Result<CanisterId, CnsError> {
         .map_err(|e| CnsError::Internal(format!("Failed getting CNS root cid: {}", e)))?;
     let (lookup,): (DomainLookup,) =
         call(cns_root, "lookup", (domain.to_string(), "NC".to_string())).await?;
-    get_cid_from_records(&lookup.answers, &format!("NC lookup for {}", domain))
+    get_principal_id_from_records(&lookup.answers, &format!("NC lookup for {}", domain))
+}
+
+async fn get_ptr_records(id: Principal) -> Result<Vec<DomainRecord>, CnsError> {
+    let nc_cid = lookup_nc(".icp.").await?;
+    let (lookup,): (DomainLookup,) =
+        call(nc_cid, "lookup", (format!("{}.reverse.icp.", id), "PTR".to_string())).await?;
+    Ok(lookup.answers)
+}
+
+pub async fn domain_for_canister(canister_id: CanisterId) -> Result<String, CnsError> {
+    let ptr_records = get_ptr_records(canister_id).await?;
+    if let Some(record) = ptr_records.first() {
+        return Ok(record.data.clone());
+    }
+    Err(CnsError::NotFound(format!("No domain found for canister {}", canister_id)))
+}
+
+pub async fn name_for_subnet(subnet_id: SubnetId) -> Result<String, CnsError> {
+    let ptr_records = get_ptr_records(subnet_id).await?;
+    if let Some(record) = ptr_records.first() {
+        return Ok(record.data.clone());
+    }
+    Err(CnsError::NotFound(format!("No name found for subnet {}", subnet_id)))
 }
 
 pub async fn lookup_domain(domain: &str) -> Result<CanisterId, CnsError> {
     let nc_cid = lookup_nc(domain).await?;
     let (lookup,): (DomainLookup,) =
         call(nc_cid, "lookup", (domain.to_string(), "CID".to_string())).await?;
-    get_cid_from_records(&lookup.answers, &format!("CID lookup for {}", domain))
+    get_principal_id_from_records(&lookup.answers, &format!("CID lookup for {}", domain))
+}
+
+pub async fn lookup_subnet(subnet_name: &str) -> Result<SubnetId, CnsError> {
+    let nc_cid = lookup_nc(subnet_name).await?;
+    let (lookup,): (DomainLookup,) =
+        call(nc_cid, "lookup", (subnet_name.to_string(), "SID".to_string())).await?;
+    get_principal_id_from_records(&lookup.answers, &format!("SID lookup for {}", subnet_name))
 }
 
 pub async fn register_domain(domain: &str, cid: CanisterId) -> Result<(), CnsError> {

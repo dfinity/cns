@@ -11,6 +11,9 @@ const TEST_CLIENT_WASM: &str = "../../../.dfx/local/canisters/test_client/test_c
 use assert_matches::assert_matches;
 use candid::{CandidType, Deserialize};
 
+type CanisterId = Principal;
+type SubnetId = Principal;
+
 #[derive(CandidType, Deserialize)]
 pub struct ClientInit {
     pub cns_root_cid: String,
@@ -61,8 +64,10 @@ impl CnsFixture {
             .unwrap(),
             None,
         );
-        // Set controller, so that test_client can register domains.
-        pic.set_controllers(tld_operator, None, vec![test_client])
+        // Add test_client as controller, so that it can register domains.
+        let mut controllers = pic.get_controllers(tld_operator);
+        controllers.push(test_client);
+        pic.set_controllers(tld_operator, None, controllers)
             .expect("Failed setting TLD operator controller");
         CnsFixture {
             pic,
@@ -105,7 +110,7 @@ impl CnsFixture {
         Decode!(&reply, Result<(), CnsError>).expect("reply decoding failed")
     }
 
-    fn lookup_domain(&self, domain: &str) -> Result<Principal, CnsError> {
+    fn lookup_domain(&self, domain: &str) -> Result<CanisterId, CnsError> {
         let response = self.pic.update_call(
             self.test_client,
             Principal::anonymous(),
@@ -117,10 +122,49 @@ impl CnsFixture {
         };
         Decode!(&reply, Result<Principal, CnsError>).expect("reply decoding failed")
     }
+
+    fn lookup_subnet(&self, subnet_name: &str) -> Result<SubnetId, CnsError> {
+        let response = self.pic.update_call(
+            self.test_client,
+            Principal::anonymous(),
+            "lookup_subnet",
+            encode_one(subnet_name).expect("failed encoding arg"),
+        );
+        let Ok(WasmResult::Reply(reply)) = response else {
+            panic!("call failed: {:?}", response);
+        };
+        Decode!(&reply, Result<SubnetId, CnsError>).expect("reply decoding failed")
+    }
+
+    fn domain_for_canister(&self, cid_text: &str) -> Result<String, CnsError> {
+        let response = self.pic.update_call(
+            self.test_client,
+            Principal::anonymous(),
+            "domain_for_canister",
+            encode_one(cid_text).expect("failed encoding arg"),
+        );
+        let Ok(WasmResult::Reply(reply)) = response else {
+            panic!("call failed: {:?}", response);
+        };
+        Decode!(&reply, Result<String, CnsError>).expect("reply decoding failed")
+    }
+
+    fn name_for_subnet(&self, sid_text: &str) -> Result<String, CnsError> {
+        let response = self.pic.update_call(
+            self.test_client,
+            Principal::anonymous(),
+            "name_for_subnet",
+            encode_one(sid_text).expect("failed encoding arg"),
+        );
+        let Ok(WasmResult::Reply(reply)) = response else {
+            panic!("call failed: {:?}", response);
+        };
+        Decode!(&reply, Result<String, CnsError>).expect("reply decoding failed")
+    }
 }
 
 #[test]
-fn should_register_and_lookup() {
+fn should_register_and_lookup_domains() {
     let env = CnsFixture::init();
     env.register_icp_nc();
     for (domain, cid_text) in [
@@ -132,6 +176,26 @@ fn should_register_and_lookup() {
         assert!(result.is_ok(), "Domain registration failed: {:?}", result);
         let result = env.lookup_domain(domain);
         assert_matches!(result, Ok(cid) if (cid.to_string() == cid_text));
+        let result = env.domain_for_canister(cid_text);
+        assert_matches!(result, Ok(d) if (domain == d));
+
+    }
+}
+
+fn should_register_and_lookup_subnets() {
+    let env = CnsFixture::init();
+    env.register_icp_nc();
+    for (subnet, sid_text) in [
+        ("example.subnet.icp.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
+        ("nns_governance.subnet.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
+        ("nns_registry.subnet.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
+    ] {
+        let result = env.register_domain(subnet, sid_text);
+        assert!(result.is_ok(), "Domain registration failed: {:?}", result);
+        let result = env.lookup_subnet(subnet);
+        assert_matches!(result, Ok(sid) if (sid.to_string() == sid_text));
+        let result = env.name_for_subnet(sid_text);
+        assert_matches!(result, Ok(sn) if (subnet == sn));
     }
 }
 
@@ -153,6 +217,7 @@ fn should_not_register_and_lookup_if_missing_nc() {
 #[test]
 fn should_not_register_and_lookup_if_not_icp_tld() {
     let env = CnsFixture::init();
+    env.register_icp_nc();
     for (domain, cid_text) in [
         ("example.com.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
         ("nns_governance.org.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
@@ -162,5 +227,41 @@ fn should_not_register_and_lookup_if_not_icp_tld() {
         assert_matches!(result, Err(err) if (err.to_string().contains("No record for NC")));
         let result = env.lookup_domain(domain);
         assert_matches!(result, Err(err) if (err.to_string().contains("No record for NC")));
+    }
+}
+
+#[test]
+fn should_not_register_non_test_domains_if_not_controller() {
+    let env = CnsFixture::init();
+    env.register_icp_nc();
+    env.pic.set_controllers(env.tld_operator, None, vec![]).expect("Failed removing test_client as controller");
+    for (domain, cid_text) in [
+        ("example.icp.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
+        ("nns_governance.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
+        ("nns_registry.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
+    ] {
+        let result = env.register_domain(domain, cid_text);
+        assert_matches!(result, Err(err) if (err.to_string().contains("Currently only a canister controller can register non-test")));
+        let result = env.lookup_domain(domain);
+        assert_matches!(result, Err(err) if (err.to_string().contains("No record for CID lookup")));
+    }
+}
+
+#[test]
+fn should_register_test_domains_if_not_controller() {
+    let env = CnsFixture::init();
+    env.register_icp_nc();
+    env.pic.set_controllers(env.tld_operator, None, vec![]).expect("Failed removing test_client as controller");
+    for (domain, cid_text) in [
+        ("example.test.icp.", "r7inp-6aaaa-aaaaa-aaabq-cai"),
+        ("nns_governance.test.icp.", "rrkah-fqaaa-aaaaa-aaaaq-cai"),
+        ("nns_registry.test.icp.", "rwlgt-iiaaa-aaaaa-aaaaa-cai"),
+    ] {
+        let result = env.register_domain(domain, cid_text);
+        assert!(result.is_ok(), "Domain registration failed: {:?}", result);
+        let result = env.lookup_domain(domain);
+        assert_matches!(result, Ok(cid) if (cid.to_string() == cid_text));
+        let result = env.domain_for_canister(cid_text);
+        assert_matches!(result, Ok(d) if (domain == d));
     }
 }
