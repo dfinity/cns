@@ -10,7 +10,7 @@ export interface CnsClientArgs {
 }
 
 const DEFAULT_API_GATEWAY = 'https://icp-api.io';
-const DEFAULT_CNS_ROOT = 'rdmx6-jaaaa-aaaaa-aaadq-cai';
+const DEFAULT_CNS_ROOT = 'rupqg-4qaaa-aaaad-qhosa-cai'; // Mainnet CNS Root Canister ID
 
 enum RecordType {
   CID = 'CID',
