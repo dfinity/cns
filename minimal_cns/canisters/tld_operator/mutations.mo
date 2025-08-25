@@ -49,7 +49,8 @@ module {
       record = domainRecord;
     };
 
-    Domain.RegistrationRecordsStore.add(lookupAnswersMap, domainLowercase, newRegistrationRecord);
+    let updatePtrRecords = not Text.endsWith(domainLowercase, #text(".test" # myTld));
+    Domain.RegistrationRecordsStore.add(lookupAnswersMap, domainLowercase, newRegistrationRecord, updatePtrRecords);
 
     (
       {

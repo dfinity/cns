@@ -26,7 +26,7 @@ Currently, the following components are being worked on:
   - `lookup`-operation, available publicly, returning CID- or SID- records for `.icp`-domains,
     provided previously via `register`-operation.
   - `lookup`-operation for reverse lookup by principal (canister id or subnet id), returning `PTR`-like
-    records if a domain has been assigned to the principal previously
+    records if a **non-test domain** has been assigned to the principal previously
     (cf. [here](https://en.wikipedia.org/wiki/List_of_DNS_record_types#PTR)).  
     To make a reverse lookup for a principal, encode the principal in a special domain
     `<text representation of principal>.reverse.icp.` and request `PTR`-record.

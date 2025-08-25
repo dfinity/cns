@@ -104,10 +104,11 @@ module {
       store : Types.RegistrationRecordsStore,
       domain : Types.Domain,
       { controllers; record } : Types.NewRegistrationDomainRecord,
+      updatePtrRecords : Bool,
     ) : () {
       // if this is a principal record type CID or SID (in the future maybe other principals?),
       // update the principal to domain index
-      if (isPrincipalRecordType(record.record_type)) {
+      if (updatePtrRecords and isPrincipalRecordType(record.record_type)) {
         // update the principal to domain index entry (add new or update existing)
         updatePrincipalToDomainIndexEntry(store, domain, record);
       };

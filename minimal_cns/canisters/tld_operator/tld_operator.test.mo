@@ -35,6 +35,7 @@ persistent actor {
     Debug.print("--- starting runPTRTestsIfController...");
     await shouldRegisterPtrAutomaticallyWithCid();
     await shouldRegisterPtrAutomaticallyWithSid();
+    await shouldNotOverwriteOriginalPtrWithTestDomain();
   };
 
   public func runTestsIfNotController() : async () {
@@ -438,7 +439,7 @@ persistent actor {
 
   func shouldRegisterPtrAutomaticallyWithCid() : async () {
     Debug.print("    test shoulRegisterPTRAutomaticallyWithCID...");
-    let domain = "example.test.icp.";
+    let domain = "example.domain.icp.";
     let canisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
     let record : DomainRecord = {
       name = domain;
@@ -494,6 +495,76 @@ persistent actor {
     assert Test.isEqualText(ptrRecord.name, ptrDomain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, name mismatch");
     assert Test.isEqualText(ptrRecord.record_type, "PTR", "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, record_type mismatch");
     assert Test.isEqualText(ptrRecord.data, domain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, data mismatch");
+  };
+
+  func shouldNotOverwriteOriginalPtrWithTestDomain() : async () {
+    Debug.print("    test shouldNotOverwriteOriginalPtrWithTestDomain...");
+    let domain = "first.domain.icp.";
+    let canisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
+    let record : DomainRecord = {
+      name = domain;
+      record_type = "CID";
+      ttl = 3600;
+      data = canisterId;
+    };
+    let registrationRecords = {
+      controllers = [];
+      records = ?[record];
+    };
+    let registerResponse = await IcpTldOperator.register(domain, registrationRecords);
+    assert Test.isTrue(registerResponse.success, "Registration of " # domain # " failed unexpectedly with error" # debug_show (registerResponse.message));
+
+    // Check that the PTR record was created automatically.
+    let ptrDomain = canisterId # ".reverse.icp.";
+    do {
+      let ptrLookupResponse = await IcpTldOperator.lookup(ptrDomain, "PTR");
+      assert Test.isEqualInt(ptrLookupResponse.answers.size(), 1, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, size of answers");
+      let ptrRecord = ptrLookupResponse.answers[0];
+      assert Test.isEqualText(ptrRecord.name, ptrDomain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, name mismatch");
+      assert Test.isEqualText(ptrRecord.record_type, "PTR", "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, record_type mismatch");
+      assert Test.isEqualText(ptrRecord.data, domain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, data mismatch");
+    };
+    // Register a test domain, pointing to the same id.
+    let testDomain = "another.domain.test.icp.";
+    let testRecord : DomainRecord = {
+      name = testDomain;
+      record_type = "CID";
+      ttl = 3600;
+      data = canisterId;
+    };
+    let testRegistrationRecords = {
+      controllers = [];
+      records = ?[testRecord];
+    };
+    let testRegisterResponse = await IcpTldOperator.register(testDomain, testRegistrationRecords);
+    assert Test.isTrue(testRegisterResponse.success, "Registration of " # testDomain # " failed unexpectedly with error" # debug_show (testRegisterResponse.message));
+
+    // Check that both records exist and point to the same canister ID.
+    do {
+      let lookupResponse = await IcpTldOperator.lookup(domain, "CID");
+      assert Test.isEqualInt(lookupResponse.answers.size(), 1, "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, size of answers");
+      let record = lookupResponse.answers[0];
+      assert Test.isEqualText(record.name, domain, "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, name mismatch");
+      assert Test.isEqualText(record.record_type, "CID", "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, record_type mismatch");
+      assert Test.isEqualText(record.data, canisterId, "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, data mismatch");
+    };
+    do {
+      let lookupResponse = await IcpTldOperator.lookup(testDomain, "CID");
+      assert Test.isEqualInt(lookupResponse.answers.size(), 1, "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, size of answers");
+      let record = lookupResponse.answers[0];
+      assert Test.isEqualText(record.name, testDomain, "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, name mismatch");
+      assert Test.isEqualText(record.record_type, "CID", "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, record_type mismatch");
+      assert Test.isEqualText(record.data, canisterId, "shoulRegisterPTRAutomaticallyWithSID() failed for CID lookup, data mismatch");
+    };
+    // Check that the PTR record again, it should still point to `domain`.
+    do {
+      let ptrLookupResponse = await IcpTldOperator.lookup(ptrDomain, "PTR");
+      assert Test.isEqualInt(ptrLookupResponse.answers.size(), 1, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, size of answers");
+      let ptrRecord = ptrLookupResponse.answers[0];
+      assert Test.isEqualText(ptrRecord.name, ptrDomain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, name mismatch");
+      assert Test.isEqualText(ptrRecord.record_type, "PTR", "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, record_type mismatch");
+      assert Test.isEqualText(ptrRecord.data, domain, "shoulRegisterPTRAutomaticallyWithSID() failed for PTR lookup, data mismatch");
+    };
   };
 
   func shouldNotRegisterTestDomainIfBadCanisterId() : async () {
