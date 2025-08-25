@@ -27,17 +27,17 @@
     "tld_operator_test": {
       "main": "minimal_cns/src/backend/tld_operator.test.mo",
       "type": "motoko",
-      "dependencies": ["name_registry", "tld_operator"]
+      "dependencies": ["name0registry", "tld_operator"]
     },
     "name_registry": {
       "type": "rust",
       "candid": "canisters/name-registry/spec.did",
-      "package": "cns_domain_registry"
+      "package": "cns-domain-registry"
     },
     "test_client": {
       "type": "rust",
       "candid": "canisters/test-client/spec.did",
-      "package": "test_client"
+      "package": "test-client"
     }
   },
   "output_env_file": ".env",

@@ -1,12 +1,6 @@
 [package]
-name = "cns_domain_registry"
-version = "0.1.0"
-edition = "2021"
-authors = ["DFINITY Stiftung"]
-license = "Apache-2.0"
+name = "cns-domain-registry"
 include = ["src", "Cargo.toml"]
-homepage = "https://github.com/dfinity/cns#readme"
-repository = "https://github.com/dfinity/cns"
 categories = ["configuration", "cryptography", "wasm"]
 keywords = [
   "internet-computer",
@@ -16,7 +10,12 @@ keywords = [
   "domain-names",
 ]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+homepage.workspace = true
 
 [dependencies]
 candid.workspace = true

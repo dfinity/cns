@@ -1,6 +1,6 @@
 {
   "name": "@dfinity/cns",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A JavaScript client to interact with the Internet Computer Canister Naming Service (CNS)",
   "author": "DFINITY Stiftung",
   "license": "Apache-2.0",

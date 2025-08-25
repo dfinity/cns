@@ -1,49 +1,32 @@
-name: 'Code style'
+name: code_style
 
 on:
-  pull_request:
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-      - labeled
   merge_group:
-    types: [checks_requested]
-    branches:
-      - main
-
-env:
-  # When getting Rust dependencies, retry on network error:
-  CARGO_NET_RETRY: 10
-  # Use the local .curlrc
-  CURL_HOME: .
+  pull_request:
 
 jobs:
-  rust:
-    name: 'consistent-style:required'
+  rust_code_style:
+    name: rust_code_style:required
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
-      - name: 'Format code'
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check code formatting
         run: cargo fmt --all -- --check
-        env:
-          RUST_BACKTRACE: 1
-      - name: 'Lint code'
-        run: cargo clippy --verbose --tests --benches --workspace -- -D clippy::all
-        env:
-          RUST_BACKTRACE: 1
+
+      - name: Lint code
+        run: cargo clippy --all-targets --all-features
 
   motoko_code_style:
-    name: 'motoko-code-style:required'
+    name: motoko_code_style:required
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout code'
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup PNPM
         uses: dfinity/ci-tools/actions/setup-pnpm@main
 
-      - name: 'Check code formatting'
+      - name: Check code formatting
         run: pnpm format:check

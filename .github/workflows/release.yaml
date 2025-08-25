@@ -1,0 +1,58 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+b[0-9]+'
+
+env:
+  SCCACHE_GHA_ENABLED: 'true'
+  RUSTC_WRAPPER: 'sccache'
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: dfinity/ci-tools/actions/setup-pnpm@main
+
+      - name: Determine if Beta Release
+        id: is_beta
+        run: |
+          IS_BETA=$([[ '${{ github.ref_name }}' == *b* ]] && echo true || echo false)
+          echo "is_beta=$IS_BETA" >> $GITHUB_OUTPUT
+
+      - name: Build NPM packages
+        run: pnpm build
+
+      - name: Generate release notes
+        uses: dfinity/ci-tools/actions/generate-release-notes@main
+
+      - name: Release @dfinity/cns NPM package
+        working-directory: lib/cns-js
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+        run: |
+          npm pack --pack-destination ../../
+
+          release_cmd="npm publish --access public"
+          if [ "${{ steps.is_beta.outputs.is_beta }}" = true ]; then
+            release_cmd="$release_cmd --tag beta"
+          fi
+
+          $release_cmd
+
+      - name: Create Github release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: 'dfinity-pic-${{ github.ref_name }}.tgz'
+          bodyFile: 'RELEASE_NOTES.md'
+          tag: '${{ github.ref_name }}'
+          commit: 'main'
+          prerelease: ${{ steps.is_beta.outputs.is_beta == true }}
+          makeLatest: ${{ steps.is_beta.outputs.is_beta == false }}

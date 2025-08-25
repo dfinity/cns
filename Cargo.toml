@@ -1,7 +1,20 @@
 [workspace]
-members = ["canisters/name-registry", "canisters/operator", "canisters/root", "canisters/test-client", "lib/ic-cns-canister-client/rs"]
+resolver = "2"
+members = [
+    "canisters/name-registry",
+    "canisters/operator",
+    "canisters/root",
+    "canisters/test-client",
+    "lib/ic-cns-canister-client",
+]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["DFINITY Stiftung"]
 edition = "2021"
-workspace.resolver = "2"
+repository = "https://github.com/dfinity/cns"
+homepage = "https://github.com/dfinity/cns#readme"
+license = "Apache-2.0"
 
 [workspace.dependencies]
 assert_matches = "1"
@@ -14,6 +27,5 @@ rstest = "0.24"
 thiserror = "1"
 pocket-ic = "6"
 
-cns_domain_registry = { path = "./canisters/name-registry"}
-ic_cns_canister_client = { path = "./lib/ic-cns-canister-client/rs" }
-
+cns-domain-registry = { path = "./canisters/name-registry", version = "0.1.0" }
+ic-cns-canister-client = { path = "./lib/ic-cns-canister-client", version = "0.1.0" }

@@ -1,31 +1,16 @@
-name: 'Code tests'
+name: tests
 
 on:
-  pull_request:
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-      - labeled
   merge_group:
-    types: [checks_requested]
-    branches:
-      - main
-
-env:
-  # When getting Rust dependencies, retry on network error:
-  CARGO_NET_RETRY: 10
-  # Use the local .curlrc
-  CURL_HOME: .
+  pull_request:
 
 jobs:
-  rust_test:
-    name: 'rust-tests:required'
+  rust_tests:
+    name: rust_tests:required
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout'
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
@@ -47,10 +32,10 @@ jobs:
         run: cargo test --all-features
 
   motoko_tests:
-    name: 'motoko-tests:required'
+    name: motoko_tests:required
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout code'
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup DFX
@@ -58,10 +43,10 @@ jobs:
         with:
           dfx-version: 'auto'
 
-      - name: 'Start DFX'
+      - name: Start DFX
         run: dfx start --background
 
-      - name: 'Test cns_root canister'
+      - name: Test cns_root canister
         # NOTE: The functionality of cns_root depends on whether the caller is a controller or not,
         #   so we proceed in two steps.  Initially the test canister (i.e. cns_root) is not a controller,
         #   so we test the behaviour for non-controller callers.  Afterwards we make the test canister
@@ -75,7 +60,7 @@ jobs:
           echo "Calling runTests on canister cns_root_test..."
           dfx canister call cns_root_test runTests "()"
 
-      - name: 'Test tld_operator canister'
+      - name: Test tld_operator canister
         # NOTE: The functionality of tld_operator depends on whehter the caller is a controller or not,
         #   so we proceed in two steps.  Initially the test canister (i.e. tld_operator_test) is not a controller,
         #   so we test the behaviour for non-controller callers.  Afterwards we make the test canister
@@ -89,5 +74,5 @@ jobs:
           echo "Calling runTests on canister tld_operator_test..."
           dfx canister call tld_operator_test runTests "()"
 
-      - name: 'Stop DFX'
+      - name: Stop DFX
         run: dfx stop
