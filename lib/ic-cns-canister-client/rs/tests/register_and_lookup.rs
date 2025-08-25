@@ -265,6 +265,6 @@ fn should_register_test_domains_if_not_controller() {
         let result = env.lookup_domain(domain);
         assert_matches!(result, Ok(cid) if (cid.to_string() == cid_text));
         let result = env.domain_for_canister(cid_text);
-        assert_matches!(result, Ok(d) if (domain == d));
+        assert_matches!(result, Err(err) if (err.to_string().contains("No domain found for canister")));
     }
 }
