@@ -1,7 +1,7 @@
 import { HttpAgent } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
-import { CnsRootClient, Record, LookupResponse } from './cns-root';
+import { CnsRootClient, DomainRecord, LookupResponse } from './cns-root';
 import { isNil, isNotNil } from './utils';
 
 /**
@@ -165,7 +165,7 @@ export class CnsClient {
   /**
    * Looks up the PTR (Pointer) records for a given domain and ID.
    * These records map the given ID to a registered name,
-   * essentially performing a reverse DNS lookup.
+   * essentially performing a reverse CNS lookup.
    *
    * @param tld The TLD to perform the reverse look up on. Note, if a full domain is passed,
    * only the TLD portion of the domain is used.
@@ -180,7 +180,7 @@ export class CnsClient {
   public async reverseLookup(
     tld: string,
     id: Principal | string,
-  ): Promise<Record[]> {
+  ): Promise<DomainRecord[]> {
     const normalizedTld = normalizeTld(tld);
     const principal = Principal.from(id);
 
@@ -253,7 +253,7 @@ function getAnswer(
   domain: string,
   res: LookupResponse,
   recordType: RecordType,
-): Record {
+): DomainRecord {
   const answer = res.answers.find(answer => answer.recordType === recordType);
   if (isNil(answer)) {
     throw new Error(`No ${recordType} record found for domain ${domain}`);

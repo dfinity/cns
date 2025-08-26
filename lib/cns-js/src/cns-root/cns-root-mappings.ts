@@ -10,7 +10,7 @@ import {
 import {
   ControllerRole,
   LookupResponse,
-  Record,
+  DomainRecord,
   RegistrationControllerRequest,
   RegistrationRecordRequest,
 } from './cns-root-types';
@@ -56,7 +56,7 @@ export function mapDomainRegistrationResponse(
   }
 }
 
-export function mapRecordRequest(req: Record): CanisterDomainRecord {
+export function mapRecordRequest(req: DomainRecord): CanisterDomainRecord {
   return {
     ttl: req.ttl,
     record_type: req.recordType,
@@ -65,7 +65,7 @@ export function mapRecordRequest(req: Record): CanisterDomainRecord {
   };
 }
 
-export function mapRecordResponse(res: CanisterDomainRecord): Record {
+export function mapRecordResponse(res: CanisterDomainRecord): DomainRecord {
   return {
     ttl: res.ttl,
     recordType: res.record_type,

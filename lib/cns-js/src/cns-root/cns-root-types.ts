@@ -6,9 +6,9 @@ export interface LookupRequest {
 }
 
 export interface LookupResponse {
-  answers: Record[];
-  additionals: Record[];
-  authorities: Record[];
+  answers: DomainRecord[];
+  additionals: DomainRecord[];
+  authorities: DomainRecord[];
 }
 
 export interface RegisterDomainRequest {
@@ -18,7 +18,7 @@ export interface RegisterDomainRequest {
 
 export interface RegistrationRecordRequest {
   controller: RegistrationControllerRequest[];
-  records?: Record[] | null;
+  records?: DomainRecord[] | null;
 }
 
 export interface RegistrationControllerRequest {
@@ -26,7 +26,7 @@ export interface RegistrationControllerRequest {
   roles: ControllerRole[];
 }
 
-export interface Record {
+export interface DomainRecord {
   ttl: bigint;
   recordType: string;
   data: string;
