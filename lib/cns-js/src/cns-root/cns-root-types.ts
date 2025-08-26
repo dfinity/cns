@@ -1,14 +1,14 @@
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
-export interface LookupDomainRequest {
-  domain: string;
+export interface LookupRequest {
+  name: string;
   recordType: string;
 }
 
-export interface LookupDomainResponse {
-  answers: DomainRecord[];
-  additionals: DomainRecord[];
-  authorities: DomainRecord[];
+export interface LookupResponse {
+  answers: Record[];
+  additionals: Record[];
+  authorities: Record[];
 }
 
 export interface RegisterDomainRequest {
@@ -18,7 +18,7 @@ export interface RegisterDomainRequest {
 
 export interface RegistrationRecordRequest {
   controller: RegistrationControllerRequest[];
-  domainRecords?: DomainRecord[] | null;
+  records?: Record[] | null;
 }
 
 export interface RegistrationControllerRequest {
@@ -26,7 +26,7 @@ export interface RegistrationControllerRequest {
   roles: ControllerRole[];
 }
 
-export interface DomainRecord {
+export interface Record {
   ttl: bigint;
   recordType: string;
   data: string;

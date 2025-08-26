@@ -28,14 +28,11 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/cns.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/cns.umd.js"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/cns.mjs",
+      "node": "./dist/cns.umd.js",
+      "require": "./dist/cns.umd.js",
+      "default": "./dist/cns.mjs"
     }
   },
   "scripts": {
@@ -46,8 +43,6 @@
     "test:coverage": "vitest run --coverage"
   },
   "peerDependencies": {
-    "@dfinity/agent": "^2.3.0",
-    "@dfinity/principal": "^2.3.0",
-    "@dfinity/candid": "^2.3.0"
+    "@icp-sdk/core": "^4.0.0"
   }
 }

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "declarationDir": "./dist",
     "emitDeclarationOnly": true,
-    "declaration": true
+    "declaration": true,
+    "declarationMap": true
   }
 }
