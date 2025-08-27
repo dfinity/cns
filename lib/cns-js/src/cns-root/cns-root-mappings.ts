@@ -1,4 +1,4 @@
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import {
   DomainRecord as CanisterDomainRecord,
   DomainLookup as CanisterDomainLookup,
@@ -9,20 +9,18 @@ import {
 } from '../declarations/cns-root/cns_root.did';
 import {
   ControllerRole,
-  LookupDomainResponse,
+  LookupResponse,
   DomainRecord,
   RegistrationControllerRequest,
   RegistrationRecordRequest,
 } from './cns-root-types';
 import { fromCandidOpt, toCandidOpt } from '../utils';
 
-export function mapDomainLookupResponse(
-  res: CanisterDomainLookup,
-): LookupDomainResponse {
+export function mapLookupResponse(res: CanisterDomainLookup): LookupResponse {
   return {
-    answers: res.answers.map(mapDomainRecordResponse),
-    additionals: res.additionals.map(mapDomainRecordResponse),
-    authorities: res.authorities.map(mapDomainRecordResponse),
+    answers: res.answers.map(mapRecordResponse),
+    additionals: res.additionals.map(mapRecordResponse),
+    authorities: res.authorities.map(mapRecordResponse),
   };
 }
 
@@ -31,7 +29,7 @@ export function mapRegistrationRecordRequest(
 ): CanisterRegistrationRecords {
   return {
     controllers: req.controller.map(mapRegistrationControllerRequest),
-    records: toCandidOpt(req.domainRecords?.map(mapDomainRecordRequest)),
+    records: toCandidOpt(req.records?.map(mapRecordRequest)),
   };
 }
 
@@ -58,9 +56,7 @@ export function mapDomainRegistrationResponse(
   }
 }
 
-export function mapDomainRecordRequest(
-  req: DomainRecord,
-): CanisterDomainRecord {
+export function mapRecordRequest(req: DomainRecord): CanisterDomainRecord {
   return {
     ttl: req.ttl,
     record_type: req.recordType,
@@ -69,9 +65,7 @@ export function mapDomainRecordRequest(
   };
 }
 
-export function mapDomainRecordResponse(
-  res: CanisterDomainRecord,
-): DomainRecord {
+export function mapRecordResponse(res: CanisterDomainRecord): DomainRecord {
   return {
     ttl: res.ttl,
     recordType: res.record_type,
