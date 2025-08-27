@@ -1,13 +1,13 @@
-import { Actor, ActorSubclass, HttpAgent } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import { Actor, ActorSubclass, HttpAgent } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { _SERVICE, idlFactory } from '../declarations/cns-root/cns_root.did';
 import {
-  LookupDomainRequest,
-  LookupDomainResponse,
+  LookupRequest,
+  LookupResponse,
   RegisterDomainRequest,
 } from './cns-root-types';
 import {
-  mapDomainLookupResponse,
+  mapLookupResponse,
   mapDomainRegistrationResponse,
   mapRegistrationRecordRequest,
 } from './cns-root-mappings';
@@ -27,12 +27,12 @@ export class CnsRootClient {
     });
   }
 
-  public async lookupDomain({
-    domain,
+  public async lookup({
+    name,
     recordType,
-  }: LookupDomainRequest): Promise<LookupDomainResponse> {
-    const canisterRes = await this.#actor.lookup(domain, recordType);
-    return mapDomainLookupResponse(canisterRes);
+  }: LookupRequest): Promise<LookupResponse> {
+    const canisterRes = await this.#actor.lookup(name, recordType);
+    return mapLookupResponse(canisterRes);
   }
 
   public async registerDomain({

@@ -12,18 +12,9 @@ importers:
         specifier: ^3.0.2
         version: 3.0.2
     devDependencies:
-      '@dfinity/agent':
-        specifier: ^2.3.0
-        version: 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
-      '@dfinity/candid':
-        specifier: ^2.3.0
-        version: 2.3.0(@dfinity/principal@2.3.0)
-      '@dfinity/principal':
-        specifier: ^2.3.0
-        version: 2.3.0
-      '@hadronous/pic':
-        specifier: ~0.11.0
-        version: 0.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/identity@2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
+      '@icp-sdk/core':
+        specifier: ^4.0.0
+        version: 4.0.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/identity-secp256k1@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/identity@2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@types/node':
         specifier: ^22.10.7
         version: 22.13.1
@@ -48,15 +39,9 @@ importers:
 
   lib/cns-js:
     dependencies:
-      '@dfinity/agent':
-        specifier: ^2.3.0
-        version: 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
-      '@dfinity/candid':
-        specifier: ^2.3.0
-        version: 2.3.0(@dfinity/principal@2.3.0)
-      '@dfinity/principal':
-        specifier: ^2.3.0
-        version: 2.3.0
+      '@icp-sdk/core':
+        specifier: ^4.0.0
+        version: 4.0.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/identity-secp256k1@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/identity@2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
 
 packages:
 
@@ -242,16 +227,17 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@hadronous/pic@0.11.0':
-    resolution: {integrity: sha512-aWrxkVMb/TkEMgUVoGlo7P2u5XyyOHDzkHcjbD5ep/xUyxHYMbjEHPasOQzSz74HDnOfYQJoQrroXRN3K4sqZg==}
-    peerDependencies:
-      '@dfinity/agent': ^2.1.3
-      '@dfinity/candid': ^2.1.3
-      '@dfinity/identity': ^2.1.3
-      '@dfinity/principal': ^2.1.3
-
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
+
+  '@icp-sdk/core@4.0.0':
+    resolution: {integrity: sha512-4TCjmfrCv53qMapMszM1AR2/B06mRNPe3y4zqeQc3KJOCxgufL6lBkQy7RrLrrUgPCEygMv2MPbycISnvDH2eg==}
+    peerDependencies:
+      '@dfinity/agent': ^3.2.2
+      '@dfinity/candid': ^3.2.2
+      '@dfinity/identity': ^3.2.2
+      '@dfinity/identity-secp256k1': ^3.2.2
+      '@dfinity/principal': ^3.2.2
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -2142,15 +2128,15 @@ snapshots:
   '@esbuild/win32-x64@0.24.2':
     optional: true
 
-  '@hadronous/pic@0.11.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/identity@2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)':
+  '@iarna/toml@2.2.5': {}
+
+  '@icp-sdk/core@4.0.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/identity-secp256k1@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/identity@2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)':
     dependencies:
       '@dfinity/agent': 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@dfinity/candid': 2.3.0(@dfinity/principal@2.3.0)
       '@dfinity/identity': 2.3.0(@dfinity/agent@2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
+      '@dfinity/identity-secp256k1': 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@dfinity/principal': 2.3.0
-      bip39: 3.1.0
-
-  '@iarna/toml@2.2.5': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:

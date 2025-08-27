@@ -1,11 +1,11 @@
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
-export interface LookupDomainRequest {
-  domain: string;
+export interface LookupRequest {
+  name: string;
   recordType: string;
 }
 
-export interface LookupDomainResponse {
+export interface LookupResponse {
   answers: DomainRecord[];
   additionals: DomainRecord[];
   authorities: DomainRecord[];
@@ -18,7 +18,7 @@ export interface RegisterDomainRequest {
 
 export interface RegistrationRecordRequest {
   controller: RegistrationControllerRequest[];
-  domainRecords?: DomainRecord[] | null;
+  records?: DomainRecord[] | null;
 }
 
 export interface RegistrationControllerRequest {
