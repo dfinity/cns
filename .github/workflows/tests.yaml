@@ -34,18 +34,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Setup PNPM
-        uses: dfinity/ci-tools/actions/setup-pnpm@main
+        uses: dfinity/ci-tools/actions/setup-pnpm@afeee4fbdc0683a88ec5a74ed7f59a2ce0e833ad # main
 
       - name: Setup DFX
-        uses: dfinity/setup-dfx@main
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
         with:
           dfx-version: 'auto'
 
       - name: Install PocketIC server
-        uses: dfinity/pocketic@main
+        uses: dfinity/pocketic@20c33db1aa87cc6ece50857ac632c37acf5e0322 # main
         with:
           pocket-ic-server-version: '7.0.0'
 
@@ -63,13 +63,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout code'
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Setup PNPM
-        uses: dfinity/ci-tools/actions/setup-pnpm@main
+        uses: dfinity/ci-tools/actions/setup-pnpm@afeee4fbdc0683a88ec5a74ed7f59a2ce0e833ad # main
 
       - name: Setup DFX
-        uses: dfinity/setup-dfx@main
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
         with:
           dfx-version: 'auto'
 
@@ -116,13 +116,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Setup PNPM
-        uses: dfinity/ci-tools/actions/setup-pnpm@main
+        uses: dfinity/ci-tools/actions/setup-pnpm@afeee4fbdc0683a88ec5a74ed7f59a2ce0e833ad # main
 
       - name: Setup DFX
-        uses: dfinity/setup-dfx@main
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
         with:
           dfx-version: 'auto'
 
